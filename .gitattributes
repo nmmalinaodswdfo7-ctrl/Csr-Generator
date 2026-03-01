@@ -1,0 +1,27 @@
+# Default: normalize text files, keep LF in repo and working tree
+* text=auto eol=lf
+
+# Windows scripts should stay CRLF in working tree
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Unix scripts stay LF
+*.sh text eol=lf
+
+# Common binaries (never line-ending normalize)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.exe binary
+*.dll binary

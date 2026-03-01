@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SCSR GENERATOR</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <link href="../libraries/summernote/summernote-lite.min.css" rel="stylesheet">
+    <script src="../libraries/summernote/summernote-lite.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1c74e9",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111821",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"],
+                        "lexend": ["Lexend", "sans-serif"],
+                        "lexend": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .note-editing-area {
+            background-color: white !important;
+        }
+
+        p.indent {
+            text-indent: 3.5em;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
+
+        th.sticky-col,
+        td.sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+
+        th.sticky-col::after,
+        td.sticky-col::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.05), transparent);
+            pointer-events: none;
+            transform: translateX(100%);
+        }
+
+        .dark th.sticky-col::after,
+        .dark td.sticky-col::after {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.05), transparent);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+
+        .loader {
+            --d: 22px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            color: #25b09b;
+            box-shadow:
+                calc(1*var(--d)) calc(0*var(--d)) 0 0,
+                calc(0.707*var(--d)) calc(0.707*var(--d)) 0 1px,
+                calc(0*var(--d)) calc(1*var(--d)) 0 2px,
+                calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
+                calc(-1*var(--d)) calc(0*var(--d)) 0 4px,
+                calc(-0.707*var(--d)) calc(-0.707*var(--d)) 0 5px,
+                calc(0*var(--d)) calc(-1*var(--d)) 0 6px;
+            animation: l27 1s infinite steps(8);
+        }
+
+        .loader--sm { 
+            --d: 12px;  /* try 8–12px */
+        }   
+
+        #casedevelopment .note-editable {
+            font-family: "Calibri", "Arial", sans-serif !important;
+            font-size: 12pt !important;
+            line-height: 1.2 !important;
+        }
+
+        @keyframes l27 {
+            100% {
+                transform: rotate(1turn)
+            }
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+    <div id="login-section" class="relative flex min-h-screen w-full flex-col items-center justify-center p-4 group/design-root">
+        <div id="login-card" class="w-full max-w-md space-y-8 rounded-xl bg-white dark:bg-slate-900 p-6 shadow-lg sm:p-8">
+            <!-- PageHeading -->
+            <div class="text-center">
+                <p class="text-slate-900 dark:text-white text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+                    HI USER </p>
+            </div>
+                <!-- Form Container -->
+                <div class="space-y-6">
+                <!-- TextField -->
+                <div id="login-id-field" class="flex flex-col">
+                    <label class="text-slate-700 dark:text-slate-300 text-base font-medium leading-normal pb-2"
+                        for="user-id">Enter your ID</label>
+                    <input
+                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 h-14 p-4 text-base font-normal leading-normal text-slate-900 dark:text-slate-50 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary dark:focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors duration-200"
+                        id="user-id" placeholder="e.g., 12345678" value="" />
+                    <p class="mt-2 text-sm text-red-600 hidden" id="user-id-error"></p>
+                </div>
+                <div id="login-municipality-field" class="flex flex-col">
+                    <label class="text-slate-700 dark:text-slate-300 text-base font-medium leading-normal pb-2"
+                        for="municipality">Municipality (One-time selection) </label>
+                    <div class="relative">
+                        <select
+                            class="form-select flex w-full min-w-0 flex-1 appearance-none rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 h-14 px-4 text-base font-normal leading-normal text-slate-900 dark:text-slate-50 focus:border-primary dark:focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors duration-200"
+                            id="municipality">
+                            <option selected="" value="">Select Municipality</option>
+                            <option value="ALBURQUERQUE">ALBURQUERQUE</option>
+                            <option value="ALICIA">ALICIA</option>
+                            <option value="ANDA">ANDA</option>
+                            <option value="BACLAYON">BACLAYON</option>
+                            <option value="BATUAN">BATUAN</option>
+                            <option value="BIEN UNIDO">BIEN UNIDO</option>
+                            <option value="BILAR">BILAR</option>
+                            <option value="CANDIJAY">CANDIJAY</option>
+                            <option value="DAUIS">DAUIS</option>
+                            <option value="DIMIAO">DIMIAO</option>
+                            <option value="DUERO">DUERO</option>
+                            <option value="GARCIA HERNANDEZ">GARCIA HERNANDEZ</option>
+                            <option value="GUINDULMAN">GUINDULMAN</option>
+                            <option value="JAGNA">JAGNA</option>
+                            <option value="LILA">LILA</option>
+                            <option value="LOAY">LOAY</option>
+                            <option value="LOBOC">LOBOC</option>
+                            <option value="MABINI">MABINI</option>
+                            <option value="PANGLAO">PANGLAO</option>
+                            <option value="PILAR">PILAR</option>
+                            <option value="PRES.CARLOS P. GARCIA">PRESIDENT CARLOS P. GARCIA</option>
+                            <option value="SAN MIGUEL">SAN MIGUEL</option>
+                            <option value="SIERRA BULLONES">SIERRA BULLONES</option>
+                            <option value="UBAY">UBAY</option>
+                            <option value="VALENCIA">VALENCIA</option>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 dark:text-slate-400">
+                            <span class="material-symbols-outlined"></span>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-sm text-red-600 hidden" id="municipality-error"></p>
+                </div>
+                <!-- ButtonGroup -->
+                <div class="flex flex-col sm:flex-row sm:justify-center gap-3">
+                    <button id="restore-session"
+                        class="hidden flex min-w-[84px] w-full sm:w-auto cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-slate-200 text-slate-800 text-base font-bold leading-normal tracking-wide grow transition-all duration-200 hover:bg-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-300">
+                        <span class="truncate">Restore Session</span>
+                    </button>
+                    <button id="search-id"
+                        class="flex min-w-[84px] w-full sm:w-auto cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-slate-50 text-base font-bold leading-normal tracking-wide grow transition-all duration-200 hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-primary/30">
+                        <span class="truncate">Login</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full px-6 py-8 pb-0 md:px-12">
+        <div class="max-w-[1850px] mx-auto">
+            <!-- Page Header & Main Actions -->
+            <div id="data-table-header" class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 hidden">
+                <div>
+                    <h1 class="text-3xl font-bold font-lexend text-slate-900 tracking-tight">CSR GENERATOR</h1>
+                    <p class="text-slate-500 font-lexend mt-1">Manage CSR in one place.</p>
+                </div>
+                <button id="return-to-csr-selection" type="button"
+                    class="hidden min-w-[220px] w-full md:w-auto cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-slate-200 text-slate-800 text-base font-bold leading-normal tracking-wide transition-all duration-200 hover:bg-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-300">
+                    <span class="truncate">Return to CSR Selection</span>
+                </button>
+            </div>
+
+            <!-- Data Table Card -->
+            <div id="data-table-card" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
+                <!-- Controls Toolbar -->
+                <div
+                    class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+                        <div class="relative w-full sm:w-80">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                <span class="material-symbols-outlined text-[24px]">search</span>
+                            </span>
+                            <input
+                                id="data-search-input"
+                                class="w-full pl-11 pr-4 py-3 text-base border-slate-200 rounded-lg focus:ring-primary focus:border-primary placeholder:text-slate-400"
+                                placeholder="Search HHID or Name" type="text" />
+                        </div>
+                        <div class="relative w-full sm:w-80">
+                            <select id="barangay-filter"
+                                class="form-select w-full pl-3 pr-8 py-3 text-base border-slate-200 rounded-lg focus:ring-primary focus:border-primary bg-slate-50 hover:bg-white transition-colors cursor-pointer text-slate-600">
+                                <option value="">Filter by Barangay</option>
+                            </select>
+                        </div>
+                        <div class="relative w-full sm:w-80">
+                            <select id="status-filter"
+                                class="form-select w-full pl-3 pr-8 py-3 text-base border-slate-200 rounded-lg focus:ring-primary focus:border-primary bg-slate-50 hover:bg-white transition-colors cursor-pointer text-slate-600">
+                                <option value="">Filter by Status</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="update-data-btn"
+                        class="hidden flex min-w-[84px] w-full sm:w-auto cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-amber-500 text-white text-base font-bold leading-normal tracking-wide transition-all duration-200 hover:bg-amber-600 focus:outline-none focus:ring-4 focus:ring-amber-300">
+                        <span class="truncate">Update Data</span>
+                    </button>
+                </div>
+
+                <div id="data-loader" class="hidden py-8 flex items-center justify-center">
+                    <div class="loader"></div>
+                </div>
+
+                <!-- Grid View -->
+                <div id="household-grid"
+                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 py-4 px-4">
+                </div>
+
+                <div class="p-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-base text-slate-500 font-lexend">
+                        Showing <span id="summary-start" class="font-semibold text-slate-900">0</span> to <span
+                            id="summary-end" class="font-semibold text-slate-900">0</span> of <span
+                            id="summary-total" class="font-semibold text-slate-900">0</span> entries
+                    </p>
+                    <nav aria-label="Pagination"
+                        class="isolate inline-flex -space-x-px rounded-md shadow-sm font-lexend">
+                        <button id="page-prev" type="button"
+                            class="relative inline-flex items-center rounded-l-md px-3 py-3 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Previous</span>
+                            <span class="material-symbols-outlined text-[24px]">chevron_left</span>
+                        </button>
+                        <div id="page-numbers" class="flex"></div>
+                        <button id="page-next" type="button"
+                            class="relative inline-flex items-center rounded-r-md px-3 py-3 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Next</span>
+                            <span class="material-symbols-outlined text-[24px]">chevron_right</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Stepper -->
+            <div id="csr-stepper" class="w-full py-2 mb-2 pb-2 overflow-x-auto font-Inter hidden">
+                <!-- MOBILE (stacked) -->
+                <div
+                    class="lg:hidden flex flex-col divide-y divide-slate-200 dark:divide-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <!-- Step 1: Active -->
+                    <button type="button" data-step-trigger="1" class="flex items-center gap-3 px-3 py-2">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 bg-primary text-white rounded-full font-bold shadow-lg ring-4 ring-primary/20 transition-all">
+                            1</div>
+                        <span class="text-sm font-bold text-primary">Basic Information</span>
+                    </button>
+                    <!-- Step 2: Inactive -->
+                    <button type="button" data-step-trigger="2" class="flex items-center gap-3 px-3 py-2">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                            2</div>
+                        <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Family Composition</span>
+                    </button>
+                    <!-- Step 3 -->
+                    <button type="button" data-step-trigger="3" class="flex items-center gap-3 px-3 py-2">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                            3</div>
+                        <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Case Development</span>
+                    </button>
+                    <!-- Step 4 -->
+                    <button type="button" data-step-trigger="4" class="flex items-center gap-3 px-3 py-2">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                            4</div>
+                        <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Interventions
+                            Provided</span>
+                    </button>
+                    <!-- Step 5 -->
+                    <button type="button" data-step-trigger="5" class="flex items-center gap-3 px-3 py-2">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                            5</div>
+                        <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Household Intervention
+                            Plan</span>
+                    </button>
+                    <!-- Step 6 -->
+                    <button type="button" data-step-trigger="6" class="flex items-center gap-3 px-3 py-2">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                            6</div>
+                        <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Recommendation</span>
+                    </button>
+                </div>
+
+                <div class="hidden lg:block">
+                    <div class="flex flex-wrap items-start justify-between gap-y-6 px-2">
+                        <button type="button" data-step-trigger="1" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
+                            <div
+                                class="flex items-center justify-center w-10 h-10 bg-primary text-white rounded-full font-bold shadow-lg ring-4 ring-primary/20 transition-all">
+                                1
+                            </div>
+                            <span class="mt-2 text-sm font-bold text-primary leading-tight">Basic Information</span>
+                        </button>
+                        <button type="button" data-step-trigger="2" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
+                            <div
+                                class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                                2
+                            </div>
+                            <span
+                                class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 leading-tight">Family
+                                Composition</span>
+                        </button>
+                        <button type="button" data-step-trigger="3" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
+                            <div
+                                class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                                3
+                            </div>
+                            <span class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 leading-tight">Case
+                                Development</span>
+                        </button>
+                        <button type="button" data-step-trigger="4" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
+                            <div
+                                class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                                4
+                            </div>
+                            <span
+                                class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 leading-tight">Interventions
+                                Provided</span>
+                        </button>
+                        <button type="button" data-step-trigger="5" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
+                            <div
+                                class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                                5
+                            </div>
+                            <span
+                                class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 leading-tight">Household
+                                Intervention Plan</span>
+                        </button>
+                        <button type="button" data-step-trigger="6" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
+                            <div
+                                class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">
+                                6
+                            </div>
+                            <span
+                                class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 leading-tight">Recommendation</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div id="basic-information" data-step-section="1"
+                class="bg-white dark:bg-[#1a2632] rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hidden">
+                <div class="border-b border-slate-100 dark:border-slate-700 px-8 py-4 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">person_outline</span>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Beneficiary Profile</h3>
+                </div>
+                <div class="p-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <!-- Left Column: Read Only -->
+                        <div class="space-y-6">
+                            <div
+                                class="flex items-center gap-2 mb-4 text-slate-600 text-sm font-semibold uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-sm">lock</span>Read-Only Information
+                            </div>
+                            <div class="grid grid-cols-1 gap-5">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Grantee
+                                        Name</label>
+                                    <div class="relative overflow-hidden">
+                                        <input id="basic-grantee-name"
+                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 pl-4 pr-12 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                            disabled="" type="text" value="" />
+                                        <span id="basic-info-prefill-spinner"
+                                            class="hidden absolute right-5 top-1/2 -translate-y-1/2 loader loader--sm block scale-[0.35] origin-center"></span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">HH
+                                            ID</label>
+                                        <input id="basic-hh-id"
+                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                            disabled="" type="text" value="" />
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">HH
+                                            Set Group</label>
+                                        <input id="basic-hh-set"
+                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                            disabled="" type="text" value="" />
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Sex</label>
+                                        <input id="basic-sex"
+                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                            disabled="" type="text" value="" />
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Birthday</label>
+                                        <div class="relative">
+                                            <input id="basic-birthday"
+                                                class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                                disabled="" type="text" value="" />
+                                            <span
+                                                class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 text-lg">calendar_today</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Age</label>
+                                        <input id="basic-age"
+                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                            disabled="" type="text" value="" />
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Civil
+                                            Status</label>
+                                        <input id="basic-civil-status"
+                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                            disabled="" type="text" value="" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">IP
+                                        Affiliation</label>
+                                    <input id="basic-ip-affiliation"
+                                        class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                        disabled="" type="text" value="" />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Client
+                                        Status on Exit</label>
+                                    <input id="basic-client-status-on-exit"
+                                        class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
+                                        disabled="" type="text" value="" />
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right Column: Editable -->
+                        <div class="space-y-6">
+                            <div
+                                class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2 text-primary text-sm font-semibold uppercase tracking-wider">
+                                    <span class="material-symbols-outlined text-sm">edit</span>Edit Details
+                                </div>
+                                <button id="basic-info-restore-btn" type="button"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold uppercase tracking-wide hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    <span class="material-symbols-outlined text-[16px]">restore</span>
+                                    Restore
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 gap-5">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Educational
+                                            Attainment</label>
+                                        <select id="edit-educational-attainment" data-basic-edit-required="1"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm">
+                                            <option selected="">Select Level</option>
+                                            <option>No Grade Completed</option>
+                                            <option>Missing</option>
+                                            <option>College Graduate</option>
+                                            <option>Graduate Studies</option>
+                                            <option>4th Year College</option>
+                                            <option>3rd Year College</option>
+                                            <option>2nd Year College</option>
+                                            <option>1st Year College</option>
+                                            <option>4TH YEAR COLLEGE / VOCATIONAL</option>
+                                            <option>3RD YEAR COLLEGE / VOCATIONAL</option>
+                                            <option>2ND YEAR COLLEGE / VOCATIONAL</option>
+                                            <option>1ST YEAR COLLEGE / VOCATIONAL</option>
+                                            <option>Senior High School Graduate</option>
+                                            <option>Senior High School (SHS) ADM/ALS</option>
+                                            <option>High School Graduate</option>
+                                            <option>Junior High School(JHS) ADM/ALS</option>
+                                            <option>Grade 12</option>
+                                            <option>Grade 11</option>
+                                            <option>Grade 10</option>
+                                            <option>Grade 9</option>
+                                            <option>Grade 8</option>
+                                            <option>Grade 7</option>
+                                            <option>Elementary Graduate</option>
+                                            <option>Grade 6</option>
+                                            <option>Grade 5</option>
+                                            <option>Grade 4</option>
+                                            <option>Grade 3</option>
+                                            <option>Grade 2</option>
+                                            <option>Grade 1</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Contact
+                                            Info</label>
+                                        <div class="relative">
+                                            <input id="edit-contact-info" data-basic-edit-required="1"
+                                                class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                                placeholder="09XXXXXXXXX" type="tel" maxlength="11" inputmode="numeric" />
+                                            <span
+                                                class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">phone</span>
+                                        </div>
+                                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                            Use 11 digits only, starts with 09 (example: 09XXXXXXXXX).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">National
+                                            ID No.</label>
+                                        <input id="edit-national-id" data-basic-edit-required="1"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                            placeholder="XXXX-XXXX-XXXX-XXXX" type="text" />
+                                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                            Enter 16 digits in 4 groups (auto-formats with dashes).
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Religion</label>
+                                        <select id="edit-religion" data-basic-edit-required="1"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm">
+                                            <option>Select Religion</option>
+                                            <option>Roman Catholic</option>
+                                            <option>Christian</option>
+                                            <option>Iglesia Filipina Independiente</option>
+                                            <option>Born Again</option>
+                                            <option>United Church of Christ in the Philippines</option>
+                                            <option>Methodist</option>
+                                            <option>Anglican</option>
+                                            <option>Baptist</option>
+                                            <option>Islam</option>
+                                            <option>Iglesia ni Cristo</option>
+                                            <option>Aglipay</option>
+                                            <option>Church of Christ</option>
+                                            <option>Seventh Day Adventist</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Year
+                                            of Registration</label>
+                                        <input id="edit-year-registration" data-basic-edit-required="1"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                            placeholder="2012" type="text" />
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Years
+                                            in Program</label>
+                                        <input id="edit-years-program" data-basic-edit-required="1"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                            placeholder="0" type="text" maxlength="2" inputmode="numeric" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Present
+                                        Address</label>
+                                    <textarea id="edit-present-address" data-basic-edit-required="1"
+                                        class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400 resize-none"
+                                        placeholder="House No., Street, Barangay, City/Municipality, Province"
+                                        rows="2"></textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Place of Birth</label>
+                                        <input id="edit-place-of-birth" data-basic-edit-required="1"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                            placeholder="e.g. Quezon City, Metro Manila" type="text" />
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Source
+                                            of Info</label>
+                                        <input id="edit-source-of-info" data-basic-edit-required="1"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                            placeholder="e.g. Grantee" type="text" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Current
+                                        Level of Well-being</label>
+                                    <input id="edit-prev-wellbeing" data-basic-edit-required="1"
+                                        class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                        placeholder="Level 2 - Subsistence Index Score : 2.52484" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-[#15202b] px-8 py-5 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-end gap-4">
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-end">
+                        <p id="basic-info-save-status" class="text-xs text-slate-500 dark:text-slate-400"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Family Composition -->
+        <div class="max-w-[1850px] mx-auto space-y-3" id="family-composition" data-step-section="2">
+            <div class="flex justify-end gap-2">
+                <button id="family-composition-reset-btn" type="button"
+                    class="items-center gap-2 px-4 py-2 rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 font-semibold text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors inline-flex">
+                    <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                    Restore Member Data
+                </button>
+                <button id="family-composition-restore-btn" type="button"
+                    class="hidden items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">restore</span>
+                    Restore Member
+                </button>
+            </div>
+            <div id="family-composition-list" class="space-y-3"></div>
+            <div id="family-composition-empty" class="hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a2632] p-5 text-sm text-slate-500 dark:text-slate-300">
+                No family composition records found for this HH ID.
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+                <p id="family-composition-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button id="family-composition-back-btn" type="button"
+                    class="w-full sm:w-auto px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>Back
+                </button>
+            </div>
+
+            <div id="family-composition-restore-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
+                <div class="w-full max-w-3xl rounded-lg bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 shadow-xl">
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Restore Member</h3>
+                        <button id="family-composition-restore-close-btn" type="button" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-200">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div id="family-composition-restore-list" class="max-h-[55vh] overflow-auto p-4 space-y-3"></div>
+                    <div class="px-5 py-4 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+                        <button id="family-composition-restore-cancel-btn" type="button"
+                            class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Case Development -->
+        <div class="max-w-5xl mx-auto hidden" id="casedevelopment" data-step-section="3">
+            <div id="summernote"></div>
+            <div
+                class="mt-4 flex gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-lg">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
+                <div class="text-sm text-blue-800 dark:text-blue-200">
+                    <p class="font-semibold mb-1">Writing Guidelines</p>
+                    <p>Ensure that the narrative includes specific observations, intervention goals, and expected
+                        outcomes. Confidential information should be handled according to protocol.</p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
+                <p id="case-development-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button id="case-development-back-btn" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    Back
+                </button>
+            </div>
+        </div>
+
+        <!-- Interventions Provided -->
+        <div id="interventions-provided-section" class="max-w-[1850px] mx-auto hidden" data-step-section="4">
+            <div
+                class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col rounded-none md:rounded-lg">
+                <div
+                    class="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a2632]">
+                    <h2 class="text-lg md:text-xl font-bold text-[#111418] dark:text-white font-lexend">Interventions
+                    </h2>
+                    <button id="interventions-provided-add-btn" type="button"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">add</span>
+                        <span class="hidden sm:inline">Add Row</span>
+                    </button>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                        <thead
+                            class="bg-white dark:bg-[#1a2632] text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-6 py-4 min-w-[200px] w-5/12" scope="col">Interventions Provided</th>
+                                <th class="px-6 py-4 min-w-[140px] w-2/12" scope="col">Date Completed</th>
+                                <th class="px-6 py-4 min-w-[150px] w-3/12" scope="col">Involved Parties</th>
+                                <th class="px-6 py-4 min-w-[100px] w-1/12 text-center" scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interventions-provided-list" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
+                <p id="interventions-provided-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button
+                    id="interventions-provided-back-btn" type="button"
+                    class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>Back
+                </button>
+            </div>
+
+            <!-- Interventions Provided Form -->
+            <div id="interventions-provided-modal" aria-labelledby="modal-title" aria-modal="true" 
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden"
+                role="dialog">
+                <div
+                    class="w-full max-w-xl bg-white dark:bg-[#1a2632] shadow-2xl rounded-none ring-1 ring-slate-900/5 dark:ring-slate-100/10">
+                    <div
+                        class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-[#111418] dark:text-white font-lexend" id="modal-title">Add
+                            Intervention</h2>
+                        <button id="interventions-provided-close-btn" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                            <span class="material-symbols-outlined text-[24px]">close</span>
+                        </button>
+                    </div>
+                    <div class="px-6 py-6 space-y-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200"
+                                for="interventions">
+                                Interventions Provided
+                            </label>
+                            <textarea
+                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none"
+                                id="interventions" placeholder="Describe the intervention..." rows="6"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200"
+                                for="date_accomplished">
+                                Date Completed/Accomplished
+                            </label>
+                            <input
+                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+                                id="date_accomplished" placeholder="e.g., 2022–2025 or May 2022" type="text" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200"
+                                for="involved_parties">
+                                Involved Parties
+                            </label>
+                            <input
+                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+                                id="involved_parties" placeholder="e.g., DSWD–4Ps, DOH" type="text" />
+                        </div>
+                    </div>
+                    <div
+                        class="px-6 py-4 bg-slate-50 dark:bg-[#151f28] border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+                        <button id="interventions-provided-cancel-btn" type="button"
+                            class="px-4 py-2 bg-white dark:bg-transparent border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-none">
+                            Cancel
+                        </button>
+                        <button id="interventions-provided-modal-save-btn" type="button"
+                            class="px-4 py-2 bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors rounded-none">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Household Intervention Plan -->
+        <div id="household-intervention-plan-section" class="max-w-[1850px] mx-auto hidden" data-step-section="5">
+            <div
+                class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col rounded-none md:rounded-lg">
+                <div
+                    class="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a2632]">
+                    <h2 class="text-lg md:text-xl font-bold text-[#111418] dark:text-white font-lexend">Household
+                        Intervention Plan</h2>
+                    <button id="household-intervention-plan-add-btn" type="button"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">add</span>
+                        <span class="hidden sm:inline">Add Row</span>
+                    </button>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                        <thead
+                            class="bg-white dark:bg-[#1a2632] text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-6 py-4 min-w-[200px] w-2/12" scope="col">Objectives</th>
+                                <th class="px-6 py-4 min-w-[230px] w-3/12" scope="col">Suggested Intervention/Activities
+                                </th>
+                                <th class="px-6 py-4 min-w-[170px] w-2/12" scope="col">Responsible Person/Agency</th>
+                                <th class="px-6 py-4 min-w-[180px] w-2/12" scope="col">Timeline</th>
+                                <th class="px-6 py-4 min-w-[320px] w-3/12" scope="col">Expected Outcome</th>
+                                <th class="px-4 py-4 min-w-[80px] w-1/12 text-center" scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="household-intervention-plan-list" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
+                <p id="household-intervention-plan-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button id="household-intervention-plan-back-btn" type="button"
+                    class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>Back
+                </button>
+            </div>
+
+            <div id="household-intervention-plan-modal"
+                class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm hidden">
+                <div
+                    class="bg-white dark:bg-[#1a2632] w-full max-w-2xl rounded-none shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh]">
+                    <div
+                        class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                        <h3 id="household-intervention-plan-modal-title" class="text-xl font-bold text-[#111418] dark:text-white font-lexend">Household Intervention
+                            Plan</h3>
+                        <button id="household-intervention-plan-close-btn" type="button"
+                            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="p-6 overflow-y-auto custom-scrollbar space-y-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
+                                for="objectives">Objectives</label>
+                            <textarea
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                id="objectives" placeholder="Describe the objectives of this intervention..."
+                                rows="4"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
+                                for="activities">Suggested Intervention/Activities</label>
+                            <textarea
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                id="activities" placeholder="List the specific activities or interventions..."
+                                rows="4"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
+                                for="responsible">Responsible Person/Agency</label>
+                            <textarea
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                id="responsible" placeholder="Identify who is responsible..." rows="2"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
+                                for="timeline">Timeline</label>
+                            <input
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                id="timeline" placeholder="e.g. Q1 2024, Ongoing, Within 3 months..." type="text" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
+                                for="outcome">Expected Outcome</label>
+                            <textarea
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                id="outcome" placeholder="Describe the expected results..." rows="4"></textarea>
+                        </div>
+                    </div>
+                    <div
+                        class="px-6 py-4 bg-slate-50 dark:bg-[#151f28] border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3 rounded-b-none">
+                        <button id="household-intervention-plan-cancel-btn" type="button"
+                            class="px-5 py-2.5 rounded-none border border-slate-300 dark:border-slate-600 bg-white dark:bg-transparent text-slate-700 dark:text-slate-300 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            Cancel
+                        </button>
+                        <button id="household-intervention-plan-modal-save-btn" type="button"
+                            class="px-5 py-2.5 rounded-none bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendation -->
+        <div id="recommendation-section" class="max-w-[1024px] mx-auto hidden" data-step-section="6">
+            <div
+                class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12 rounded-none md:rounded-sm">
+                <div class="mb-8 border-b border-slate-100 dark:border-slate-700 pb-4">
+                    <h2
+                        class="text-xl md:text-2xl font-bold text-[#111418] dark:text-white font-lexend uppercase tracking-wide">
+                        Recommendation</h2>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+                        for="recommendation_text">Recommendation</label>
+                    <textarea
+                        class="w-full rounded-none border-slate-300 dark:border-slate-600 bg-white dark:bg-[#151f28] text-slate-900 dark:text-white focus:border-primary focus:ring-primary placeholder:text-slate-400 text-base leading-relaxed p-4"
+                        id="recommendation_text" placeholder="Write the recommendation narrative here..."
+                        rows="7"></textarea>
+                </div>
+                <div class="mb-12 max-w-xs">
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+                        for="recommendation_date">Date</label>
+                    <input
+                        class="w-full rounded-none border-slate-300 dark:border-slate-600 bg-white dark:bg-[#151f28] text-slate-900 dark:text-white focus:border-primary focus:ring-primary h-10 px-3"
+                        id="recommendation_date" type="date" />
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 mb-16">
+                    <div class="flex flex-col">
+                        <label class="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">Prepared
+                            by:</label>
+                        <input
+                            id="recommendation-prepared-by"
+                            class="border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                            placeholder="Full Name" type="text" />
+                        <span class="text-sm font-semibold text-slate-700 mt-1">PDO II-Municipal Link	</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-4 gap-3">
+                            <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Reviewed
+                                by:</label>
+                            <button id="recommendation-reviewed-by-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                        </div>
+                        <input
+                            id="recommendation-reviewed-by"
+                            class="border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                            placeholder="Full Name" type="text" />
+                        <span class="text-sm font-semibold text-slate-700 mt-1">Social Welfare Officer III </span>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-4 gap-3">
+                            <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Noted
+                                by:</label>
+                            <button id="recommendation-noted-by-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                        </div>
+                        <input
+                            id="recommendation-noted-by"
+                            class="border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                            placeholder="Full Name" type="text" />
+                        <span class="text-sm font-semibold text-slate-700 mt-1">Provincial Link</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-4 gap-3">
+                            <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Approved
+                                by:</label>
+                            <button id="recommendation-approved-by-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                        </div>
+                        <input
+                            id="recommendation-approved-by"
+                            class="border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                            placeholder="Full Name" type="text" />
+                        <span class="text-sm font-semibold text-slate-700 mt-1">Regional Program Coordinator</span>
+                    </div>
+                </div>
+                <div class="border-t border-slate-200 dark:border-slate-700 pt-10">
+                    <h3
+                        class="text-center text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-10">
+                        Exit Plan concurred by:</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-10 max-w-4xl mx-auto">
+                        <div class="flex flex-col items-center">
+                            <div class="w-full h-[30px] mb-1"></div>
+                            <input
+                                id="recommendation-hh-grantee"
+                                class="w-full text-center border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                                placeholder="Enter Name" type="text" />
+                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-2">HH
+                                Grantee</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-full flex justify-end mb-1">
+                                <button id="recommendation-mswd-officer-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                            </div>
+                            <input
+                                id="recommendation-mswd-officer"
+                                class="w-full text-center border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                                placeholder="Enter Name" type="text" />
+                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-2">MSWD
+                                Officer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="sticky bottom-0 z-20 w-full bg-white dark:bg-[#1a2632] border-t border-slate-200 dark:border-slate-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <div class="max-w-5xl mx-auto px-4 md:px-10 py-4">
+                    <div class="flex flex-wrap justify-end items-center gap-4">
+                        <p id="recommendation-save-status" class="text-xs text-slate-500 dark:text-slate-400 self-center"></p>
+                        <div class="flex items-center gap-3">
+                            <button id="recommendation-back-btn" type="button" class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">arrow_back</span>Back
+                            </button>
+                            <button id="recommendation-print-preview-btn" type="button"
+                                class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">preview</span>Print Preview
+                            </button>
+                            <button id="recommendation-export-btn" type="button"
+                                class="px-6 py-2.5 rounded-lg bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">file_download</span>Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="recommendation-preview-modal"
+        class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm p-4 md:p-6">
+        <div class="w-full h-full bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white">CSR Print Preview</h3>
+                <div class="flex items-center gap-2">
+                    <button id="recommendation-preview-open-browser-btn" type="button"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                        Open in Browser
+                    </button>
+                    <button id="recommendation-preview-print-btn" type="button"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">print</span>
+                        Print
+                    </button>
+                    <button id="recommendation-preview-close-btn" type="button"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                        Close
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 bg-slate-100 dark:bg-slate-900 p-2 md:p-3">
+                <iframe id="recommendation-preview-iframe" title="CSR Print Preview" class="w-full h-full rounded bg-white border-0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+    <script src="script.js" defer></script>
+
+</body>
+
+</html>
+
+

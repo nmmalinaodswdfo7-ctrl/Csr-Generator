@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        display: ["Public Sans", "sans-serif"],
+                        print: ["Calibri", "Arial", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                    },
+                    screens: {
+                        print: { raw: "print" },
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            html,
+            body {
+                width: 210mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body>.flex-grow {
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                overflow: visible !important;
+                background: white !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .page-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                min-height: 297mm !important;
+                max-height: 297mm !important;
+                border-radius: 0 !important;
+                padding: 1.27cm !important;
+                background: white !important;
+                overflow: hidden !important;
+                position: relative !important;
+                display: block !important;
+                box-sizing: border-box !important;
+                break-inside: avoid-page !important;
+                page-break-inside: avoid !important;
+                break-before: auto !important;
+                page-break-before: auto !important;
+                break-after: auto !important;
+                page-break-after: auto !important;
+            }
+
+            a {
+                color: inherit !important;
+                text-decoration: none !important;
+            }
+
+            * {
+                font-family: "Calibri", "Arial", sans-serif !important;
+            }
+
+            /* Force footer to the true bottom edge in print preview/output */
+            .footer-section,
+            .page-one .footer-section {
+                bottom: 0.35cm !important;
+                padding-bottom: 0 !important;
+                position: absolute !important;
+                left: 0 !important;
+                right: 0 !important;
+            }
+        }
+
+        .print-indent {
+            text-indent: 1.27cm;
+        }
+
+        .doc-text {
+            font-family: 'Calibri', 'Carlito', sans-serif;
+            font-size: 12pt;
+            line-height: 1.2;
+            color: black;
+        }
+
+
+        .page-container {
+            width: 210mm;
+            height: 297mm;
+            flex: 0 0 auto;
+            margin: 2rem auto;
+            background: white;
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.27cm;
+            position: relative;
+            font-family: "Calibri", "Arial", sans-serif;
+            font-size: 12pt;
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 18.46cm;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .report-table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            font-size: 12pt;
+        }
+
+        .report-table th,
+        .report-table td {
+            border: 1px solid #000;
+            padding: 2px 2px;
+            font-size: 11pt;
+            line-height: 1;
+            vertical-align: middle;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .report-table th,
+        .report-table td {
+            font-size: 10pt;
+        }
+
+        .report-table th,
+        .report-table td {
+            font-size: 11pt;
+        }
+
+        .report-table th {
+            font-weight: bold;
+            text-align: center;
+            background-color: transparent;
+        }
+
+        /* Keep headers centered, but force all data cells left-aligned */
+        .report-table tbody td {
+            text-align: left !important;
+        }
+
+        .col-name {
+            width: 18%;
+        }
+
+        .col-sex {
+            width: 8%;
+        }
+
+        .col-age {
+            width: 6%;
+        }
+
+        .col-civil {
+            width: 10%;
+        }
+
+        .col-rel {
+            width: 10%;
+        }
+
+        .col-check-header {
+            width: 7%;
+        }
+
+        .col-check {
+            width: 4%;
+        }
+
+        .col-educ {
+            width: 15%;
+        }
+
+        .col-occup {
+            width: 11%;
+        }
+
+        .col-income {
+            width: 9%;
+        }
+
+        .col-disability {
+            width: 8%;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 0;
+            font-size: 12pt;
+        }
+
+        .info-label {
+            font-weight: normal;
+        }
+
+        .info-value {
+            display: flex;
+        }
+
+        .info-colon {
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .footer-section {
+            position: absolute;
+            bottom: 0.8cm;
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 0 1.27cm 0;
+            box-sizing: border-box;
+        }
+
+        .page-one .footer-section {
+            bottom: 0.8cm;
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 0 1.27cm 0;
+            box-sizing: border-box;
+        }
+
+        .custom-table {
+            border: 1px solid black;
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .family-composition-table {
+            width: 100% !important;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            border: 1px solid black;
+            padding: 2px 4px;
+            overflow: hidden;
+            word-wrap: break-word;
+            vertical-align: middle;
+        }
+
+        .page-two-content {
+            /* Keep footer clearance but avoid wasting too much usable page space */
+            padding-bottom: 0;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1px solid black;
+        }
+
+        .header-text {
+            font-family: 'Calibri', 'Carlito', sans-serif;
+            font-size: 10pt;
+        }
+
+        .annex-b-badge {
+            display: inline-block;
+            border: 1px solid #000;
+            padding: 1px 4px;
+            line-height: 1;
+            width: fit-content;
+            align-self: flex-start;
+        }
+
+        .text-justify {
+            text-align: justify;
+        }
+
+        .calibri-text {
+            font-family: 'Calibri', 'Open Sans', sans-serif;
+        }
+
+        .csr-flow-doc {
+            width: 100%;
+            max-width: 18.46cm;
+            margin: 0 auto;
+            color: #000;
+            font-family: "Calibri", "Arial", sans-serif;
+            font-size: 12pt;
+            line-height: 1.15;
+        }
+
+        .csr-flow-doc .section-gap {
+            margin-bottom: 10pt;
+        }
+
+        .case-development-body p,
+        .case-dev-paragraph {
+            text-indent: 1.27cm;
+            margin: 0 0 0.35rem 0;
+            font-family: "Calibri", "Arial", sans-serif !important;
+            font-size: 12pt !important;
+            line-height: 1.2 !important;
+        }
+
+        .case-development-body p:last-child,
+        .case-dev-paragraph:last-child {
+            margin-bottom: 0;
+        }
+
+        .case-development-body {
+            font-family: "Calibri", "Arial", sans-serif !important;
+            font-size: 12pt !important;
+            line-height: 1.2 !important;
+        }
+
+        .csr-flow-doc .running-header {
+            position: running(doc-header);
+        }
+
+        .csr-flow-doc .running-footer {
+            position: running(doc-footer);
+        }
+
+        .csr-flow-doc .flow-header-line {
+            border-top: 1px solid #000;
+            margin-top: 8pt;
+            margin-bottom: 8pt;
+        }
+
+        .csr-flow-doc .page-counter::before {
+            content: "PAGE " counter(page) " of " counter(pages);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 10pt;
+        }
+
+        body.pagedjs-engine .page-container {
+            display: none !important;
+        }
+
+        body.pagedjs-engine .pagedjs_pages {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        body.pagedjs-engine .pagedjs_page {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+            body {
+                display: block !important;
+                min-height: auto !important;
+                overflow: visible !important;
+            }
+
+            body>.flex-grow {
+                display: block !important;
+                width: 210mm !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                background: white !important;
+            }
+
+            .annex-b-badge {
+                border-width: 0.5px;
+                padding: 0 2px;
+            }
+        }
+    </style>
+    <script>
+        window.PagedConfig = { auto: false };
+    </script>
+    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 flex flex-col min-h-screen">
+    <div class="flex-grow flex flex-col items-center overflow-auto p-0 sm:p-8 bg-slate-100 dark:bg-slate-900/50">
+        <!-- Page 1 -->
+        <div class="page-container page-one text-black">
+            <div class="content-wrapper">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col">
+                        <span class="annex-b-badge font-bold text-[16pt] leading-none">ANNEX B</span>
+                        <div class="flex items-center gap-3 mt-1">
+                            <img src="../assets/dswd_logo.png" alt="DSWD logo" class="h-14 w-auto object-contain" />
+                            <img src="../assets/bagong_pilipinas.png" alt="Bagong Pilipinas logo"
+                                class="h-14 w-auto object-contain -mt-3" />
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t-2 border-black mb-4 w-full"></div>
+                <div class="text-center mb-2">
+                    <h1 class="text-[18pt] font-bold uppercase tracking-wide">
+                        CASE SUMMARY REPORT
+                    </h1>
+                </div>
+                <div class="flex justify-end mb-4 w-full">
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-bold text-[14pt]">Date:</span>
+                        <span data-csr-field="date"
+                            class="text-[14pt] font-bold border-b border-black min-w-[140px] text-center">June 17,
+                            2025</span>
+                    </div>
+                </div>
+                <div class="mb-4 pl-0">
+                    <h2 class="font-bold text-[12pt] mb-2 uppercase">
+                        I. Identifying Information:
+                    </h2>
+                    <div class="info-grid ml-4">
+                        <div class="info-label">Grantee's Name</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span>
+                            <span data-csr-field="granteeName" class="font-bold uppercase">TUSOY, MEGAN PANUNCIALMAN</span>
+                        </div>
+                        <div class="info-label">Household ID Number</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="householdId">071234006-2-09458050</span>
+                        </div>
+                        <div class="info-label">HH Set Group</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="hhSet">11A</span>
+                        </div>
+                        <div class="info-label">National ID</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="nationalId">None</span>
+                        </div>
+                        <div class="info-label">Date of Registration</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="yearOfRegistration">2022</span>
+                        </div>
+                        <div class="info-label">Years in the Program</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="yearsInProgram">3 years</span>
+                        </div>
+                        <div class="info-label">Sex</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="sex">Female</span>
+                        </div>
+                        <div class="info-label">Birthday</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="birthday">January 09, 2004</span>
+                        </div>
+                        <div class="info-label">Age</div>
+                        <div class="info-value"><span class="info-colon">:</span> <span data-csr-field="age">21</span></div>
+                        <div class="info-label">Place of Birth</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="placeOfBirth">Pilar, Bohol</span>
+                        </div>
+                        <div class="info-label">Civil Status</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="civilStatus">Common Law</span>
+                        </div>
+                        <div class="info-label">Present Address</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="presentAddress">Purok 6, Cagawasan, Pilar
+                            Bohol</span>
+                        </div>
+                        <div class="info-label">Educational Attainment</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="educationalAttainment">High School Graduate</span>
+                        </div>
+                        <div class="info-label">Contact information</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="contactInfo">09318489008</span>
+                        </div>
+                        <div class="info-label">Religion</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="religion">Jehovah's Witness</span>
+                        </div>
+                        <div class="info-label">IP Affiliation</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="ipAffiliation">None</span>
+                        </div>
+                        <div class="info-label">Source of Information</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="sourceOfInfo">Grantee</span>
+                        </div>
+                        <div class="info-label">Current HH level of well-being</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span>
+                            <span data-csr-field="previousWellBeingLevel">Level 3 - Self-Sufficient Index Score: 2.90006</span>
+                        </div>
+                        <div class="info-label">Client Status upon Exit</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="clientStatusOnExit">CS1-Active</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-2 pl-0 w-full" data-flow-kind="family">
+                    <h2 class="font-bold text-[12pt] mb-2 uppercase">
+                        II. Family Composition
+                    </h2>
+                    <div class="w-full">
+                        <table class="report-table family-composition-table text-left border-black">
+                            <colgroup>
+                                <col class="col-name" />
+                                <col class="col-sex" />
+                                <col class="col-age" />
+                                <col class="col-civil" />
+                                <col class="col-rel" />
+                                <col class="col-check" />
+                                <col class="col-check" />
+                                <col class="col-educ" />
+                                <col class="col-occup" />
+                                <col class="col-income" />
+                                <col class="col-disability" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="border border-black">Name</th>
+                                    <th class="border border-black">Sex</th>
+                                    <th class="border border-black">Age</th>
+                                    <th class="border border-black">Civil Status</th>
+                                    <th class="border border-black">Relationship to the HH Grantee</th>
+                                    <th class="border border-black p-0" colspan="2">
+                                        <div class="w-full h-full flex flex-col">
+                                            <div class="border-b border-black p-1 text-[9pt]">
+                                                Monitored Child
+                                            </div>
+                                            <div class="flex h-full">
+                                                <div class="w-1/2 border-r border-black p-0.5">Yes</div>
+                                                <div class="w-1/2 p-0.5">No</div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th class="border border-black">Educ. Attainment</th>
+                                    <th class="border border-black">Occupation</th>
+                                    <th class="border border-black">Monthly Income</th>
+                                    <th class="border border-black">Type of Disability(if applicable)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="csr-family-composition-body">
+                                <tr>
+                                    <td class="border border-black">
+                                        Tusoy, Lucia Panuncialman
+                                    </td>
+                                    <td class="border border-black text-center">MALE</td>
+                                    <td class="border border-black text-center">42</td>
+                                    <td class="border border-black">Separated</td>
+                                    <td class="border border-black">Head</td>
+                                    <td class="border border-black text-center font-bold">✓</td>
+                                    <td class="border border-black text-center"></td>
+                                    <td class="border border-black text-center"></td>
+                                    <td class="border border-black text-center font-bold">✓</td>
+                                    <td class="border border-black uppercase text-[10pt]">
+                                        High School Grad
+                                    </td>
+                                    <td class="border border-black text-[10pt]">Food Vendor</td>
+                                    <td class="border border-black text-right">3,000.00</td>
+                                    <td class="border border-black">N/A</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black">
+                                        Tusoy, Megan Panuncialman
+                                    </td>
+                                    <td class="border border-black text-center">FEMALE</td>
+                                    <td class="border border-black text-center">21</td>
+                                    <td class="border border-black">Common-Law</td>
+                                    <td class="border border-black">Daughter</td>
+                                    <td class="border border-black text-center font-bold">✓</td>
+                                    <td class="border border-black text-center"></td>
+                                    <td class="border border-black text-center"></td>
+                                    <td class="border border-black text-center font-bold">✓</td>
+                                    <td class="border border-black uppercase text-[10pt]">
+                                        Senior High Grad
+                                    </td>
+                                    <td class="border border-black text-[10pt]">None</td>
+                                    <td class="border border-black text-right">N/A</td>
+                                    <td class="border border-black">N/A</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black">
+                                        Tusoy, Jorell Panuncialman
+                                    </td>
+                                    <td class="border border-black text-center">MALE</td>
+                                    <td class="border border-black text-center">20</td>
+                                    <td class="border border-black">Single</td>
+                                    <td class="border border-black">Son</td>
+                                    <td class="border border-black text-center font-bold">✓</td>
+                                    <td class="border border-black text-center"></td>
+                                    <td class="border border-black text-center font-bold">✓</td>
+                                    <td class="border border-black text-center"></td>
+                                    <td class="border border-black text-[10pt]">
+                                        1st Year College
+                                    </td>
+                                    <td class="border border-black text-[10pt]">None</td>
+                                    <td class="border border-black text-right">N/A</td>
+                                    <td class="border border-black">N/A</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-section">
+                <div class="flex flex-col items-center">
+                    <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 1 of 1</p>
+                    <div class="w-full border-t border-black mb-1"></div>
+                    <div class="text-[9pt] text-center leading-tight font-print w-full">
+                        <p class="font-normal">
+                            DSWD Field Office VII, M.J. Cuenco Avenue Corner Gen. Maxilom
+                            Avenue, Brgy. Carreta, Cebu City (6000)
+                        </p>
+                        <p class="font-normal">
+                            Website:
+                            <a class="text-blue-600 underline" href="#">http://www.dswd.gov.ph</a>
+                            Tel Nos.: (032) 412-9908 / (032) 232-9505 Telefax: (032)
+                            231-2172
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2 -->
+        <div class="page-container text-black hidden">
+            <div class="content-wrapper page-two-content">
+                <div class="flex justify-end w-full mb-4">
+                    <span class="font-bold calibri-font text-[10pt] leading-none">DSWD-GF-010 | REV 02 | 22 SEP
+                        2023</span>
+                </div>
+                <div class="flex-1 flex flex-col">
+                    <div class="flex gap-4 mb-2 calibri-font">
+                        <h3 class="font-bold text-[12pt] uppercase">III. CASE DEVELOPMENT</h3>
+                    </div>
+                    <div id="csr-case-development-content" class="calibri-font text-[12pt] leading-none text-justify space-y-4">
+                        <p class="print-indent mb-0">
+                            The family was identified as poor under the Listahanan and was enrolled in the Pantawid
+                            Pamilyang Pilipino Program (4Ps) in 2022. For over three years in the 4Ps program, Megan,
+                            the grantee, has consistently complied with the program's conditions, regularly attending
+                            Family Development Sessions (FDS), participating in health monitoring, and ensuring the
+                            children's school attendance. Despite economic challenges, the family has strived to meet
+                            their basic needs with the support from the 4Ps program. According to the Social Welfare and
+                            Development Indicator (SWDI) assessment conducted on May 23, 2024, the family had reached
+                            the Self-Sufficient level of well-being. This was largely attributed to the mother, Lucia,
+                            who was working abroad as a Domestic Helper in Hong Kong, earning approximately P20,000.00
+                            per month. Her husband, Benjamin, also contributed to the household income through farming,
+                            earning about P7,000.00 monthly.
+                        </p>
+                        <p class="print-indent mb-0">
+                            However, recent events have caused a significant setback in the family's economic stability.
+                            Lucia returned home in April 2025 after her overseas contract ended. While waiting for a new
+                            opportunity abroad, she is currently engaged in food vending in their community, with a
+                            modest income of P3,000.00. Her return was also partly influenced by a serious family
+                            conflict. Early in 2025, while Lucia was still abroad, Benjamin left home to live with
+                            another woman. Although he continues to send sacks of rice for the family's consumption, his
+                            financial support has become inconsistent and significantly reduced.
+                        </p>
+                        <p class="print-indent mb-0">
+                            Meanwhile, Megan, the program grantee, is currently pregnant with her second child and stays
+                            at home to care for her eldest son. Her common-law partner, Ronald, works as a laborer,
+                            earning approximately P4,000.00 per month. Despite the challenges, all monitored children
+                            remain in school. The previously monitored child, Jorell, is now a first-year college
+                            student at Trinidad Municipal College. Jezrel is in Grade 11 at Pilar Technical Vocational
+                            High School, and Leslie is in Grade 4 at Cagawasan Elementary School.
+                        </p>
+                        <p class="print-indent mb-0">
+                            The most recent SWDI assessment, conducted on June 17, 2025, shows that the family's
+                            well-being status has declined to Level 2 or Subsistence. This downgrade reflects the
+                            economic shock experienced due to multiple factors. First, the loss of Lucia's stable
+                            overseas income; second, the reduced financial support from Benjamin; lastly, and the
+                            increasing financial demands of supporting children in school, covering expenses such as
+                            food, school supplies, boarding house rentals, and other educational needs. At present, the
+                            family is in a vulnerable state and may benefit from case management intervention,
+                            livelihood support, and referrals to appropriate social welfare services to help them regain
+                            economic stability and improve their overall well-being.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-section">
+                <div class="flex flex-col items-center">
+                    <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 2 of 4</p>
+                    <div class="w-full border-t border-black mb-1"></div>
+                    <div class="text-[9pt] text-center leading-tight font-print w-full">
+                        <p class="font-bold">
+                            DSWD FIELD OFFICE VII | PANTAWID PAMILYANG PILIPINO PROGRAM
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3 -->
+        <div class="page-container text-black hidden">
+            <div class="content-wrapper page-two-content">
+                <div class="flex justify-end w-full mb-4">
+                    <span class="font-bold calibri-font text-[10pt] leading-none">DSWD-GF-010 | REV 02 | 22 SEP
+                        2023</span>
+                </div>
+                <section class="mb-8">
+                    <h2 class="doc-text font-bold mb-2 uppercase">IV.    INTERVENTIONS PROVIDED</h2>
+                    <table class="report-table doc-text w-full">
+                        <colgroup>
+                            <col style="width: 45%;" />
+                            <col style="width: 20%;" />
+                            <col style="width: 35%;" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>INTERVENTIONS PROVIDED</th>
+                                <th>Date Completed/<br />Accomplished</th>
+                                <th>Involved Parties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="csr-interventions-body">
+                            <tr>
+                                <td>Provided total cash grants amounting to P 51,350.00</td>
+                                <td class="col-center">2022-2025</td>
+                                <td class="col-center">DSWD-Pantawid Pamilyang Pilipino Program</td>
+                            </tr>
+                            <tr>
+                                <td>Provided free health services and health grants amounting to <br />P 15,750.00</td>
+                                <td class="col-center">2022-2025</td>
+                                <td class="col-center">DSWD-Pantawid Pamilyang Pilipino Program</td>
+                            </tr>
+                            <tr>
+                                <td>Provided Rice Subsidy amounting to P13,200.00</td>
+                                <td class="col-center">2022-2025</td>
+                                <td class="col-center">DSWD-Pantawid Pamilyang Pilipino Program</td>
+                            </tr>
+                            <tr>
+                                <td>Provided educational grants amounting to P22,400.00</td>
+                                <td class="col-center">2022-2025</td>
+                                <td class="col-center">DSWD-Pantawid Pamilyang Pilipino Program</td>
+                            </tr>
+                            <tr>
+                                <td>Provided TCT Grants amounting of P3,000.00</td>
+                                <td class="col-center">2022-2025</td>
+                                <td class="col-center">DSWD-Target Cash Transfer</td>
+                            </tr>
+                            <tr>
+                                <td>Provided learning inputs, capacity building, and advocacy on social protection
+                                    through Family Development Sessions (FDS) like financial literacy, disaster
+                                    preparedness, gender-based violence awareness, rights and protection of children, TB
+                                    awareness.</td>
+                                <td class="col-center">2022-2025</td>
+                                <td class="col-center">DSWD-Pantawid Pamilyang Pilipino Program</td>
+                            </tr>
+                            <tr>
+                                <td>Received P 5,000 Cash assistance for victim of Typhoon Odette and relief goods</td>
+                                <td class="col-center">May 2022</td>
+                                <td class="col-center">DSWD</td>
+                            </tr>
+                            <tr>
+                                <td>Provided PhilHealth under NHTS sponsorship</td>
+                                <td class="col-center">2022-2025</td>
+                                <td class="col-center">Department of Health</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="flex-grow">
+                    <h2 class="doc-text font-bold mb-2">V. TRANSITION/EXIT PLAN</h2>
+                    <table class="report-table doc-text w-full">
+                        <colgroup>
+                            <col style="width: 20%;" />
+                            <col style="width: 23%;" />
+                            <col style="width: 20%;" />
+                            <col style="width: 12%;" />
+                            <col style="width: 25%;" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Objectives</th>
+                                <th>Suggested Intervention/<br />Activities</th>
+                                <th>Responsible Person/<br />Agency</th>
+                                <th>Timeline</th>
+                                <th>Expected<br />Outcome</th>
+                            </tr>
+                        </thead>
+                        <tbody id="csr-household-plan-body">
+                            <tr>
+                                <td>To increase their number of vegetables and fruits in their backyard garden</td>
+                                <td>Refer Megan to MAO for the acquisition of free vegetable seedlings.</td>
+                                <td class="col-center">
+                                    ML<br /><br />
+                                    LGU-MAO<br /><br />
+                                    Tusoy<br />Family
+                                </td>
+                                <td>June-July, 2025</td>
+                                <td>Megan received the complimentary vegetable seedlings and was able to pick them for
+                                    daily usage.</td>
+                            </tr>
+                            <tr>
+                                <td>To continuously receive medical service consultation and Health Insurance from
+                                    Philhealth</td>
+                                <td>
+                                    -Referral to LGU Rural Health Unit<br />
+                                    -Enroll/enlist HH for LGU-sponsored Group Enrollment Program for continuous
+                                    availment of Philhealth Konsulta
+                                </td>
+                                <td class="col-center">
+                                    Tusoy Family,<br />
+                                    LGU-RHU,<br />
+                                    LGU-Philhealth Focal
+                                </td>
+                                <td>2025</td>
+                                <td>The household received continuous medical service consultation and availed the
+                                    Konsulta package of Philhealth</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <div class="footer-section">
+                    <div class="flex flex-col items-center">
+                        <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 3 of 4</p>
+                        <div class="w-full border-t border-black mb-1"></div>
+                        <div class="text-[9pt] text-center leading-tight font-print w-full">
+                            <p class="font-bold">
+                                DSWD FIELD OFFICE VII | PANTAWID PAMILYANG PILIPINO PROGRAM
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 4 -->
+        <div class="page-container text-black hidden">
+            <div class="content-wrapper page-two-content">
+                <div class="flex justify-end w-full mb-4">
+                    <span class="font-bold calibri-font text-[10pt] leading-none">DSWD-GF-010 | REV 02 | 22 SEP
+                        2023</span>
+                </div>
+                <div class="space-y-8">
+                    <section>
+                        <h2 class="text-[12pt] font-bold text-black dark:text-white mb-6 font-calibri">
+                            VI. RECOMMENDATION
+                        </h2>
+                        <div class="prose prose-slate max-w-none dark:prose-invert">
+                            <p id="csr-recommendation-text"
+                                class="text-justify indent-[1.27cm] text-[12pt] leading-snug font-calibri text-black dark:text-slate-200">
+                                The undersigned recommended that the household be retained in the 4Ps program for
+                                continuous access to conditional cash grants, health and education monitoring, and
+                                development sessions. Conduct regular home visits and follow-up assessments to track
+                                improvements or further needs.
+                            </p>
+                        </div>
+                    </section>
+                </div>
+                <section class="mt-16 w-full">
+                    <div class="grid grid-cols-2 gap-x-12 gap-y-12">
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[12pt] font-normal text-black dark:text-slate-300 mb-12 font-calibri">Prepared
+                                by:</span>
+                            <div class="relative">
+                                <p
+                                    class="font-bold text-[12pt] text-black dark:text-white uppercase font-calibri relative z-10 mb-2">
+                                    <span data-csr-field="preparedBy">NICKSON R. MANLIGAS</span></p>
+                                <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri mb-4">PDO
+                                    II-Municipal Link</p>
+                                <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                    <span>Date:</span>
+                                    <span class="border-b border-black w-24"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[12pt] font-normal text-black dark:text-slate-300 mb-12 font-calibri">Reviewed
+                                by:</span>
+                            <div>
+                                <p class="font-bold text-[12pt] text-black dark:text-white uppercase font-calibri mb-2">
+                                    <span data-csr-field="reviewedBy">MIGUELIZA V. FELIAS, RSW</span></p>
+                                <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri mb-4">Social
+                                    Welfare Officer III</p>
+                                <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                    <span>Date:</span>
+                                    <span class="border-b border-black w-24"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col pt-4">
+                            <span
+                                class="text-[12pt] font-normal text-black dark:text-slate-300 mb-12 font-calibri">Noted
+                                by:</span>
+                            <div>
+                                <p class="font-bold text-[12pt] text-black dark:text-white uppercase font-calibri mb-2"><span
+                                        data-csr-field="notedBy">LUZ
+                                        C. FEGARIDO, RSW</span></p>
+                                <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri mb-4">
+                                    Provincial Link</p>
+                                <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                    <span>Date:</span>
+                                    <span class="border-b border-black w-24"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col pt-4">
+                            <span
+                                class="text-[12pt] font-normal text-black dark:text-slate-300 mb-12 font-calibri">Approved
+                                by:</span>
+                            <div>
+                                <p class="font-bold text-[12pt] text-black dark:text-white uppercase font-calibri mb-2"><span
+                                        data-csr-field="approvedBy">JIAH
+                                        L. SAYSON</span></p>
+                                <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri mb-4">Regional
+                                    Program Coordinator</p>
+                                <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                    <span>Date:</span>
+                                    <span class="border-b border-black w-24"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="mt-8 pt-6">
+                    <h3 class="text-center text-[12pt] font-normal text-black dark:text-slate-300 mb-12 font-calibri">
+                        Exit Plan concurred by:</h3>
+                    <div class="grid grid-cols-2 gap-x-12">
+                        <div class="flex flex-col">
+                            <p class="font-bold text-[12pt] uppercase text-black dark:text-white font-calibri mb-2"><span
+                                    data-csr-field="hhGrantee">TUSOY,
+                                    MEGAN PANUNCIALMAN</span></p>
+                            <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri mb-4">HH
+                                Grantee</p>
+                            <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                <span>Date:</span>
+                                <span class="border-b border-black w-24"></span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="font-bold text-[12pt] uppercase text-black dark:text-white font-calibri mb-2"><span
+                                    data-csr-field="mswdOfficer">ESTRELLA
+                                    S. MALNEGRO, RSW</span></p>
+                            <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri mb-4">MSWD
+                                Officer</p>
+                            <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                <span>Date:</span>
+                                <span class="border-b border-black w-24"></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <div class="footer-section">
+                    <div class="flex flex-col items-center">
+                        <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 4 of 4</p>
+                        <div class="w-full border-t border-black mb-1"></div>
+                        <div class="text-[9pt] text-center leading-tight font-print w-full">
+                            <p class="font-bold">
+                                DSWD FIELD OFFICE VII | PANTAWID PAMILYANG PILIPINO PROGRAM
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="csr-template.js"></script>
+</body>
+
+</html>
+
