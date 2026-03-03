@@ -1,0 +1,47 @@
+{
+  "appId": "com.csr.generator.desktop",
+  "productName": "CSR Generator",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "assets/**/*",
+    "backup/**/*",
+    "db/**/*",
+    "downloads/**/*",
+    "libraries/**/*",
+    "main/**/*",
+    "launcher/**/*",
+    "package.json"
+  ],
+  "asar": false,
+  "win": {
+    "signAndEditExecutable": false,
+    "forceCodeSigning": false,
+    "icon": "assets/logo.ico",
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "portable",
+        "arch": [
+          "x64"
+        ]
+      }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": false,
+    "perMachine": false,
+    "allowElevation": false,
+    "installerIcon": "assets/logo.ico",
+    "uninstallerIcon": "assets/logo.ico",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  }
+}

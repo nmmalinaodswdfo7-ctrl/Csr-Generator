@@ -308,7 +308,6 @@
                     cloned.textContent = raw;
                     cloned.classList.add("case-dev-paragraph");
                     cloned.style.margin = "0 0 0.35rem 0";
-                    cloned.style.textIndent = "1.27cm";
                     return [cloned];
                 }
 
@@ -325,7 +324,6 @@
                         p.textContent = value;
                         p.classList.add("case-dev-paragraph");
                         p.style.margin = "0 0 0.35rem 0";
-                        p.style.textIndent = "1.27cm";
                         out.push(p);
                         return;
                     }
@@ -343,7 +341,6 @@
                     if (tag === "P") {
                         const cloned = node.cloneNode(true);
                         cloned.classList.add("case-dev-paragraph");
-                        cloned.style.textIndent = "1.27cm";
                         cloned.style.margin = "0 0 0.35rem 0";
                         out.push(cloned);
                         return;
@@ -359,7 +356,6 @@
                     const cloned = node.cloneNode(true);
                     if (cloned && cloned.nodeType === 1 && String(cloned.tagName || "").toUpperCase() === "P") {
                         cloned.classList.add("case-dev-paragraph");
-                        cloned.style.textIndent = "1.27cm";
                         if (!cloned.style.margin) {
                             cloned.style.margin = "0 0 0.35rem 0";
                         }

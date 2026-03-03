@@ -1,5 +1,5 @@
 @echo off
-setlocal EnableExtensions
+setlocal EnableExtensions EnableDelayedExpansion
 
 set "ROOT_DIR=%~dp0"
 if "%ROOT_DIR:~-1%"=="\" set "ROOT_DIR=%ROOT_DIR:~0,-1%"
@@ -7,9 +7,13 @@ set "TIMESTAMP=%DATE:~-4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2
 set "TIMESTAMP=%TIMESTAMP: =0%"
 set "RELEASE_DIR=%ROOT_DIR%\release\CSR_GENERATOR_%TIMESTAMP%"
 set "PORTABLE_NODE_EXE=%ROOT_DIR%\runtime\node\node.exe"
-set "STRICT_PROTECT=1"
-set "BUILD_EXE=1"
-set "EXE_SMOKE_TEST=1"
+if not defined STRICT_PROTECT set "STRICT_PROTECT=1"
+if not defined BUILD_EXE set "BUILD_EXE=1"
+if not defined EXE_SMOKE_TEST set "EXE_SMOKE_TEST=1"
+if not defined SAFE_BUILD set "SAFE_BUILD=1"
+if not defined OBFUSCATE_JS set "OBFUSCATE_JS=1"
+if not defined ENABLE_EXE_ICON set "ENABLE_EXE_ICON=0"
+if not defined FORCE_UNSIGNED set "FORCE_UNSIGNED=0"
 
 where node >nul 2>nul
 if errorlevel 1 (
@@ -76,25 +80,37 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo Obfuscating main\script.js in release copy...
-call npx.cmd javascript-obfuscator "..\main\script.js" --output "..\main\script.js" --compact true --control-flow-flattening true --string-array true --rename-globals false --self-defending false
-if errorlevel 1 (
-  echo javascript-obfuscator failed.
-  popd
-  pause
-  exit /b 1
-)
+if "%OBFUSCATE_JS%"=="1" (
+  set "OBF_SRC_SCRIPT=..\main\script.js"
+  set "OBF_SRC_TEMPLATE=..\main\csr-template.js"
+  set "OBF_TMP_SCRIPT=..\main\script.obf.tmp.js"
+  set "OBF_TMP_TEMPLATE=..\main\csr-template.obf.tmp.js"
 
-echo Obfuscating main\csr-template.js in release copy...
-call npx.cmd javascript-obfuscator "..\main\csr-template.js" --output "..\main\csr-template.js" --compact true --control-flow-flattening false --string-array true --rename-globals false --self-defending false
-if errorlevel 1 (
-  echo javascript-obfuscator failed for csr-template.js.
-  popd
-  pause
-  exit /b 1
-)
+  if exist "!OBF_TMP_SCRIPT!" del /f /q "!OBF_TMP_SCRIPT!" >nul 2>nul
+  if exist "!OBF_TMP_TEMPLATE!" del /f /q "!OBF_TMP_TEMPLATE!" >nul 2>nul
 
-echo Skipping obfuscation for launcher\server.js to keep Playwright export stable.
+  echo Obfuscating main\script.js ^(safe profile^)...
+  call npx.cmd javascript-obfuscator "!OBF_SRC_SCRIPT!" --output "!OBF_TMP_SCRIPT!" --compact true --control-flow-flattening false --string-array true --string-array-threshold 0.7 --rename-globals false --self-defending false --simplify true
+  if errorlevel 1 goto :obfuscation_failed
+  call node --check "!OBF_TMP_SCRIPT!"
+  if errorlevel 1 goto :obfuscation_failed
+
+  echo Obfuscating main\csr-template.js ^(safe profile^)...
+  call npx.cmd javascript-obfuscator "!OBF_SRC_TEMPLATE!" --output "!OBF_TMP_TEMPLATE!" --compact true --control-flow-flattening false --string-array true --string-array-threshold 0.65 --rename-globals false --self-defending false --simplify true
+  if errorlevel 1 goto :obfuscation_failed
+  call node --check "!OBF_TMP_TEMPLATE!"
+  if errorlevel 1 goto :obfuscation_failed
+
+  move /y "!OBF_TMP_SCRIPT!" "!OBF_SRC_SCRIPT!" >nul
+  if errorlevel 1 goto :obfuscation_failed
+  move /y "!OBF_TMP_TEMPLATE!" "!OBF_SRC_TEMPLATE!" >nul
+  if errorlevel 1 goto :obfuscation_failed
+
+  echo Safe obfuscation complete.
+  echo Skipping obfuscation for launcher\server.js to keep Playwright export stable.
+) else (
+  echo Obfuscation disabled by OBFUSCATE_JS=0.
+)
 
 if "%STRICT_PROTECT%"=="1" (
   echo Applying strict protection cleanup...
@@ -113,6 +129,27 @@ if "%BUILD_EXE%"=="1" (
     echo EXE packaging skipped: package.json not found in release root.
     goto :after_exe_build
   )
+  set "PACK_SCRIPT=pack:win"
+  if "%SAFE_BUILD%"=="1" (
+    if "%ENABLE_EXE_ICON%"=="1" (
+      if exist "%RELEASE_DIR%\electron-builder.safe.icon.json" (
+        set "PACK_SCRIPT=pack:win:safe:icon"
+      ) else (
+        echo ENABLE_EXE_ICON is on but electron-builder.safe.icon.json is missing. Falling back to icon-off safe config.
+        if exist "%RELEASE_DIR%\electron-builder.safe.json" (
+          set "PACK_SCRIPT=pack:win:safe"
+        ) else (
+          echo SAFE_BUILD enabled but electron-builder.safe.json is missing. Falling back to standard pack config.
+        )
+      )
+    ) else (
+      if exist "%RELEASE_DIR%\electron-builder.safe.json" (
+        set "PACK_SCRIPT=pack:win:safe"
+      ) else (
+        echo SAFE_BUILD enabled but electron-builder.safe.json is missing. Falling back to standard pack config.
+      )
+    )
+  )
 
   echo Installing desktop packager dependencies...
   pushd "%RELEASE_DIR%"
@@ -124,12 +161,34 @@ if "%BUILD_EXE%"=="1" (
     exit /b 1
   )
 
-  echo Building Windows EXE installer...
-  rem Safe unsigned build: prevent auto code-sign discovery/tools download.
-  set "CSC_IDENTITY_AUTO_DISCOVERY=false"
-  set "WIN_CSC_LINK="
-  set "WIN_CSC_KEY_PASSWORD="
-  call npm.cmd run pack:win
+  echo Building Windows EXE installer using script: !PACK_SCRIPT!
+  set "HAS_SIGNING_VARS=0"
+  if defined CSC_LINK set "HAS_SIGNING_VARS=1"
+  if defined WIN_CSC_LINK set "HAS_SIGNING_VARS=1"
+  if defined CSC_NAME set "HAS_SIGNING_VARS=1"
+  if defined CSC_KEY_PASSWORD set "HAS_SIGNING_VARS=1"
+  if defined WIN_CSC_KEY_PASSWORD set "HAS_SIGNING_VARS=1"
+  if "%FORCE_UNSIGNED%"=="1" (
+    echo FORCE_UNSIGNED enabled. Packaging without code signing.
+    set "CSC_IDENTITY_AUTO_DISCOVERY=false"
+    set "CSC_LINK="
+    set "CSC_NAME="
+    set "WIN_CSC_LINK="
+    set "CSC_KEY_PASSWORD="
+    set "WIN_CSC_KEY_PASSWORD="
+  ) else if "!HAS_SIGNING_VARS!"=="0" (
+    echo No signing certificate variables detected. Packaging unsigned and disabling signer auto-discovery.
+    set "CSC_IDENTITY_AUTO_DISCOVERY=false"
+    set "CSC_LINK="
+    set "CSC_NAME="
+    set "WIN_CSC_LINK="
+    set "CSC_KEY_PASSWORD="
+    set "WIN_CSC_KEY_PASSWORD="
+  ) else (
+    echo Signing variables detected. Allowing electron-builder to sign this build.
+    set "CSC_IDENTITY_AUTO_DISCOVERY=true"
+  )
+  call npm.cmd run !PACK_SCRIPT!
   if errorlevel 1 (
     echo EXE packaging failed.
     popd
@@ -146,6 +205,22 @@ if "%BUILD_EXE%"=="1" (
       exit /b 1
     )
     echo Smoke test passed: EXE output detected.
+  )
+
+  echo Preparing installer diagnostics launcher...
+  if exist "%ROOT_DIR%\capture-install-diagnostics.ps1" (
+    copy /y "%ROOT_DIR%\capture-install-diagnostics.ps1" "%RELEASE_DIR%\dist\capture-install-diagnostics.ps1" >nul
+    (
+      echo @echo off
+      echo setlocal
+      echo set "SCRIPT_DIR=%%~dp0"
+      echo powershell -NoProfile -ExecutionPolicy Bypass -File "%%SCRIPT_DIR%%capture-install-diagnostics.ps1"
+      echo endlocal
+    ) > "%RELEASE_DIR%\dist\Install-CSR-With-Diagnostics.cmd"
+    echo Created diagnostics installer launcher:
+    echo   %RELEASE_DIR%\dist\Install-CSR-With-Diagnostics.cmd
+  ) else (
+    echo Skipped diagnostics launcher: capture-install-diagnostics.ps1 not found in project root.
   )
 )
 
@@ -164,6 +239,10 @@ if "%BUILD_EXE%"=="1" (
     echo Generated portable app EXE:
     dir /b "%RELEASE_DIR%\dist\win-unpacked\*.exe"
   )
+  if exist "%RELEASE_DIR%\dist\Install-CSR-With-Diagnostics.cmd" (
+    echo Installer launcher with diagnostics:
+    echo %RELEASE_DIR%\dist\Install-CSR-With-Diagnostics.cmd
+  )
 )
 echo.
 echo To run release:
@@ -172,3 +251,12 @@ echo 2. start-app.bat
 echo.
 pause
 endlocal
+goto :eof
+
+:obfuscation_failed
+echo Safe obfuscation failed. Release source files were not replaced.
+if defined OBF_TMP_SCRIPT if exist "!OBF_TMP_SCRIPT!" del /f /q "!OBF_TMP_SCRIPT!" >nul 2>nul
+if defined OBF_TMP_TEMPLATE if exist "!OBF_TMP_TEMPLATE!" del /f /q "!OBF_TMP_TEMPLATE!" >nul 2>nul
+popd
+pause
+exit /b 1

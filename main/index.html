@@ -648,7 +648,10 @@
                                             of Info</label>
                                         <input id="edit-source-of-info" data-basic-edit-required="1"
                                             class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
-                                            placeholder="e.g. Grantee" type="text" />
+                                            placeholder="e.g. Grantee" type="text" list="source-of-info-datalist" />
+                                        <datalist id="source-of-info-datalist">
+                                            <option value="Grantee"></option>
+                                        </datalist>
                                     </div>
                                 </div>
                                 <div>
@@ -657,7 +660,11 @@
                                         Level of Well-being</label>
                                     <input id="edit-prev-wellbeing" data-basic-edit-required="1"
                                         class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
-                                        placeholder="Level 2 - Subsistence Index Score : 2.52484" type="text" />
+                                        placeholder="Level 2 - Subsistence Index Score : 2.52484" type="text" list="prev-wellbeing-datalist" />
+                                    <datalist id="prev-wellbeing-datalist">
+                                        <option value="Level 2 - Subsistence Index Score : 2.56792"></option>
+                                        <option value="Level 3 - Self-Sufficient Index Score : 2.923"></option>
+                                    </datalist>
                                 </div>
                             </div>
                         </div>

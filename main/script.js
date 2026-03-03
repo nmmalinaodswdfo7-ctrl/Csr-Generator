@@ -15,10 +15,11 @@
   const CARDS_PAGE_KEY_PREFIX = "csr_cards_page_v1_";
   const UPDATE_PENDING_KEY_PREFIX = "csr_update_pending_v1_";
   const ORPHAN_CLEANUP_PENDING_KEY_PREFIX = "csr_orphan_cleanup_pending_v1_";
-  const MUNICIPALITY_CHANGE_CHECK_MS = 30000;
+  const MUNICIPALITY_CHANGE_CHECK_MS = 5 * 60 * 1000;
   const PROJECT_DOWNLOADS_DIR_LABEL = "app downloads folder";
   const TOAST_SUCCESS_DURATION_MS = 4000;
   const TOAST_ERROR_DURATION_MS = 3500;
+  const EXPORT_SUCCESS_REDIRECT_DELAY_MS = 500;
   // Set to a number (e.g. 3000) to force one global toast duration for all toasts.
   // Keep as null to use per-type defaults and per-call overrides.
   const TOAST_GLOBAL_DURATION_MS = null;
@@ -27,6 +28,10 @@
   const CSR_ID_MIN = 10000;
   const CSR_ID_MAX = 99999;
   const CSR_STEP_COUNT = 6;
+  const SOURCE_OF_INFO_FIELD_ID = "edit-source-of-info";
+  const SOURCE_OF_INFO_DATALIST_ID = "source-of-info-datalist";
+  const PREV_WELLBEING_FIELD_ID = "edit-prev-wellbeing";
+  const PREV_WELLBEING_DATALIST_ID = "prev-wellbeing-datalist";
   const BASIC_INFO_AUTOSAVE_DELAY_MS = 700;
   const FAMILY_COMPOSITION_AUTOSAVE_DELAY_MS = 700;
   const CASE_DEVELOPMENT_AUTOSAVE_DELAY_MS = 700;
@@ -215,6 +220,7 @@
   pendingCsrDeepLink = parseCsrDeepLinkFromUrl();
   initializeSessionState();
   startServerSessionWatcher();
+  document.addEventListener("visibilitychange", handleDocumentVisibilityChange);
 
   idInput.addEventListener("input", () => {
     const numbersOnly = idInput.value.replace(/\D/g, "");
@@ -565,7 +571,11 @@
         clearLocalSessionState();
         await clearServerSession();
         showLoginUI();
-        showToast("Municipality source returned empty data. Login cancelled.");
+        showDatasetOfflinePopup({
+          title: "Municipality Dataset Unavailable",
+          message:
+            "Municipality source returned empty data. Contact the developer to check your municipality dataset.",
+        });
         return;
       }
       const filteredMlsData = [
@@ -1007,11 +1017,6 @@
         const municipality = String(serverSession.municipality || "")
           .trim()
           .toUpperCase();
-        const hasMunicipalityDb = await hasMunicipalityDbFile(municipality);
-        if (!hasMunicipalityDb) {
-          await handleMissingMunicipalityDbSession(municipality);
-          return;
-        }
 
         setUiSession({
           loggedIn: true,
@@ -2199,7 +2204,7 @@
 
   function startMunicipalityChangeWatcher() {
     stopMunicipalityChangeWatcher();
-    if (!activeMunicipalityForCards) {
+    if (!isMunicipalityPollingAllowed()) {
       return;
     }
     municipalityWatcherId = window.setInterval(() => {
@@ -2215,8 +2220,24 @@
     }
   }
 
+  function isMunicipalityPollingAllowed() {
+    return Boolean(activeMunicipalityForCards) && document.visibilityState === "visible";
+  }
+
+  function handleDocumentVisibilityChange() {
+    if (!activeMunicipalityForCards) {
+      return;
+    }
+    if (isMunicipalityPollingAllowed()) {
+      startMunicipalityChangeWatcher();
+      void checkMunicipalityChangeOnline();
+      return;
+    }
+    stopMunicipalityChangeWatcher();
+  }
+
   async function checkMunicipalityChangeOnline() {
-    if (!activeMunicipalityForCards || hasPendingMunicipalityUpdate) {
+    if (!isMunicipalityPollingAllowed() || hasPendingMunicipalityUpdate) {
       return;
     }
     if (municipalityCheckInFlight) {
@@ -2538,13 +2559,6 @@
         ? await getServerSession()
         : serverSessionFromStream;
     if (serverSession && serverSession.loggedIn) {
-      const municipality = normalizeText(serverSession.municipality).toUpperCase();
-      const hasMunicipalityDb = await hasMunicipalityDbFile(municipality);
-      if (!hasMunicipalityDb) {
-        await handleMissingMunicipalityDbSession(municipality);
-        return;
-      }
-
       const oneTimeState = getOneTimeLoginState();
       if (
         oneTimeState &&
@@ -2896,7 +2910,11 @@
     );
   }
 
-  function showDatasetOfflinePopup() {
+  function showDatasetOfflinePopup(options) {
+    const resolvedTitle = normalizeText(options && options.title) || "Dataset Offline";
+    const resolvedMessage =
+      normalizeText(options && options.message) ||
+      "Contact the developer to download your municipality datasets.";
     const modalId = "dataset-offline-modal";
     let modal = document.getElementById(modalId);
     if (!modal) {
@@ -2906,8 +2924,8 @@
         "fixed inset-0 z-[120] hidden items-center justify-center bg-black/50 p-4";
       modal.innerHTML = `
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-bold text-slate-900">Dataset Offline</h3>
-          <p class="mt-3 text-sm text-slate-700">Contact the admin to download your municipality datasets</p>
+          <h3 class="text-lg font-bold text-slate-900"></h3>
+          <p class="mt-3 text-sm text-slate-700"></p>
           <div class="mt-5 flex justify-end">
             <button type="button" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">OK</button>
           </div>
@@ -2926,6 +2944,14 @@
         }
       });
       document.body.appendChild(modal);
+    }
+    const titleNode = modal.querySelector("h3");
+    if (titleNode) {
+      titleNode.textContent = resolvedTitle;
+    }
+    const messageNode = modal.querySelector("p");
+    if (messageNode) {
+      messageNode.textContent = resolvedMessage;
     }
 
     modal.classList.remove("hidden");
@@ -3055,7 +3081,7 @@
                 ? `Completed CSR already exists (completed on ${completedOnLabel}). Opening existing record.`
                 : "Completed CSR already exists. Opening existing record.",
               "pending",
-              2600
+              6000
             );
           }
           csrOpenConfirmShownKeys.add(promptKey);
@@ -4892,6 +4918,7 @@
       showToast("Export already running. Please wait.", "pending", 2200);
       return;
     }
+    let exportSucceeded = false;
     recommendationPdfExportInProgress = true;
     setRecommendationExportButtonBusy(true);
     upsertExportProgressToast(5, "Starting");
@@ -4937,6 +4964,7 @@
           "success",
           3200
         );
+        exportSucceeded = true;
       } catch (error) {
         const details = normalizeText(error && error.message);
         showToast(
@@ -4949,7 +4977,27 @@
       recommendationPdfExportInProgress = false;
       setRecommendationExportButtonBusy(false);
       window.setTimeout(removeExportProgressToast, 900);
+      if (exportSucceeded) {
+        queueSafeRedirectToDataTableAfterExport();
+      }
     }
+  }
+
+  function queueSafeRedirectToDataTableAfterExport() {
+    const workspaceVisibleNow =
+      !!csrStepper && !csrStepper.classList.contains("hidden");
+    if (!workspaceVisibleNow || !currentCsrRecord || !currentCsrRecord.csrId) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      const workspaceStillVisible =
+        !!csrStepper && !csrStepper.classList.contains("hidden");
+      if (!workspaceStillVisible || recommendationPdfExportInProgress) {
+        return;
+      }
+      handleReturnToSelectionClick();
+    }, EXPORT_SUCCESS_REDIRECT_DELAY_MS);
   }
 
   function buildCsrPdfFileName() {
@@ -5596,12 +5644,52 @@
           .filter((rule) => !/^\s*font-family\s*:/i.test(rule))
           .filter((rule) => !/^\s*font-size\s*:/i.test(rule))
           .filter((rule) => !/^\s*line-height\s*:/i.test(rule))
+          .filter((rule) => !/^\s*text-indent\s*:/i.test(rule))
+          .filter((rule) => !/^\s*margin-left\s*:/i.test(rule))
+          .filter((rule) => !/^\s*padding-left\s*:/i.test(rule))
           .join("; ");
         if (filtered) {
           el.setAttribute("style", filtered);
         } else {
           el.removeAttribute("style");
         }
+      });
+
+      const trimLeadingIndentWhitespace = (node) => {
+        if (!node || !node.childNodes || node.childNodes.length === 0) {
+          return;
+        }
+        let cursor = node.firstChild;
+        while (cursor) {
+          if (cursor.nodeType === 3) {
+            const rawText = String(cursor.textContent || "");
+            const trimmedText = rawText.replace(/^[\u00A0\s]+/, "");
+            if (!trimmedText) {
+              const next = cursor.nextSibling;
+              cursor.remove();
+              cursor = next;
+              continue;
+            }
+            if (trimmedText !== rawText) {
+              cursor.textContent = trimmedText;
+            }
+            return;
+          }
+          if (cursor.nodeType === 1) {
+            trimLeadingIndentWhitespace(cursor);
+            const hasVisibleText =
+              String(cursor.textContent || "").replace(/[\u00A0\s]+/g, "").length > 0;
+            if (hasVisibleText) {
+              return;
+            }
+            cursor = cursor.nextSibling;
+            continue;
+          }
+          cursor = cursor.nextSibling;
+        }
+      };
+      Array.from(container.querySelectorAll("p, li")).forEach((el) => {
+        trimLeadingIndentWhitespace(el);
       });
 
       const isEmptyNode = (node) => {
@@ -6087,6 +6175,48 @@
           .slice(0, 4);
       });
     }
+
+    const sourceOfInfoField = document.getElementById(SOURCE_OF_INFO_FIELD_ID);
+    if (sourceOfInfoField) {
+      ["input", "change", "blur"].forEach((eventName) => {
+        sourceOfInfoField.addEventListener(eventName, () => {
+          refreshBasicInfoDatalistVisibility();
+        });
+      });
+    }
+
+    const prevWellBeingField = document.getElementById(PREV_WELLBEING_FIELD_ID);
+    if (prevWellBeingField) {
+      ["input", "change", "blur"].forEach((eventName) => {
+        prevWellBeingField.addEventListener(eventName, () => {
+          refreshBasicInfoDatalistVisibility();
+        });
+      });
+    }
+
+    refreshBasicInfoDatalistVisibility();
+  }
+
+  function syncInputDatalistVisibility(field, datalistId) {
+    if (!field) {
+      return;
+    }
+    const hasValue = normalizeText(field.value).length > 0;
+    if (hasValue) {
+      field.removeAttribute("list");
+      return;
+    }
+    if (datalistId && document.getElementById(datalistId)) {
+      field.setAttribute("list", datalistId);
+    }
+  }
+
+  function refreshBasicInfoDatalistVisibility() {
+    const sourceOfInfoField = document.getElementById(SOURCE_OF_INFO_FIELD_ID);
+    syncInputDatalistVisibility(sourceOfInfoField, SOURCE_OF_INFO_DATALIST_ID);
+
+    const prevWellBeingField = document.getElementById(PREV_WELLBEING_FIELD_ID);
+    syncInputDatalistVisibility(prevWellBeingField, PREV_WELLBEING_DATALIST_ID);
   }
 
   function normalizePhilippineMobile(value) {
@@ -6410,6 +6540,9 @@
       return;
     }
     field.value = normalizeText(value);
+    if (id === SOURCE_OF_INFO_FIELD_ID || id === PREV_WELLBEING_FIELD_ID) {
+      refreshBasicInfoDatalistVisibility();
+    }
   }
 
   function applySavedBasicInfoEditDetails() {
@@ -7874,6 +8007,7 @@
     ) {
       religionField.value = prefilledReligion;
     }
+    refreshBasicInfoDatalistVisibility();
   }
 
   function handleReturnToSelectionClick() {
