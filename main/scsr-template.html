@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        display: ["Public Sans", "sans-serif"],
+                        print: ["Calibri", "Arial", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                    },
+                    screens: {
+                        print: { raw: "print" },
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        :root {
+            --screen-page-width: 794px;
+            --screen-page-height: 1123px;
+            --screen-page-padding: 48px;
+            --screen-content-width: 698px;
+            --screen-footer-bottom: 10px;
+            --screen-footer-clearance: 0px;
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            html,
+            body {
+                width: 210mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body>.flex-grow {
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                overflow: visible !important;
+                background: white !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .page-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                min-height: 297mm !important;
+                max-height: 297mm !important;
+                border-radius: 0 !important;
+                padding: 1.27cm !important;
+                background: white !important;
+                overflow: hidden !important;
+                position: relative !important;
+                display: block !important;
+                box-sizing: border-box !important;
+                break-inside: avoid-page !important;
+                page-break-inside: avoid !important;
+                break-before: auto !important;
+                page-break-before: auto !important;
+                break-after: auto !important;
+                page-break-after: auto !important;
+            }
+
+            .content-wrapper {
+                max-width: 18.46cm !important;
+                padding-bottom: 0 !important;
+            }
+
+            a {
+                color: inherit !important;
+                text-decoration: none !important;
+            }
+
+            * {
+                font-family: "Calibri", "Arial", sans-serif !important;
+            }
+
+            .header-text,
+            .header-text * {
+                font-family: "Times New Roman", Times, serif !important;
+                font-size: 11pt !important;
+                text-align: left !important;
+                text-transform: uppercase !important;
+                line-height: 1.1 !important;
+            }
+
+            .case-development-body p,
+            .case-dev-paragraph {
+                letter-spacing: -0.05px !important;
+            }
+
+            /* Force footer to the true bottom edge in print preview/output */
+            .footer-section,
+            .page-one .footer-section {
+                bottom: 0.35cm !important;
+                padding-bottom: 0 !important;
+                position: absolute !important;
+                left: 0 !important;
+                right: 0 !important;
+            }
+        }
+
+        .print-indent {
+            text-indent: 1.27cm;
+        }
+
+        .doc-text {
+            font-family: 'Calibri', 'Carlito', sans-serif;
+            font-size: 12pt;
+            line-height: 1.2;
+            color: black;
+        }
+
+
+        .page-container {
+            width: var(--screen-page-width);
+            height: var(--screen-page-height);
+            flex: 0 0 auto;
+            margin: 2rem auto;
+            background: white;
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: var(--screen-page-padding);
+            position: relative;
+            font-family: "Calibri", "Arial", sans-serif;
+            font-size: 12pt;
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .page-container::before {
+            content: "CONFIDENTIAL";
+            position: absolute;
+            left: 50%;
+            top: 58%;
+            transform: translate(-50%, -50%);
+            font-family: "Calibri", "Arial", sans-serif;
+            font-size: 42pt;
+            line-height: 1;
+            font-weight: 400;
+            letter-spacing: 0.45px;
+            color: rgba(120, 120, 120, 0.24);
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: var(--screen-content-width);
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            padding-bottom: 0;
+        }
+
+        .report-table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            font-size: 12pt;
+        }
+
+        .report-table th,
+        .report-table td {
+            border: 1px solid #000;
+            padding: 2px 2px;
+            font-size: 11pt;
+            line-height: 1;
+            vertical-align: middle;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .report-table th,
+        .report-table td {
+            font-size: 10pt;
+        }
+
+        .report-table th,
+        .report-table td {
+            font-size: 11pt;
+        }
+
+        .report-table th {
+            font-weight: bold;
+            text-align: center;
+            background-color: transparent;
+        }
+
+        /* Keep headers centered, but force all data cells left-aligned */
+        .report-table tbody td {
+            text-align: left !important;
+        }
+
+        .col-name {
+            width: 18%;
+        }
+
+        .col-sex {
+            width: 8%;
+        }
+
+        .col-age {
+            width: 6%;
+        }
+
+        .col-civil {
+            width: 10%;
+        }
+
+        .col-rel {
+            width: 10%;
+        }
+
+        .col-check-header {
+            width: 7%;
+        }
+
+        .col-check {
+            width: 4%;
+        }
+
+        .col-educ {
+            width: 15%;
+        }
+
+        .col-occup {
+            width: 11%;
+        }
+
+        .col-income {
+            width: 9%;
+        }
+
+        .col-disability {
+            width: 8%;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 0;
+            font-size: 12pt;
+        }
+
+        .info-label {
+            font-weight: normal;
+        }
+
+        .info-value {
+            display: flex;
+        }
+
+        .info-colon {
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .footer-section {
+            position: absolute;
+            bottom: var(--screen-footer-bottom);
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 0 var(--screen-page-padding) 0;
+            box-sizing: border-box;
+            z-index: 2;
+        }
+
+        .page-one .footer-section {
+            bottom: var(--screen-footer-bottom);
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 0 var(--screen-page-padding) 0;
+            box-sizing: border-box;
+        }
+
+        .footer-section .flex {
+            min-height: 34px;
+            justify-content: flex-end;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 45%);
+        }
+
+        .custom-table {
+            border: 1px solid black;
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .family-composition-table {
+            width: 100% !important;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            border: 1px solid black;
+            padding: 2px 4px;
+            overflow: hidden;
+            word-wrap: break-word;
+            vertical-align: middle;
+        }
+
+        .page-two-content {
+            /* Reserve space for the fixed footer so dynamic page content cannot render under it */
+            padding-bottom: 0;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1px solid black;
+        }
+
+        .header-text {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 11pt;
+            text-align: left;
+        }
+
+        .annex-b-badge {
+            display: inline-block;
+            border: 1px solid #000;
+            padding: 1px 4px;
+            line-height: 1;
+            width: fit-content;
+            align-self: flex-start;
+        }
+
+        .text-justify {
+            text-align: justify;
+        }
+
+        .recommendation-combined-section {
+            break-inside: avoid-page;
+            page-break-inside: avoid;
+        }
+
+        .calibri-text {
+            font-family: 'Calibri', 'Open Sans', sans-serif;
+        }
+
+        .csr-flow-doc {
+            width: 100%;
+            max-width: 18.46cm;
+            margin: 0 auto;
+            color: #000;
+            font-family: "Calibri", "Arial", sans-serif;
+            font-size: 12pt;
+            line-height: 1.15;
+        }
+
+        .csr-flow-doc .section-gap {
+            margin-bottom: 10pt;
+        }
+
+        .case-development-body p,
+        .case-dev-paragraph {
+            text-indent: 1.27cm;
+            margin: 0 0 0.18rem 0;
+            font-family: "Calibri", "Arial", sans-serif !important;
+            font-size: 12pt !important;
+            line-height: 1.2 !important;
+        }
+
+        .case-development-body p[data-paragraph-continuation="1"],
+        .case-dev-paragraph[data-paragraph-continuation="1"],
+        .case-development-body p.narrative-paragraph-continuation,
+        .case-dev-paragraph.narrative-paragraph-continuation {
+            text-indent: 0 !important;
+        }
+
+        .case-development-body p:last-child,
+        .case-dev-paragraph:last-child {
+            margin-bottom: 0;
+        }
+
+        .case-development-body {
+            font-family: "Calibri", "Arial", sans-serif !important;
+            font-size: 12pt !important;
+            line-height: 1.2 !important;
+        }
+
+        .csr-flow-doc .running-header {
+            position: running(doc-header);
+            height: 0;
+            overflow: hidden;
+        }
+
+        .csr-flow-doc .running-footer {
+            position: running(doc-footer);
+            height: 0;
+            overflow: hidden;
+        }
+
+        .csr-flow-doc .flow-header-line {
+            border-top: 1px solid #000;
+            margin-top: 8pt;
+            margin-bottom: 8pt;
+        }
+
+        .csr-flow-doc .page-counter::before {
+            content: "PAGE " counter(page) " of " counter(pages);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 10pt;
+        }
+
+        body.pagedjs-engine .page-container {
+            display: none !important;
+        }
+
+        body.pagedjs-engine .pagedjs_pages {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        body.pagedjs-engine .pagedjs_page {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        body.pagedjs-engine #csr-flow-doc {
+            visibility: hidden;
+            height: 0;
+            overflow: hidden;
+        }
+
+        body.pagedjs-engine .pagedjs_page::before {
+            content: "CONFIDENTIAL";
+            position: absolute;
+            left: 50%;
+            top: 58%;
+            transform: translate(-50%, -50%);
+            font-family: "Calibri", "Arial", sans-serif;
+            font-size: 42pt;
+            line-height: 1;
+            font-weight: 400;
+            letter-spacing: 0.45px;
+            color: rgba(120, 120, 120, 0.24);
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+            body {
+                display: block !important;
+                min-height: auto !important;
+                overflow: visible !important;
+            }
+
+            body>.flex-grow {
+                display: block !important;
+                width: 210mm !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                background: white !important;
+            }
+
+            .annex-b-badge {
+                border-width: 0.5px;
+                padding: 0 2px;
+            }
+        }
+    </style>
+    <script>
+        window.PagedConfig = { auto: false };
+    </script>
+    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 flex flex-col min-h-screen">
+    <div class="flex-grow flex flex-col items-center overflow-auto p-0 sm:p-8 bg-slate-100 dark:bg-slate-900/50">
+        <!-- Page 1 -->
+        <div class="page-container page-one text-black">
+            <div class="content-wrapper">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-3 mt-1">
+                            <img src="../assets/dswd_logo.png" alt="DSWD logo" class="h-14 w-auto object-contain" />
+                            <img src="../assets/bagong_pilipinas.png" alt="Bagong Pilipinas logo"
+                                class="h-14 w-auto object-contain -mt-3" />
+                        </div>
+                    </div>
+                    <div class="header-text uppercase leading-tight">
+                        <div>Pantawid Pamilyang Pilipino Program</div>
+                        <div>Field Office VII</div>
+                        <div>DSWD-GF-004 | Rev 03 | 22 Sep 2023</div>
+                    </div>
+                </div>
+                <div class="border-t-2 border-black mb-4 w-full"></div>
+                <div class="mt-10 mb-4">
+                    <p class="text-[12pt] font-normal">CM Form No. 4</p>
+                </div>
+                <div class="text-center mb-6">
+                    <h1 class="text-[18pt] font-bold uppercase tracking-wide">
+                        SOCIAL CASE STUDY REPORT (SCSR)
+                    </h1>
+                </div>
+                <div class="mb-4 w-full">
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-bold text-[12pt]">Date:</span>
+                        <span data-csr-field="date"
+                            class="text-[12pt] border-b border-black min-w-[140px]">June 17, 2025</span>
+                    </div>
+                </div>
+                <div class="mb-4 pl-0">
+                    <h2 class="font-bold text-[12pt] mb-2 uppercase">
+                        I. Identifying Information:
+                    </h2>
+                    <div class="info-grid ml-4">
+                        <div class="info-label">Household ID Number</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="householdId">071234006-2-09458050</span>
+                        </div>
+                        <div class="info-label">Client's Name</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span>
+                            <span data-csr-field="clientName" class="font-bold uppercase">TUSOY, MEGAN PANUNCIALMAN</span>
+                        </div>
+                        <div class="info-label">HH Status</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="clientStatusOnExit">CS1-Active</span>
+                        </div>
+                        <div class="info-label">HH Set Group</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="hhSet">11A</span>
+                        </div>
+                        <div class="info-label">Civil Status</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="civilStatus">Common Law</span>
+                        </div>
+                        <div class="info-label">Educational Attainment</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="educationalAttainment">High School Graduate</span>
+                        </div>
+                        <div class="info-label">Sex</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="sex">Female</span>
+                        </div>
+                        <div class="info-label">Birthday</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="birthday">January 09, 2004</span>
+                        </div>
+                        <div class="info-label">Age</div>
+                        <div class="info-value"><span class="info-colon">:</span> <span data-csr-field="age">21</span></div>
+                        <div class="info-label">Place of Birth</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="placeOfBirth">Pilar, Bohol</span>
+                        </div>
+                        <div class="info-label">Religion</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="religion">Jehovah's Witness</span>
+                        </div>
+                        <div class="info-label">IP Affiliation</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="ipAffiliation">None</span>
+                        </div>
+                        <div class="info-label">Source of Income</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="sourceOfIncome">None</span>
+                        </div>
+                        <div class="info-label">Monthly Income</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="monthlyIncome">None</span>
+                        </div>
+                        <div class="info-label">Per Capita Income</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="perCapitaIncome">None</span>
+                        </div>
+                        <div class="info-label">Level of Well-Being</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span>
+                            <span data-csr-field="levelOfWellBeing">Level 2 - Subsistence</span>
+                        </div>
+                        <div class="info-label">Present Address</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="presentAddress">Purok 6, Cagawasan, Pilar
+                            Bohol</span>
+                        </div>
+                        <div class="info-label">Contact Number</div>
+                        <div class="info-value">
+                            <span class="info-colon">:</span> <span data-csr-field="contactInfo">09318489008</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-2 pl-0 w-full" data-flow-kind="family">
+                    <h2 class="font-bold text-[12pt] mb-2 uppercase">
+                        II. Family Composition
+                    </h2>
+                    <div class="w-full">
+                        <table class="report-table family-composition-table text-left border-black">
+                            <colgroup>
+                                <col class="col-name" />
+                                <col class="col-sex" />
+                                <col class="col-age" />
+                                <col class="col-civil" />
+                                <col class="col-rel" />
+                                <col class="col-check" />
+                                <col class="col-check" />
+                                <col class="col-educ" />
+                                <col class="col-occup" />
+                                <col class="col-income" />
+                                <col class="col-disability" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="border border-black">Name</th>
+                                    <th class="border border-black">Sex</th>
+                                    <th class="border border-black">Age</th>
+                                    <th class="border border-black">Birthday</th>
+                                    <th class="border border-black">Relationship to the Client</th>
+                                    <th class="border border-black p-0" colspan="2">
+                                        <div class="w-full h-full flex flex-col">
+                                            <div class="border-b border-black p-1 text-[9pt]">
+                                                Monitored Child
+                                            </div>
+                                            <div class="flex h-full">
+                                                <div class="w-1/2 border-r border-black p-0.5">Yes</div>
+                                                <div class="w-1/2 p-0.5">No</div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th class="border border-black">Educ. Attainment</th>
+                                    <th class="border border-black">Occupation</th>
+                                    <th class="border border-black">Monthly Income</th>
+                                    <th class="border border-black">Type of Disability(if applicable)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="csr-family-composition-body">
+                                <tr>
+                                    <td class="border border-black text-center" colspan="11">No family composition data provided.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-section">
+                <div class="flex flex-col items-center">
+                    <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 1 of 1</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2 -->
+        <div class="page-container text-black hidden">
+            <div class="content-wrapper page-two-content">
+                <div class="w-full mb-4"></div>
+                <div class="flex-1 flex flex-col">
+                    <div class="flex gap-4 mb-2 calibri-font">
+                        <h3 class="font-bold text-[12pt] uppercase">III. PRESENTING PROBLEM</h3>
+                    </div>
+                    <div id="csr-case-development-content" class="calibri-font text-[12pt] leading-none text-justify space-y-4">
+                        <p class="print-indent mb-0">No presenting problem data provided.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-section">
+                <div class="flex flex-col items-center">
+                    <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 2 of 4</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3 -->
+        <div class="page-container text-black hidden">
+            <div class="content-wrapper page-two-content">
+                <div class="w-full mb-4"></div>
+                <section class="mb-8">
+                    <h2 class="doc-text font-bold mb-2 uppercase">IV. BACKGROUND INFORMATION</h2>
+                    <table class="report-table doc-text w-full">
+                        <colgroup>
+                            <col style="width: 28%;" />
+                            <col style="width: 72%;" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Section</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="csr-interventions-body">
+                            <tr>
+                                <td>The Client</td>
+                                <td>No background information provided.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="flex-grow">
+                    <h2 class="doc-text font-bold mb-2">V. CASE ASSESSMENT</h2>
+                    <table class="report-table doc-text w-full">
+                        <colgroup>
+                            <col style="width: 100%;" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Assessment Narrative</th>
+                            </tr>
+                        </thead>
+                        <tbody id="csr-household-plan-body">
+                            <tr>
+                                <td>No case assessment provided.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+            <div class="footer-section">
+                <div class="flex flex-col items-center">
+                    <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 3 of 4</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 4 -->
+        <div class="page-container text-black hidden">
+            <div class="content-wrapper page-two-content">
+                <div class="w-full mb-4"></div>
+                <div class="space-y-8">
+                    <section>
+                        <h2 class="text-[12pt] font-bold text-black dark:text-white mb-6 font-calibri">VIII. CASE RECOMMENDATION</h2>
+                        <div class="prose prose-slate max-w-none dark:prose-invert">
+                            <p id="csr-recommendation-text" class="text-justify indent-[1.27cm] text-[12pt] leading-snug font-calibri text-black dark:text-slate-200">No case recommendation provided.</p>
+                        </div>
+                    </section>
+                </div>
+                <section class="mt-16 w-full">
+                    <div class="flex flex-col gap-y-12">
+                        <div class="flex flex-col">
+                            <span class="text-[12pt] font-normal text-black dark:text-slate-300 mb-6 font-calibri">Prepared by:</span>
+                            <div>
+                                <p class="font-bold text-[12pt] text-black dark:text-white uppercase font-calibri mb-1"><span data-csr-field="preparedBy"></span></p>
+                                <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri leading-tight">PDO II-Municipal Link</p>
+                                <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                    <span>Date:</span>
+                                    <span class="border-b border-black w-24"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[12pt] font-normal text-black dark:text-slate-300 mb-6 font-calibri">Reviewed by:</span>
+                            <div>
+                                <p class="font-bold text-[12pt] text-black dark:text-white uppercase font-calibri mb-1"><span data-csr-field="reviewedBy"></span></p>
+                                <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri leading-tight">Social Welfare Officer III</p>
+                                <div class="flex items-end gap-2 mt-1 font-calibri text-[12pt]">
+                                    <span>Date:</span>
+                                    <span class="border-b border-black w-24"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[12pt] font-normal text-black dark:text-slate-300 mb-6 font-calibri">Noted by:</span>
+                            <div>
+                                <p class="font-bold text-[12pt] text-black dark:text-white uppercase font-calibri mb-1"><span data-csr-field="approvedBy"></span></p>
+                                <p class="text-[12pt] text-black dark:text-slate-300 font-normal font-calibri leading-tight">Provincial Link</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <div class="footer-section">
+                    <div class="flex flex-col items-center">
+                        <p class="text-[11pt] font-bold mb-1 uppercase">PAGE 4 of 4</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="scsr-template.js"></script>
+</body>
+
+</html>
+
+
+

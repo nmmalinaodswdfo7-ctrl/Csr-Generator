@@ -6,6 +6,10 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>SCSR GENERATOR</title>
+    <link rel="icon" type="image/x-icon" href="../assets/logo/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/logo/apple-touch-icon.png" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
@@ -19,30 +23,30 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
+    <script src="../libraries/jquery/jquery-3.5.1.min.js"></script>
     <link href="../libraries/summernote/summernote-lite.min.css" rel="stylesheet">
     <script src="../libraries/summernote/summernote-lite.min.js"></script>
 
     <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1c74e9",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#111821",
+        if (window.tailwind) {
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "primary": "#1c74e9",
+                            "background-light": "#f6f7f8",
+                            "background-dark": "#111821",
+                        },
+                        fontFamily: {
+                            "display": ["Public Sans", "sans-serif"],
+                            "lexend": ["Lexend", "sans-serif"],
+                            "lexend": ["Inter", "sans-serif"]
+                        },
+                        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
                     },
-                    fontFamily: {
-                        "display": ["Public Sans", "sans-serif"],
-                        "lexend": ["Lexend", "sans-serif"],
-                        "lexend": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
                 },
-            },
+            };
         }
     </script>
     <style>
@@ -126,12 +130,6 @@
             --d: 12px;  /* try 8–12px */
         }   
 
-        #casedevelopment .note-editable {
-            font-family: "Calibri", "Arial", sans-serif !important;
-            font-size: 12pt !important;
-            line-height: 1.2 !important;
-        }
-
         @keyframes l27 {
             100% {
                 transform: rotate(1turn)
@@ -141,7 +139,16 @@
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
-    <div id="login-section" class="relative flex min-h-screen w-full flex-col items-center justify-center p-4 group/design-root">
+    <div id="app-boot-screen" class="fixed inset-0 z-[140] flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div class="flex flex-col items-center gap-4 text-center px-6">
+            <div class="loader"></div>
+            <div>
+                <div class="text-xl font-bold font-lexend text-slate-900 dark:text-white">Loading Session</div>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Preparing your workspace...</p>
+            </div>
+        </div>
+    </div>
+    <div id="login-section" class="relative hidden min-h-screen w-full flex-col items-center justify-center p-4 group/design-root">
         <div id="login-card" class="w-full max-w-md space-y-8 rounded-xl bg-white dark:bg-slate-900 p-6 shadow-lg sm:p-8">
             <!-- PageHeading -->
             <div class="text-center">
@@ -221,12 +228,12 @@
             <!-- Page Header & Main Actions -->
             <div id="data-table-header" class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 hidden">
                 <div>
-                    <h1 class="text-3xl font-bold font-lexend text-slate-900 tracking-tight">CSR GENERATOR</h1>
-                    <p class="text-slate-500 font-lexend mt-1">Manage CSR in one place.</p>
+                    <h1 class="text-3xl font-bold font-lexend text-slate-900 tracking-tight">CSR & SCSR GENERATOR</h1>
+                    <p class="text-slate-500 font-lexend mt-1">Manage CSR & SCSR in one place.</p>
                 </div>
                 <button id="return-to-csr-selection" type="button"
                     class="hidden min-w-[220px] w-full md:w-auto cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-slate-200 text-slate-800 text-base font-bold leading-normal tracking-wide transition-all duration-200 hover:bg-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-300">
-                    <span class="truncate">Return to CSR Selection</span>
+                    <span class="truncate">Return to Grantee Selection</span>
                 </button>
             </div>
 
@@ -299,7 +306,7 @@
             <!-- Stepper -->
             <div id="csr-stepper" class="w-full py-2 mb-2 pb-2 overflow-x-auto font-Inter hidden">
                 <!-- MOBILE (stacked) -->
-                <div
+                <div id="csr-stepper-mobile"
                     class="lg:hidden flex flex-col divide-y divide-slate-200 dark:divide-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                     <!-- Step 1: Active -->
                     <button type="button" data-step-trigger="1" class="flex items-center gap-3 px-3 py-2">
@@ -348,7 +355,7 @@
                 </div>
 
                 <div class="hidden lg:block">
-                    <div class="flex flex-wrap items-start justify-between gap-y-6 px-2">
+                    <div id="csr-stepper-desktop" class="flex flex-wrap items-start justify-between gap-y-6 px-2">
                         <button type="button" data-step-trigger="1" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
                             <div
                                 class="flex items-center justify-center w-10 h-10 bg-primary text-white rounded-full font-bold shadow-lg ring-4 ring-primary/20 transition-all">
@@ -408,25 +415,25 @@
                 class="bg-white dark:bg-[#1a2632] rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hidden">
                 <div class="border-b border-slate-100 dark:border-slate-700 px-8 py-4 flex items-center gap-3">
                     <span class="material-symbols-outlined text-primary">person_outline</span>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Beneficiary Profile</h3>
+                    <h3 id="basic-info-section-title" class="text-lg font-bold text-slate-900 dark:text-white">Beneficiary Profile</h3>
                 </div>
                 <div class="p-8">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                        <!-- Left Column: Read Only -->
+                        <!-- Left Column: Shared Information -->
                         <div class="space-y-6">
                             <div
                                 class="flex items-center gap-2 mb-4 text-slate-600 text-sm font-semibold uppercase tracking-wider">
-                                <span class="material-symbols-outlined text-sm">lock</span>Read-Only Information
+                                <span class="material-symbols-outlined text-sm">sync_alt</span>Shared Information
                             </div>
                             <div class="grid grid-cols-1 gap-5">
                                 <div>
-                                    <label
+                                    <label id="basic-grantee-name-label"
                                         class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Grantee
                                         Name</label>
-                                    <div class="relative overflow-hidden">
+                                    <div class="relative">
                                         <input id="basic-grantee-name"
-                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 pl-4 pr-12 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
-                                            disabled="" type="text" value="" />
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white pl-4 pr-12 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
+                                            type="text" value="" />
                                         <span id="basic-info-prefill-spinner"
                                             class="hidden absolute right-5 top-1/2 -translate-y-1/2 loader loader--sm block scale-[0.35] origin-center"></span>
                                     </div>
@@ -453,19 +460,20 @@
                                     <div>
                                         <label
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Sex</label>
-                                        <input id="basic-sex"
-                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
-                                            disabled="" type="text" value="" />
+                                        <select id="basic-sex"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow">
+                                            <option value=""></option>
+                                            <option value="MALE">MALE</option>
+                                            <option value="FEMALE">FEMALE</option>
+                                        </select>
                                     </div>
                                     <div class="col-span-2">
                                         <label
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Birthday</label>
-                                        <div class="relative">
+                                        <div>
                                             <input id="basic-birthday"
-                                                class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
-                                                disabled="" type="text" value="" />
-                                            <span
-                                                class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 text-lg">calendar_today</span>
+                                                class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow"
+                                                type="date" value="" />
                                         </div>
                                     </div>
                                 </div>
@@ -475,15 +483,22 @@
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Age</label>
                                         <input id="basic-age"
                                             class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
-                                            disabled="" type="text" value="" />
+                                            readonly="" type="text" value="" />
                                     </div>
                                     <div class="col-span-2">
                                         <label
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Civil
                                             Status</label>
-                                        <input id="basic-civil-status"
-                                            class="w-full bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 px-4 py-2.5 cursor-not-allowed text-sm font-medium focus:ring-0 focus:border-slate-200"
-                                            disabled="" type="text" value="" />
+                                        <select id="basic-civil-status"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow">
+                                            <option value=""></option>
+                                            <option value="Unknown">Unknown</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Divorced / Separated">Divorced / Separated</option>
+                                            <option value="Married with spouse migrant">Married with spouse migrant</option>
+                                            <option value="Married with spouse present">Married with spouse present</option>
+                                            <option value="Widowed">Widowed</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div>
@@ -511,11 +526,13 @@
                                 <div class="flex items-center gap-2 text-primary text-sm font-semibold uppercase tracking-wider">
                                     <span class="material-symbols-outlined text-sm">edit</span>Edit Details
                                 </div>
-                                <button id="basic-info-restore-btn" type="button"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold uppercase tracking-wide hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    <span class="material-symbols-outlined text-[16px]">restore</span>
-                                    Restore
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button id="basic-info-restore-btn" type="button"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold uppercase tracking-wide hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-colors">
+                                        <span class="material-symbols-outlined text-[16px]">restore</span>
+                                        Restore
+                                    </button>
+                                </div>
                             </div>
                             <div class="grid grid-cols-1 gap-5">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -574,7 +591,7 @@
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                    <div>
+                                    <div id="basic-field-national-id-wrap">
                                         <label
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">National
                                             ID No.</label>
@@ -608,7 +625,7 @@
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                    <div>
+                                    <div id="basic-field-year-registration-wrap">
                                         <label
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Year
                                             of Registration</label>
@@ -616,7 +633,7 @@
                                             class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
                                             placeholder="2012" type="text" />
                                     </div>
-                                    <div>
+                                    <div id="basic-field-years-program-wrap">
                                         <label
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Years
                                             in Program</label>
@@ -644,6 +661,7 @@
                                     </div>
                                     <div>
                                         <label
+                                            id="basic-source-of-info-label"
                                             class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Source
                                             of Info</label>
                                         <input id="edit-source-of-info" data-basic-edit-required="1"
@@ -656,6 +674,7 @@
                                 </div>
                                 <div>
                                     <label
+                                        id="basic-prev-wellbeing-label"
                                         class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Current
                                         Level of Well-being</label>
                                     <input id="edit-prev-wellbeing" data-basic-edit-required="1"
@@ -665,6 +684,20 @@
                                         <option value="Level 2 - Subsistence Index Score : 2.56792"></option>
                                         <option value="Level 3 - Self-Sufficient Index Score : 2.923"></option>
                                     </datalist>
+                                </div>
+                                <div id="scsr-income-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Monthly Income</label>
+                                        <input id="edit-monthly-income"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                            placeholder="₱0.00" type="text" inputmode="decimal" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Per Capita Income</label>
+                                        <input id="edit-per-capita-income"
+                                            class="w-full bg-white dark:bg-[#101922] border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-sm placeholder:text-slate-400"
+                                            placeholder="₱0.00" type="text" inputmode="decimal" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -686,7 +719,7 @@
                     Restore Member Data
                 </button>
                 <button id="family-composition-restore-btn" type="button"
-                    class="hidden items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    class="hidden items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-[18px]">restore</span>
                     Restore Member
                 </button>
@@ -728,9 +761,12 @@
                 class="mt-4 flex gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-lg">
                 <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
                 <div class="text-sm text-blue-800 dark:text-blue-200">
-                    <p class="font-semibold mb-1">Writing Guidelines</p>
-                    <p>Ensure that the narrative includes specific observations, intervention goals, and expected
-                        outcomes. Confidential information should be handled according to protocol.</p>
+                    <p class="font-semibold mb-1">Tips</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>If you use copy and paste, do not forget to click Remove Font Style in the menu. Select all first (Ctrl + A).</li>
+                        <li>If pasted content line breaks are trimmed, it is for print formatting so the output becomes paragraph-styled in Print Preview.</li>
+                        <li>Do not indent manually because indentation is applied automatically in Print Preview.</li>
+                    </ul>
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
@@ -742,8 +778,201 @@
             </div>
         </div>
 
+        <!-- SCSR Background Information -->
+        <div id="scsr-background-information-section" class="max-w-6xl mx-auto hidden" data-step-section="4" data-workflow="SCSR">
+            <div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a2632] p-4">
+                <div id="scsr-background-tabs" class="border-b border-slate-200 dark:border-slate-700 pb-2 flex flex-wrap gap-2"></div>
+                <div class="pt-4">
+                    <div id="scsr-background-summernote"></div>
+                </div>
+            </div>
+            <div
+                class="mt-4 flex gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-lg">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
+                <div class="text-sm text-blue-800 dark:text-blue-200">
+                    <p class="font-semibold mb-1">Tips</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>If you use copy and paste, do not forget to click Remove Font Style in the menu. Select all first (Ctrl + A).</li>
+                        <li>If pasted content line breaks are trimmed, it is for print formatting so the output becomes paragraph-styled in Print Preview.</li>
+                        <li>Do not indent manually because indentation is applied automatically in Print Preview.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
+                <p id="scsr-background-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button id="scsr-background-back-btn" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    Back
+                </button>
+            </div>
+        </div>
+
+        <!-- SCSR Case Assessment -->
+        <div id="scsr-case-assessment-section" class="max-w-5xl mx-auto hidden" data-step-section="5" data-workflow="SCSR">
+            <div id="scsr-case-assessment-summernote"></div>
+            <div
+                class="mt-4 flex gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-lg">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
+                <div class="text-sm text-blue-800 dark:text-blue-200">
+                    <p class="font-semibold mb-1">Tips</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>If you use copy and paste, do not forget to click Remove Font Style in the menu. Select all first (Ctrl + A).</li>
+                        <li>If pasted content line breaks are trimmed, it is for print formatting so the output becomes paragraph-styled in Print Preview.</li>
+                        <li>Do not indent manually because indentation is applied automatically in Print Preview.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
+                <p id="scsr-case-assessment-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button id="scsr-case-assessment-back-btn" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    Back
+                </button>
+            </div>
+        </div>
+
+        <!-- SCSR Intervention Plan/Plan Implementation -->
+        <div id="scsr-plan-implementation-section" class="max-w-[1850px] mx-auto hidden" data-step-section="6" data-workflow="SCSR">
+            <div
+                class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col rounded-none md:rounded-lg">
+                <div
+                    class="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a2632]">
+                    <h2 class="text-lg md:text-xl font-bold text-[#111418] dark:text-white font-lexend">Intervention Plan/Plan Implementation
+                    </h2>
+                    <button id="scsr-plan-implementation-add-btn" type="button"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">add</span>
+                        <span class="hidden sm:inline">Add Row</span>
+                    </button>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                        <thead
+                            class="bg-white dark:bg-[#1a2632] text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-6 py-4 min-w-[220px]" scope="col">Specific Objective</th>
+                                <th class="px-6 py-4 min-w-[220px]" scope="col">Activities</th>
+                                <th class="px-6 py-4 min-w-[150px]" scope="col">Timeframe</th>
+                                <th class="px-6 py-4 min-w-[180px]" scope="col">Person Responsible</th>
+                                <th class="px-6 py-4 min-w-[180px]" scope="col">Materials Needed</th>
+                                <th class="px-6 py-4 min-w-[220px]" scope="col">Expected Output</th>
+                                <th class="px-6 py-4 min-w-[100px] text-center" scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scsr-plan-implementation-list" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
+                <p id="scsr-plan-implementation-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button
+                    id="scsr-plan-implementation-back-btn" type="button"
+                    class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>Back
+                </button>
+            </div>
+
+            <div id="scsr-plan-implementation-modal" aria-labelledby="scsr-plan-implementation-modal-title" aria-modal="true"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden"
+                role="dialog">
+                <div
+                    class="w-full max-w-2xl bg-white dark:bg-[#1a2632] shadow-2xl rounded-none ring-1 ring-slate-900/5 dark:ring-slate-100/10">
+                    <div
+                        class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-[#111418] dark:text-white font-lexend" id="scsr-plan-implementation-modal-title">Add Plan Item</h2>
+                        <button id="scsr-plan-implementation-close-btn" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                            <span class="material-symbols-outlined text-[24px]">close</span>
+                        </button>
+                    </div>
+                    <div class="px-6 py-6 space-y-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200" for="scsr-plan-objective">
+                                Specific Objective
+                            </label>
+                            <textarea id="scsr-plan-objective" rows="3" data-auto-resize="true"
+                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200" for="scsr-plan-activities">
+                                Activities
+                            </label>
+                            <textarea id="scsr-plan-activities" rows="3" data-auto-resize="true"
+                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200" for="scsr-plan-timeframe">
+                                    Timeframe
+                                </label>
+                                <textarea id="scsr-plan-timeframe" rows="2" data-auto-resize="true"
+                                    class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"></textarea>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200" for="scsr-plan-person-responsible">
+                                    Person Responsible
+                                </label>
+                                <textarea id="scsr-plan-person-responsible" rows="2" data-auto-resize="true"
+                                    class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"></textarea>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200" for="scsr-plan-materials-needed">
+                                    Materials Needed
+                                </label>
+                                <textarea id="scsr-plan-materials-needed" rows="2" data-auto-resize="true"
+                                    class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"></textarea>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200" for="scsr-plan-expected-output">
+                                    Expected Output
+                                </label>
+                                <textarea id="scsr-plan-expected-output" rows="2" data-auto-resize="true"
+                                    class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="px-6 py-4 bg-slate-50 dark:bg-[#151f28] border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+                        <button id="scsr-plan-implementation-cancel-btn" type="button"
+                            class="px-4 py-2 bg-white dark:bg-transparent border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors rounded-none">
+                            Cancel
+                        </button>
+                        <button id="scsr-plan-implementation-modal-save-btn" type="button"
+                            class="px-4 py-2 bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors rounded-none">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCSR Case Management Evaluation -->
+        <div id="scsr-case-management-evaluation-section" class="max-w-5xl mx-auto hidden" data-step-section="7" data-workflow="SCSR">
+            <div id="scsr-case-management-evaluation-summernote"></div>
+            <div
+                class="mt-4 flex gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-lg">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
+                <div class="text-sm text-blue-800 dark:text-blue-200">
+                    <p class="font-semibold mb-1">Tips</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>If you use copy and paste, do not forget to click Remove Font Style in the menu. Select all first (Ctrl + A).</li>
+                        <li>If pasted content line breaks are trimmed, it is for print formatting so the output becomes paragraph-styled in Print Preview.</li>
+                        <li>Do not indent manually because indentation is applied automatically in Print Preview.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pb-10">
+                <p id="scsr-case-management-evaluation-save-status" class="text-xs text-slate-500 dark:text-slate-400 sm:self-center"></p>
+                <button id="scsr-case-management-evaluation-back-btn" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    Back
+                </button>
+            </div>
+        </div>
+
         <!-- Interventions Provided -->
-        <div id="interventions-provided-section" class="max-w-[1850px] mx-auto hidden" data-step-section="4">
+        <div id="interventions-provided-section" class="max-w-[1850px] mx-auto hidden" data-step-section="4" data-workflow="CSR">
             <div
                 class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col rounded-none md:rounded-lg">
                 <div
@@ -809,18 +1038,18 @@
                                 for="date_accomplished">
                                 Date Completed/Accomplished
                             </label>
-                            <input
-                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
-                                id="date_accomplished" placeholder="e.g., 2022–2025 or May 2022" type="text" />
+                            <textarea
+                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"
+                                id="date_accomplished" placeholder="e.g., 2022–2025 or May 2022" rows="2" data-auto-resize="true"></textarea>
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-sm font-semibold text-[#111418] dark:text-slate-200"
                                 for="involved_parties">
                                 Involved Parties
                             </label>
-                            <input
-                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
-                                id="involved_parties" placeholder="e.g., DSWD–4Ps, DOH" type="text" />
+                            <textarea
+                                class="w-full px-3 py-2 bg-white dark:bg-[#151f28] border border-slate-300 dark:border-slate-600 rounded-none focus:ring-1 focus:ring-primary focus:border-primary text-base text-[#111418] dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden"
+                                id="involved_parties" placeholder="e.g., DSWD–4Ps, DOH" rows="2" data-auto-resize="true"></textarea>
                         </div>
                     </div>
                     <div
@@ -839,7 +1068,7 @@
         </div>
 
         <!-- Household Intervention Plan -->
-        <div id="household-intervention-plan-section" class="max-w-[1850px] mx-auto hidden" data-step-section="5">
+        <div id="household-intervention-plan-section" class="max-w-[1850px] mx-auto hidden" data-step-section="5" data-workflow="CSR">
             <div
                 class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col rounded-none md:rounded-lg">
                 <div
@@ -896,38 +1125,38 @@
                             <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
                                 for="objectives">Objectives</label>
                             <textarea
-                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none overflow-hidden"
                                 id="objectives" placeholder="Describe the objectives of this intervention..."
-                                rows="4"></textarea>
+                                rows="4" data-auto-resize="true"></textarea>
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
                                 for="activities">Suggested Intervention/Activities</label>
                             <textarea
-                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none overflow-hidden"
                                 id="activities" placeholder="List the specific activities or interventions..."
-                                rows="4"></textarea>
+                                rows="4" data-auto-resize="true"></textarea>
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
                                 for="responsible">Responsible Person/Agency</label>
                             <textarea
-                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                                id="responsible" placeholder="Identify who is responsible..." rows="2"></textarea>
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none overflow-hidden"
+                                id="responsible" placeholder="Identify who is responsible..." rows="2" data-auto-resize="true"></textarea>
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
                                 for="timeline">Timeline</label>
-                            <input
-                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                                id="timeline" placeholder="e.g. Q1 2024, Ongoing, Within 3 months..." type="text" />
+                            <textarea
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none overflow-hidden"
+                                id="timeline" placeholder="e.g. Q1 2024, Ongoing, Within 3 months..." rows="2" data-auto-resize="true"></textarea>
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-base font-semibold text-slate-700 dark:text-slate-300"
                                 for="outcome">Expected Outcome</label>
                             <textarea
-                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                                id="outcome" placeholder="Describe the expected results..." rows="4"></textarea>
+                                class="w-full bg-slate-50 dark:bg-[#151f28] border-slate-300 dark:border-slate-600 rounded-none focus:ring-primary focus:border-primary text-base p-3 placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none overflow-hidden"
+                                id="outcome" placeholder="Describe the expected results..." rows="4" data-auto-resize="true"></textarea>
                         </div>
                     </div>
                     <div
@@ -946,7 +1175,7 @@
         </div>
 
         <!-- Recommendation -->
-        <div id="recommendation-section" class="max-w-[1024px] mx-auto hidden" data-step-section="6">
+        <div id="recommendation-section" class="max-w-[1024px] mx-auto hidden" data-step-section="6" data-workflow="CSR">
             <div
                 class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12 rounded-none md:rounded-sm">
                 <div class="mb-8 border-b border-slate-100 dark:border-slate-700 pb-4">
@@ -983,7 +1212,7 @@
                         <div class="flex items-center justify-between mb-4 gap-3">
                             <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Reviewed
                                 by:</label>
-                            <button id="recommendation-reviewed-by-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                            <button id="recommendation-reviewed-by-save-btn" type="button" class="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-blue-600 transition-colors">Save</button>
                         </div>
                         <input
                             id="recommendation-reviewed-by"
@@ -995,7 +1224,7 @@
                         <div class="flex items-center justify-between mb-4 gap-3">
                             <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Noted
                                 by:</label>
-                            <button id="recommendation-noted-by-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                            <button id="recommendation-noted-by-save-btn" type="button" class="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-blue-600 transition-colors">Save</button>
                         </div>
                         <input
                             id="recommendation-noted-by"
@@ -1007,7 +1236,7 @@
                         <div class="flex items-center justify-between mb-4 gap-3">
                             <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Approved
                                 by:</label>
-                            <button id="recommendation-approved-by-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                            <button id="recommendation-approved-by-save-btn" type="button" class="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-blue-600 transition-colors">Save</button>
                         </div>
                         <input
                             id="recommendation-approved-by"
@@ -1032,7 +1261,7 @@
                         </div>
                         <div class="flex flex-col items-center">
                             <div class="w-full flex justify-end mb-1">
-                                <button id="recommendation-mswd-officer-save-btn" type="button" class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Save</button>
+                                <button id="recommendation-mswd-officer-save-btn" type="button" class="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-blue-600 transition-colors">Save</button>
                             </div>
                             <input
                                 id="recommendation-mswd-officer"
@@ -1066,10 +1295,91 @@
                 </div>
             </div>
         </div>
+
+        <!-- SCSR Case Recommendation -->
+        <div id="scsr-recommendation-section" class="max-w-[1024px] mx-auto hidden" data-step-section="8" data-workflow="SCSR">
+            <div
+                class="bg-white dark:bg-[#1a2632] shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12 rounded-none md:rounded-sm">
+                <div class="mb-8 border-b border-slate-100 dark:border-slate-700 pb-4">
+                    <h2
+                        class="text-xl md:text-2xl font-bold text-[#111418] dark:text-white font-lexend uppercase tracking-wide">
+                        Case Recommendation</h2>
+                </div>
+                <div class="mb-10">
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+                        for="scsr-recommendation_text">Recommendation</label>
+                    <textarea
+                        class="w-full rounded-none border-slate-300 dark:border-slate-600 bg-white dark:bg-[#151f28] text-slate-900 dark:text-white focus:border-primary focus:ring-primary placeholder:text-slate-400 text-base leading-relaxed p-4"
+                        id="scsr-recommendation_text" placeholder="Write the recommendation narrative here..."
+                        rows="7"></textarea>
+                    <div class="mt-6 max-w-xs">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2"
+                            for="scsr-recommendation-date">Date</label>
+                        <input
+                            class="w-full rounded-none border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary"
+                            id="scsr-recommendation-date" type="date" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                    <div class="flex flex-col">
+                        <label class="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">Prepared
+                            by:</label>
+                        <input
+                            id="scsr-recommendation-prepared-by"
+                            class="border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                            placeholder="Full Name" type="text" />
+                        <span class="text-sm font-semibold text-slate-700 mt-1">PDO II-Municipal Link</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-4 gap-3">
+                            <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Reviewed
+                                by:</label>
+                            <button id="scsr-recommendation-reviewed-by-save-btn" type="button" class="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-blue-600 transition-colors">Save</button>
+                        </div>
+                        <input
+                            id="scsr-recommendation-reviewed-by"
+                            class="border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                            placeholder="Full Name" type="text" />
+                        <span class="text-sm font-semibold text-slate-700 mt-1">Social Welfare Officer III</span>
+                    </div>
+                    <div class="flex flex-col md:col-span-2">
+                        <div class="flex items-center justify-between mb-4 gap-3">
+                            <label class="block text-sm font-medium text-slate-500 dark:text-slate-400">Noted
+                                by:</label>
+                            <button id="scsr-recommendation-approved-by-save-btn" type="button" class="px-3.5 py-1.5 rounded border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-blue-600 transition-colors">Save</button>
+                        </div>
+                        <input
+                            id="scsr-recommendation-approved-by"
+                            class="border-x-0 border-t-0 border-b border-slate-400 dark:border-slate-500 bg-transparent px-0 py-2 text-[#111418] dark:text-white focus:ring-0 focus:border-primary placeholder:text-slate-300 font-medium"
+                            value="SHALAINE MARIE S. LUCERO, CESO III" type="text" />
+                        <span class="text-sm font-semibold text-slate-700 mt-1">Provincial Link</span>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="sticky bottom-0 z-20 w-full bg-white dark:bg-[#1a2632] border-t border-slate-200 dark:border-slate-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <div class="max-w-5xl mx-auto px-4 md:px-10 py-4">
+                      <div class="flex flex-wrap justify-end items-center gap-4">
+                          <p id="scsr-recommendation-save-status" class="text-xs text-slate-500 dark:text-slate-400 self-center"></p>
+                          <div class="flex items-center gap-3">
+                              <button id="scsr-recommendation-back-btn" type="button" class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                                  <span class="material-symbols-outlined text-[18px]">arrow_back</span>Back
+                              </button>
+                              <button id="scsr-recommendation-print-preview-btn" type="button" class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                                  <span class="material-symbols-outlined text-[20px]">preview</span>Print Preview
+                              </button>
+                              <button id="scsr-recommendation-export-btn" type="button" class="px-6 py-2.5 rounded-lg bg-[#1c74e9] hover:bg-[#1664c9] text-white font-semibold text-sm shadow-sm transition-colors flex items-center gap-2">
+                                  <span class="material-symbols-outlined text-[20px]">file_download</span>Export
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
     </main>
 
-    <div id="recommendation-preview-modal"
-        class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm p-4 md:p-6">
+      <div id="recommendation-preview-modal"
+          class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm p-4 md:p-6">
         <div class="w-full h-full bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden flex flex-col">
             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                 <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white">CSR Print Preview</h3>
@@ -1079,11 +1389,6 @@
                         <span class="material-symbols-outlined text-[18px]">open_in_new</span>
                         Open in Browser
                     </button>
-                    <button id="recommendation-preview-print-btn" type="button"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">print</span>
-                        Print
-                    </button>
                     <button id="recommendation-preview-close-btn" type="button"
                         class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                         <span class="material-symbols-outlined text-[18px]">close</span>
@@ -1091,8 +1396,75 @@
                     </button>
                 </div>
             </div>
-            <div class="flex-1 bg-slate-100 dark:bg-slate-900 p-2 md:p-3">
+              <div class="relative flex-1 bg-slate-100 dark:bg-slate-900 p-2 md:p-3">
+                <div id="recommendation-preview-loading" class="hidden absolute inset-2 md:inset-3 z-10 flex items-center justify-center rounded bg-white/85 dark:bg-slate-900/85 backdrop-blur-sm">
+                    <div class="flex flex-col items-center gap-3 text-center px-6">
+                        <div class="loader loader--sm"></div>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-900 dark:text-white">Preparing Preview</div>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Finalizing layout and margins...</p>
+                        </div>
+                    </div>
+                </div>
                 <iframe id="recommendation-preview-iframe" title="CSR Print Preview" class="w-full h-full rounded bg-white border-0"></iframe>
+              </div>
+          </div>
+      </div>
+
+      <div id="scsr-recommendation-preview-modal"
+          class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm p-4 md:p-6">
+          <div class="w-full h-full bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden flex flex-col">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                  <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white">SCSR Print Preview</h3>
+                  <div class="flex items-center gap-2">
+                      <button id="scsr-recommendation-preview-open-browser-btn" type="button"
+                          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                          <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                          Open in Browser
+                      </button>
+                      <button id="scsr-recommendation-preview-close-btn" type="button"
+                          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                          <span class="material-symbols-outlined text-[18px]">close</span>
+                          Close
+                      </button>
+                  </div>
+              </div>
+              <div class="relative flex-1 bg-slate-100 dark:bg-slate-900 p-2 md:p-3">
+                <div id="scsr-recommendation-preview-loading" class="hidden absolute inset-2 md:inset-3 z-10 flex items-center justify-center rounded bg-white/85 dark:bg-slate-900/85 backdrop-blur-sm">
+                    <div class="flex flex-col items-center gap-3 text-center px-6">
+                        <div class="loader loader--sm"></div>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-900 dark:text-white">Preparing Preview</div>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Finalizing layout and margins...</p>
+                        </div>
+                    </div>
+                </div>
+                <iframe id="scsr-recommendation-preview-iframe" title="SCSR Print Preview" class="w-full h-full rounded bg-white border-0"></iframe>
+              </div>
+          </div>
+      </div>
+
+    <div id="workflow-type-modal" class="hidden fixed inset-0 z-[75] bg-black/50 backdrop-blur-sm p-4 items-center justify-center">
+        <div class="w-full max-w-md bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Select Workflow</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Choose which report flow to create.</p>
+            </div>
+            <div class="p-6 space-y-3">
+                <button id="workflow-type-csr-btn" type="button"
+                    class="w-full h-12 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold hover:bg-primary hover:text-white hover:border-primary transition-colors">
+                    CSR
+                </button>
+                <button id="workflow-type-scsr-btn" type="button"
+                    class="w-full h-12 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold hover:bg-primary hover:text-white hover:border-primary transition-colors">
+                    SCSR
+                </button>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 dark:bg-[#151f28] border-t border-slate-200 dark:border-slate-700 flex justify-end">
+                <button id="workflow-type-modal-cancel-btn" type="button"
+                    class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-primary hover:text-white hover:border-primary transition-colors">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>

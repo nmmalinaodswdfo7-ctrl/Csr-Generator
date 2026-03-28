@@ -9,7 +9,9 @@
   const DOWNLOADS_HANDLE_STORE = "handles";
   const DOWNLOADS_HANDLE_KEY = "downloads_dir";
   const RECOMMENDATION_DEFAULT_NAMES_KEY = "csr_recommendation_default_names_v1";
+  const SCSR_RECOMMENDATION_DEFAULT_NAMES_KEY = "scsr_recommendation_default_names_v1";
   const CSR_TEMPLATE_PAYLOAD_KEY = "csr_template_payload_v1";
+  const SCSR_TEMPLATE_PAYLOAD_KEY = "scsr_template_payload_v1";
   const CARDS_PER_PAGE = 20;
   const CARD_CACHE_KEY_PREFIX = "csr_cards_cache_v1_";
   const CARDS_PAGE_KEY_PREFIX = "csr_cards_page_v1_";
@@ -28,10 +30,45 @@
   const CSR_ID_MIN = 10000;
   const CSR_ID_MAX = 99999;
   const CSR_STEP_COUNT = 6;
+  const SCSR_STEP_COUNT = 8;
+  const CSR_STEP_TITLES = Object.freeze([
+    "Basic Information",
+    "Family Composition",
+    "Case Development",
+    "Interventions Provided",
+    "Household Intervention Plan",
+    "Recommendation",
+  ]);
+  const SCSR_STEP_TITLES = Object.freeze([
+    "Identifying Information",
+    "Family Composition",
+    "Presenting Problem",
+    "Background Information",
+    "Case Assessment",
+    "Intervention Plan/Plan Implementation",
+    "Case Management Evaluation",
+    "Case Recommendation",
+  ]);
+  const SCSR_BACKGROUND_TABS = Object.freeze([
+    { key: "client", label: "The Client" },
+    { key: "socioEconomic", label: "Socio-Economic" },
+    { key: "healthCondition", label: "Health Condition" },
+    { key: "environmentalLivingConditions", label: "Environmental and Living Conditions" },
+    { key: "environmentCommunity", label: "The Environment/ Community" },
+  ]);
   const SOURCE_OF_INFO_FIELD_ID = "edit-source-of-info";
   const SOURCE_OF_INFO_DATALIST_ID = "source-of-info-datalist";
   const PREV_WELLBEING_FIELD_ID = "edit-prev-wellbeing";
   const PREV_WELLBEING_DATALIST_ID = "prev-wellbeing-datalist";
+  const CSR_PREV_WELLBEING_OPTIONS = Object.freeze([
+    "Level 2 - Subsistence Index Score : 2.56792",
+    "Level 3 - Self-Sufficient Index Score : 2.923",
+  ]);
+  const SCSR_PREV_WELLBEING_OPTIONS = Object.freeze([
+    "Level 1 - Survival",
+    "Level 2 - Subsistence",
+    "Level 3 - Self - Sufficient",
+  ]);
   const BASIC_INFO_AUTOSAVE_DELAY_MS = 700;
   const FAMILY_COMPOSITION_AUTOSAVE_DELAY_MS = 700;
   const CASE_DEVELOPMENT_AUTOSAVE_DELAY_MS = 700;
@@ -40,15 +77,56 @@
   const HOUSEHOLD_INTERVENTION_PLAN_AUTOSAVE_DELAY_MS = 700;
   const HOUSEHOLD_INTERVENTION_PLAN_DRAFT_AUTOSAVE_DELAY_MS = 700;
   const RECOMMENDATION_AUTOSAVE_DELAY_MS = 700;
+  const SCSR_BACKGROUND_AUTOSAVE_DELAY_MS = 700;
   const RECOMMENDATION_DEFAULT_NAMES = Object.freeze({
     reviewedBy: "MIGUELIZA V. FELIAS, RSW",
     notedBy: "LUZ C. FEGARIDO, RSW",
     approvedBy: "JIAH L. SAYSON",
     mswdOfficer: "ESTRELLA S. MALNEGRO, RSW",
   });
+  const SCSR_RECOMMENDATION_APPROVED_BY = "SHALAINE MARIE S. LUCERO, CESO III";
+  const CROSS_WORKFLOW_SHARED_BASIC_FIELDS = Object.freeze([
+    "granteeName",
+    "sex",
+    "birthday",
+    "age",
+    "civilStatus",
+    "educationalAttainment",
+    "contactInfo",
+    "religion",
+    "placeOfBirth",
+  ]);
+  const CROSS_WORKFLOW_SHARED_FAMILY_COMPOSITION_FIELDS = Object.freeze([
+    "monitoredChild",
+    "educationalAttainment",
+    "occupation",
+    "monthlyIncome",
+    "typeOfDisability",
+  ]);
   const BASIC_INFO_OPTIONAL_FIELD_IDS = new Set([
     "edit-contact-info",
     "edit-national-id",
+  ]);
+  const CSR_BASIC_INFO_REQUIRED_FIELD_IDS = Object.freeze([
+    "edit-educational-attainment",
+    "edit-contact-info",
+    "edit-national-id",
+    "edit-religion",
+    "edit-year-registration",
+    "edit-years-program",
+    "edit-present-address",
+    "edit-place-of-birth",
+    "edit-source-of-info",
+    "edit-prev-wellbeing",
+  ]);
+  const SCSR_BASIC_INFO_REQUIRED_FIELD_IDS = Object.freeze([
+    "edit-educational-attainment",
+    "edit-contact-info",
+    "edit-religion",
+    "edit-present-address",
+    "edit-place-of-birth",
+    "edit-source-of-info",
+    "edit-prev-wellbeing",
   ]);
   const CARD_STATUS_STYLE_BY_CODE = Object.freeze({
     1: { background: "#DCFCE7", text: "#166534" },
@@ -81,28 +159,52 @@
   let activeMunicipalityForCards = "";
   let currentMunicipalityFingerprint = "";
   let pendingMunicipalityRows = null;
+  let lastSheetServerWriteError = "";
   let hasPendingMunicipalityUpdate = false;
   let currentCsrRecord = null;
   let activeCsrStep = 1;
   let basicInfoPrefillRequestSeq = 0;
   let basicInfoAutoSaveTimer = null;
   let familyCompositionAutoSaveTimer = null;
+  let familyCompositionAccordionStateSaveTimer = null;
   let caseDevelopmentAutoSaveTimer = null;
+  let scsrPresentingProblemAutoSaveTimer = null;
   let interventionsProvidedAutoSaveTimer = null;
   let interventionsProvidedDraftAutoSaveTimer = null;
+  let scsrPlanImplementationAutoSaveTimer = null;
+  let scsrPlanImplementationDraftAutoSaveTimer = null;
   let householdInterventionPlanAutoSaveTimer = null;
   let householdInterventionPlanDraftAutoSaveTimer = null;
   let recommendationAutoSaveTimer = null;
+  let scsrRecommendationAutoSaveTimer = null;
   let recommendationPdfExportInProgress = false;
+  let scsrRecommendationPdfExportInProgress = false;
   let exportInvalidSteps = new Set();
   let exportValidationArmed = false;
   let recommendationPreparedByFetchPromise = null;
+  let scsrRecommendationPreparedByFetchPromise = null;
   let caseDevelopmentApplyingEditorValue = false;
   let caseDevelopmentSummernoteReady = false;
+  let scsrBackgroundAutoSaveTimer = null;
+  let scsrBackgroundApplyingEditorValue = false;
+  let scsrBackgroundSummernoteReady = false;
+  let activeScsrBackgroundTabKey = SCSR_BACKGROUND_TABS[0].key;
+  let scsrBackgroundInvalidTabKeys = new Set();
+  let scsrCaseAssessmentAutoSaveTimer = null;
+  let scsrCaseAssessmentApplyingEditorValue = false;
+  let scsrCaseAssessmentSummernoteReady = false;
+  let scsrCaseManagementEvaluationAutoSaveTimer = null;
+  let scsrCaseManagementEvaluationApplyingEditorValue = false;
+  let scsrCaseManagementEvaluationSummernoteReady = false;
   let loginInProgress = false;
   let csrOpenConfirmShownKeys = new Set();
   let pendingCsrDeepLink = null;
   let educationalAttainmentSyncInProgress = false;
+  let stepTriggers = [];
+  let activeWorkflowType = "CSR";
+  let pendingWorkflowCardData = null;
+  const workflowIsolationCleanupDone = new Set();
+  let crossWorkflowSyncQueue = Promise.resolve();
 
   const idInput = document.getElementById("user-id");
   const municipalitySelect = document.getElementById("municipality");
@@ -113,6 +215,7 @@
     ? loginButton.querySelector("span")
     : null;
   const restoreSessionButton = document.getElementById("restore-session");
+  const appBootScreen = document.getElementById("app-boot-screen");
   const loginSection = document.getElementById("login-section");
   const dataTableHeader = document.getElementById("data-table-header");
   const returnToSelectionButton = document.getElementById("return-to-csr-selection");
@@ -124,7 +227,8 @@
   const dataLoader = document.getElementById("data-loader");
   const householdGrid = document.getElementById("household-grid");
   const csrStepper = document.getElementById("csr-stepper");
-  const stepTriggers = Array.from(document.querySelectorAll("[data-step-trigger]"));
+  const csrStepperMobile = document.getElementById("csr-stepper-mobile");
+  const csrStepperDesktop = document.getElementById("csr-stepper-desktop");
   const stepSections = Array.from(document.querySelectorAll("[data-step-section]"));
   const summaryStart = document.getElementById("summary-start");
   const summaryEnd = document.getElementById("summary-end");
@@ -141,6 +245,13 @@
   const familyCompositionSaveStatus = document.getElementById("family-composition-save-status");
   const caseDevelopmentBackButton = document.getElementById("case-development-back-btn");
   const caseDevelopmentSaveStatus = document.getElementById("case-development-save-status");
+  const scsrBackgroundTabList = document.getElementById("scsr-background-tabs");
+  const scsrBackgroundBackButton = document.getElementById("scsr-background-back-btn");
+  const scsrBackgroundSaveStatus = document.getElementById("scsr-background-save-status");
+  const scsrCaseAssessmentBackButton = document.getElementById("scsr-case-assessment-back-btn");
+  const scsrCaseAssessmentSaveStatus = document.getElementById("scsr-case-assessment-save-status");
+  const scsrCaseManagementEvaluationBackButton = document.getElementById("scsr-case-management-evaluation-back-btn");
+  const scsrCaseManagementEvaluationSaveStatus = document.getElementById("scsr-case-management-evaluation-save-status");
   const interventionsProvidedBackButton = document.getElementById("interventions-provided-back-btn");
   const interventionsProvidedSaveStatus = document.getElementById("interventions-provided-save-status");
   const interventionsProvidedList = document.getElementById("interventions-provided-list");
@@ -153,6 +264,21 @@
   const interventionsProvidedTextField = document.getElementById("interventions");
   const interventionsProvidedDateField = document.getElementById("date_accomplished");
   const interventionsProvidedPartiesField = document.getElementById("involved_parties");
+  const scsrPlanImplementationBackButton = document.getElementById("scsr-plan-implementation-back-btn");
+  const scsrPlanImplementationSaveStatus = document.getElementById("scsr-plan-implementation-save-status");
+  const scsrPlanImplementationList = document.getElementById("scsr-plan-implementation-list");
+  const scsrPlanImplementationAddButton = document.getElementById("scsr-plan-implementation-add-btn");
+  const scsrPlanImplementationModal = document.getElementById("scsr-plan-implementation-modal");
+  const scsrPlanImplementationModalTitle = document.getElementById("scsr-plan-implementation-modal-title");
+  const scsrPlanImplementationCloseButton = document.getElementById("scsr-plan-implementation-close-btn");
+  const scsrPlanImplementationCancelButton = document.getElementById("scsr-plan-implementation-cancel-btn");
+  const scsrPlanImplementationModalSaveButton = document.getElementById("scsr-plan-implementation-modal-save-btn");
+  const scsrPlanObjectiveField = document.getElementById("scsr-plan-objective");
+  const scsrPlanActivitiesField = document.getElementById("scsr-plan-activities");
+  const scsrPlanTimeframeField = document.getElementById("scsr-plan-timeframe");
+  const scsrPlanPersonResponsibleField = document.getElementById("scsr-plan-person-responsible");
+  const scsrPlanMaterialsNeededField = document.getElementById("scsr-plan-materials-needed");
+  const scsrPlanExpectedOutputField = document.getElementById("scsr-plan-expected-output");
   const householdInterventionPlanBackButton = document.getElementById("household-intervention-plan-back-btn");
   const householdInterventionPlanSaveStatus = document.getElementById("household-intervention-plan-save-status");
   const householdInterventionPlanList = document.getElementById("household-intervention-plan-list");
@@ -173,10 +299,14 @@
   const recommendationSaveStatus = document.getElementById("recommendation-save-status");
   const recommendationPreviewModal = document.getElementById("recommendation-preview-modal");
   const recommendationPreviewIframe = document.getElementById("recommendation-preview-iframe");
+  const recommendationPreviewLoading = document.getElementById("recommendation-preview-loading");
   const recommendationPreviewOpenBrowserButton = document.getElementById(
     "recommendation-preview-open-browser-btn"
   );
-  const recommendationPreviewPrintButton = document.getElementById("recommendation-preview-print-btn");
+  const workflowTypeModal = document.getElementById("workflow-type-modal");
+  const workflowTypeModalCancelButton = document.getElementById("workflow-type-modal-cancel-btn");
+  const workflowTypeCsrButton = document.getElementById("workflow-type-csr-btn");
+  const workflowTypeScsrButton = document.getElementById("workflow-type-scsr-btn");
   const recommendationPreviewCloseButton = document.getElementById("recommendation-preview-close-btn");
   const recommendationTextField = document.getElementById("recommendation_text");
   const recommendationDateField = document.getElementById("recommendation_date");
@@ -190,9 +320,37 @@
   const recommendationNotedBySaveButton = document.getElementById("recommendation-noted-by-save-btn");
   const recommendationApprovedBySaveButton = document.getElementById("recommendation-approved-by-save-btn");
   const recommendationMswdOfficerSaveButton = document.getElementById("recommendation-mswd-officer-save-btn");
+  const scsrRecommendationBackButton = document.getElementById("scsr-recommendation-back-btn");
+  const scsrRecommendationPrintPreviewButton = document.getElementById("scsr-recommendation-print-preview-btn");
+  const scsrRecommendationExportButton = document.getElementById("scsr-recommendation-export-btn");
+  const scsrRecommendationSaveStatus = document.getElementById("scsr-recommendation-save-status");
+  const scsrRecommendationDateField = document.getElementById("scsr-recommendation-date");
+  const scsrRecommendationTextField = document.getElementById("scsr-recommendation_text");
+  const scsrRecommendationPreparedByField = document.getElementById("scsr-recommendation-prepared-by");
+  const scsrRecommendationReviewedByField = document.getElementById("scsr-recommendation-reviewed-by");
+  const scsrRecommendationApprovedByField = document.getElementById("scsr-recommendation-approved-by");
+  const scsrRecommendationReviewedBySaveButton = document.getElementById("scsr-recommendation-reviewed-by-save-btn");
+  const scsrRecommendationApprovedBySaveButton = document.getElementById("scsr-recommendation-approved-by-save-btn");
+  const scsrRecommendationPreviewModal = document.getElementById("scsr-recommendation-preview-modal");
+  const scsrRecommendationPreviewIframe = document.getElementById("scsr-recommendation-preview-iframe");
+  const scsrRecommendationPreviewLoading = document.getElementById("scsr-recommendation-preview-loading");
+  const scsrRecommendationPreviewOpenBrowserButton = document.getElementById(
+    "scsr-recommendation-preview-open-browser-btn"
+  );
+  const scsrRecommendationPreviewCloseButton = document.getElementById("scsr-recommendation-preview-close-btn");
   const familyCompositionRestoreButton = document.getElementById("family-composition-restore-btn");
   const familyCompositionResetButton = document.getElementById("family-composition-reset-btn");
   const basicInfoRestoreButton = document.getElementById("basic-info-restore-btn");
+  const basicInfoSectionTitle = document.getElementById("basic-info-section-title");
+  const basicGranteeNameLabel = document.getElementById("basic-grantee-name-label");
+  const basicSourceOfInfoLabel = document.getElementById("basic-source-of-info-label");
+  const basicPrevWellBeingLabel = document.getElementById("basic-prev-wellbeing-label");
+  const nationalIdFieldWrap = document.getElementById("basic-field-national-id-wrap");
+  const yearRegistrationFieldWrap = document.getElementById("basic-field-year-registration-wrap");
+  const yearsProgramFieldWrap = document.getElementById("basic-field-years-program-wrap");
+  const scsrIncomeFieldsWrap = document.getElementById("scsr-income-fields");
+  const monthlyIncomeField = document.getElementById("edit-monthly-income");
+  const perCapitaIncomeField = document.getElementById("edit-per-capita-income");
   const familyCompositionRestoreModal = document.getElementById("family-composition-restore-modal");
   const familyCompositionRestoreList = document.getElementById("family-composition-restore-list");
   const familyCompositionRestoreCloseButton = document.getElementById("family-composition-restore-close-btn");
@@ -209,6 +367,7 @@
   const basicInfoPrefillSpinner = document.getElementById("basic-info-prefill-spinner");
   let latestFamilyCompositionRows = [];
   let interventionsProvidedEditingIndex = null;
+  let scsrPlanImplementationEditingIndex = null;
   let householdInterventionPlanEditingIndex = null;
 
   initSummernoteIfPresent();
@@ -300,14 +459,39 @@
   if (caseDevelopmentBackButton) {
     caseDevelopmentBackButton.addEventListener("click", handleCaseDevelopmentBackClick);
   }
+  if (scsrBackgroundBackButton) {
+    scsrBackgroundBackButton.addEventListener("click", handleScsrBackgroundBackClick);
+  }
+  if (scsrCaseAssessmentBackButton) {
+    scsrCaseAssessmentBackButton.addEventListener("click", handleScsrCaseAssessmentBackClick);
+  }
+  if (scsrCaseManagementEvaluationBackButton) {
+    scsrCaseManagementEvaluationBackButton.addEventListener("click", handleScsrCaseManagementEvaluationBackClick);
+  }
   if (interventionsProvidedBackButton) {
     interventionsProvidedBackButton.addEventListener("click", handleInterventionsProvidedBackClick);
+  }
+  if (scsrPlanImplementationBackButton) {
+    scsrPlanImplementationBackButton.addEventListener("click", handleScsrPlanImplementationBackClick);
   }
   if (householdInterventionPlanBackButton) {
     householdInterventionPlanBackButton.addEventListener("click", handleHouseholdInterventionPlanBackClick);
   }
   if (recommendationBackButton) {
     recommendationBackButton.addEventListener("click", handleRecommendationBackClick);
+  }
+  if (scsrRecommendationBackButton) {
+    scsrRecommendationBackButton.addEventListener("click", handleScsrRecommendationBackClick);
+  }
+  if (scsrRecommendationPrintPreviewButton) {
+    scsrRecommendationPrintPreviewButton.addEventListener("click", () => {
+      void handleScsrRecommendationPrintPreviewClick();
+    });
+  }
+  if (scsrRecommendationExportButton) {
+    scsrRecommendationExportButton.addEventListener("click", () => {
+      void handleScsrRecommendationExportClick();
+    });
   }
   if (recommendationPrintPreviewButton) {
     recommendationPrintPreviewButton.addEventListener("click", () => {
@@ -322,9 +506,6 @@
   if (recommendationPreviewCloseButton) {
     recommendationPreviewCloseButton.addEventListener("click", closeRecommendationPreviewModal);
   }
-  if (recommendationPreviewPrintButton) {
-    recommendationPreviewPrintButton.addEventListener("click", printRecommendationPreviewIframe);
-  }
   if (recommendationPreviewOpenBrowserButton) {
     recommendationPreviewOpenBrowserButton.addEventListener("click", openRecommendationPreviewInBrowser);
   }
@@ -332,6 +513,39 @@
     recommendationPreviewModal.addEventListener("click", (event) => {
       if (event.target === recommendationPreviewModal) {
         closeRecommendationPreviewModal();
+      }
+    });
+  }
+  if (scsrRecommendationPreviewCloseButton) {
+    scsrRecommendationPreviewCloseButton.addEventListener("click", closeScsrRecommendationPreviewModal);
+  }
+  if (scsrRecommendationPreviewOpenBrowserButton) {
+    scsrRecommendationPreviewOpenBrowserButton.addEventListener("click", openScsrRecommendationPreviewInBrowser);
+  }
+  if (scsrRecommendationPreviewModal) {
+    scsrRecommendationPreviewModal.addEventListener("click", (event) => {
+      if (event.target === scsrRecommendationPreviewModal) {
+        closeScsrRecommendationPreviewModal();
+      }
+    });
+  }
+  if (workflowTypeCsrButton) {
+    workflowTypeCsrButton.addEventListener("click", () => {
+      void handleWorkflowTypeSelection("CSR");
+    });
+  }
+  if (workflowTypeScsrButton) {
+    workflowTypeScsrButton.addEventListener("click", () => {
+      void handleWorkflowTypeSelection("SCSR");
+    });
+  }
+  if (workflowTypeModalCancelButton) {
+    workflowTypeModalCancelButton.addEventListener("click", closeWorkflowTypeModal);
+  }
+  if (workflowTypeModal) {
+    workflowTypeModal.addEventListener("click", (event) => {
+      if (event.target === workflowTypeModal) {
+        closeWorkflowTypeModal();
       }
     });
   }
@@ -343,31 +557,45 @@
     const recommendationPreviewOpen =
       recommendationPreviewModal &&
       !recommendationPreviewModal.classList.contains("hidden");
+    const scsrRecommendationPreviewOpen =
+      scsrRecommendationPreviewModal &&
+      !scsrRecommendationPreviewModal.classList.contains("hidden");
     const interventionsModalOpen =
       interventionsProvidedModal &&
       !interventionsProvidedModal.classList.contains("hidden");
+    const scsrPlanImplementationModalOpen =
+      scsrPlanImplementationModal &&
+      !scsrPlanImplementationModal.classList.contains("hidden");
     const householdPlanModalOpen =
       householdInterventionPlanModal &&
       !householdInterventionPlanModal.classList.contains("hidden");
-    const isPrintShortcut =
-      (event.ctrlKey || event.metaKey) &&
-      String(event.key || "").toLowerCase() === "p";
-
-    if (isPrintShortcut && recommendationPreviewOpen) {
-      event.preventDefault();
-      printRecommendationPreviewIframe();
-      return;
-    }
-
+    const workflowTypeModalOpen =
+      workflowTypeModal &&
+      !workflowTypeModal.classList.contains("hidden");
     if (event.key === "Escape") {
+      if (workflowTypeModalOpen) {
+        event.preventDefault();
+        closeWorkflowTypeModal();
+        return;
+      }
       if (recommendationPreviewOpen) {
         event.preventDefault();
         closeRecommendationPreviewModal();
         return;
       }
+      if (scsrRecommendationPreviewOpen) {
+        event.preventDefault();
+        closeScsrRecommendationPreviewModal();
+        return;
+      }
       if (interventionsModalOpen) {
         event.preventDefault();
         closeInterventionsProvidedModal();
+        return;
+      }
+      if (scsrPlanImplementationModalOpen) {
+        event.preventDefault();
+        closeScsrPlanImplementationModal();
         return;
       }
       if (householdPlanModalOpen) {
@@ -381,6 +609,11 @@
       if (interventionsModalOpen) {
         event.preventDefault();
         void handleInterventionProvidedSaveClick();
+        return;
+      }
+      if (scsrPlanImplementationModalOpen) {
+        event.preventDefault();
+        void handleScsrPlanImplementationSaveClick();
         return;
       }
       if (householdPlanModalOpen) {
@@ -421,10 +654,14 @@
   bindBasicInfoAutoSaveListeners();
   bindEducationalAttainmentLiveSync();
   bindFamilyCompositionEvents();
+  bindScsrBackgroundEvents();
+  bindScsrPlanImplementationEvents();
   bindInterventionsProvidedEvents();
   bindHouseholdInterventionPlanEvents();
   bindRecommendationEvents();
+  bindScsrRecommendationEvents();
   bindPageLifecycleAutoSaveFlush();
+  setWorkflowType("CSR");
 
   [idInput, municipalitySelect].forEach((element) => {
     element.addEventListener("keydown", (event) => {
@@ -551,10 +788,12 @@
       clearFieldError(municipalitySelect, municipalityError);
 
       let municipalityData;
+      let municipalityUpstreamError = null;
       try {
         // Prefer upstream on login so newly downloaded municipality JSON is fresh.
         municipalityData = await fetchSheetData(userMunicipality, true);
-      } catch (_) {
+      } catch (error) {
+        municipalityUpstreamError = error || null;
         // Fall back to local cache when upstream is temporarily unavailable.
         municipalityData = await fetchSheetData(userMunicipality, false);
       }
@@ -571,10 +810,14 @@
         clearLocalSessionState();
         await clearServerSession();
         showLoginUI();
+        const upstreamReason = municipalityUpstreamError
+          ? normalizeText(municipalityUpstreamError.message)
+          : "";
         showDatasetOfflinePopup({
           title: "Municipality Dataset Unavailable",
-          message:
-            "Municipality source returned empty data. Contact the developer to check your municipality dataset.",
+          message: upstreamReason
+            ? `Municipality data could not be loaded from source, and no local cache is available. ${upstreamReason}`
+            : "Municipality source returned empty data. Contact the developer to check your municipality dataset.",
         });
         return;
       }
@@ -796,6 +1039,71 @@
     return safeSheetName;
   }
 
+  function extractSheetArrayFromProxyPayload(payload) {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+    if (!payload || typeof payload !== "object") {
+      return null;
+    }
+    if (Array.isArray(payload.data)) {
+      return payload.data;
+    }
+    if (Array.isArray(payload.rows)) {
+      return payload.rows;
+    }
+    if (payload.payload && typeof payload.payload === "object") {
+      if (Array.isArray(payload.payload.data)) {
+        return payload.payload.data;
+      }
+      if (Array.isArray(payload.payload.rows)) {
+        return payload.payload.rows;
+      }
+    }
+    if (payload.data && typeof payload.data === "object") {
+      if (Array.isArray(payload.data.rows)) {
+        return payload.data.rows;
+      }
+      if (Array.isArray(payload.data.data)) {
+        return payload.data.data;
+      }
+    }
+    if (payload.result && typeof payload.result === "object") {
+      if (Array.isArray(payload.result.rows)) {
+        return payload.result.rows;
+      }
+      if (Array.isArray(payload.result.data)) {
+        return payload.result.data;
+      }
+    }
+    const topKeys = Object.keys(payload);
+    for (let i = 0; i < topKeys.length; i += 1) {
+      const value = payload[topKeys[i]];
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        if (Array.isArray(value.rows)) {
+          return value.rows;
+        }
+        if (Array.isArray(value.data)) {
+          return value.data;
+        }
+      }
+    }
+    return null;
+  }
+
+  function describeProxyPayloadShape(payload) {
+    if (Array.isArray(payload)) {
+      return `array(len=${payload.length})`;
+    }
+    if (!payload || typeof payload !== "object") {
+      return typeof payload;
+    }
+    const topKeys = Object.keys(payload).slice(0, 8).join(",");
+    const dataType = payload.data === undefined ? "none" : Array.isArray(payload.data) ? "array" : typeof payload.data;
+    const rowsType = payload.rows === undefined ? "none" : Array.isArray(payload.rows) ? "array" : typeof payload.rows;
+    return `object(keys=${topKeys || "none"};data=${dataType};rows=${rowsType})`;
+  }
+
   async function fetchMunicipalitySheetDataFromApi(sheetName, preferUpstream) {
     if (isHttpContext() || ENABLE_SERVER_SHEET_PROXY) {
       const proxyUrl = `/api/sheet?sheet=${encodeURIComponent(sheetName)}${
@@ -824,19 +1132,25 @@
         );
       }
       const proxyPayload = await proxyResponse.json();
-      const proxyData =
-        Array.isArray(proxyPayload) ||
-        (proxyPayload && Array.isArray(proxyPayload.data))
-          ? Array.isArray(proxyPayload)
-            ? proxyPayload
-            : proxyPayload.data
-          : proxyPayload && proxyPayload.ok && Array.isArray(proxyPayload.data)
-          ? proxyPayload.data
-          : null;
-      if (!proxyData) {
+      if (
+        proxyPayload &&
+        typeof proxyPayload === "object" &&
+        proxyPayload.ok === false
+      ) {
+        const proxyErrorText =
+          typeof proxyPayload.error === "string"
+            ? proxyPayload.error
+            : "Upstream dataset error.";
         throw buildMunicipalityDatasetFetchError(
           sheetName,
-          `Invalid response for sheet ${sheetName}`
+          `Failed to fetch sheet ${sheetName}. ${proxyErrorText}`
+        );
+      }
+      const proxyData = extractSheetArrayFromProxyPayload(proxyPayload);
+      if (!Array.isArray(proxyData)) {
+        throw buildMunicipalityDatasetFetchError(
+          sheetName,
+          `Invalid response for sheet ${sheetName}. Shape: ${describeProxyPayloadShape(proxyPayload)}`
         );
       }
       return proxyData;
@@ -1003,6 +1317,7 @@
   }
 
   async function initializeSessionState() {
+    setAppBootScreenVisible(true);
     loginButton.disabled = true;
 
     try {
@@ -1175,12 +1490,15 @@
     }
   }
 
-  async function ensureMunicipalityDbFile(municipality) {
+  async function ensureMunicipalityDbFile(municipality, kind) {
     if (!isHttpContext()) {
       return false;
     }
 
     const safeMunicipality = normalizeText(municipality).toUpperCase();
+    const datasetKind = String(kind || "csr").trim().toLowerCase() === "scsr"
+      ? "scsr"
+      : "csr";
     if (!safeMunicipality) {
       return false;
     }
@@ -1189,7 +1507,7 @@
       const response = await fetch("/api/csr/ensure", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ municipality: safeMunicipality }),
+        body: JSON.stringify({ municipality: safeMunicipality, kind: datasetKind }),
       });
       if (!response.ok) {
         return false;
@@ -1329,6 +1647,7 @@
     if (!isHttpContext()) {
       return false;
     }
+    lastSheetServerWriteError = "";
     try {
       const response = await fetch("/api/downloads/sheet", {
         method: "POST",
@@ -1339,12 +1658,73 @@
         }),
       });
       if (!response.ok) {
+        try {
+          const payload = await response.json();
+          const errorText =
+            payload && typeof payload.error === "string" ? payload.error : "";
+          const codeText = payload && payload.code ? String(payload.code) : "";
+          const detailText =
+            payload && typeof payload.detail === "string" ? payload.detail : "";
+          const parts = [
+            `HTTP ${response.status}`,
+            errorText,
+            codeText,
+            detailText,
+          ].filter(Boolean);
+          lastSheetServerWriteError = parts.join(" | ");
+        } catch (_) {
+          lastSheetServerWriteError = `HTTP ${response.status}`;
+        }
         return false;
       }
       const payload = await response.json();
       return !!(payload && payload.ok);
     } catch (_) {
+      lastSheetServerWriteError = "Network error while saving municipality JSON.";
       return false;
+    }
+  }
+
+  async function getRuntimeWriteFailureHint() {
+    const origin = isHttpContext() ? location.origin : "";
+    if (!isHttpContext()) {
+      return "";
+    }
+    try {
+      const response = await fetch("/api/runtime/diagnostics", {
+        method: "GET",
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        return origin ? `Server: ${origin}` : "";
+      }
+      const payload = await response.json();
+      const diagnostics = payload && payload.diagnostics ? payload.diagnostics : null;
+      if (!diagnostics || !diagnostics.downloadsDirPath) {
+        return [
+          origin ? `Server: ${origin}` : "",
+          lastSheetServerWriteError ? `Cause: ${lastSheetServerWriteError}` : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+      }
+      const portSuffix =
+        diagnostics.port !== undefined && diagnostics.port !== null
+          ? ` (port ${diagnostics.port})`
+          : "";
+      return [
+        `Check folder: ${diagnostics.downloadsDirPath}${portSuffix}`,
+        lastSheetServerWriteError ? `Cause: ${lastSheetServerWriteError}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    } catch (_) {
+      return [
+        origin ? `Server: ${origin}` : "",
+        lastSheetServerWriteError ? `Cause: ${lastSheetServerWriteError}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
     }
   }
 
@@ -1508,15 +1888,25 @@
     dataTableHeader.classList.remove("hidden");
   }
 
+  function setAppBootScreenVisible(isVisible) {
+    if (!appBootScreen) {
+      return;
+    }
+    appBootScreen.classList.toggle("hidden", !isVisible);
+    appBootScreen.classList.toggle("flex", !!isVisible);
+  }
+
   function hideLoginSection() {
     if (!loginSection) {
       return;
     }
 
     loginSection.classList.add("hidden");
+    loginSection.classList.remove("flex");
   }
 
   async function showPostLoginUI() {
+    setAppBootScreenVisible(false);
     hideCsrWorkspace();
     showDataTableHeader();
     hideLoginSection();
@@ -2078,7 +2468,7 @@
         </div>
         <div class="p-4 border-t border-[#f0f2f4] bg-gray-50/50">
           <button class="create-csr-btn flex w-full items-center justify-center font-lexend rounded-lg h-12 bg-white border border-[#dbe0e6] text-primary text-lg font-bold shadow-sm hover:bg-primary hover:text-white transition-all" data-name="${encodedName}" data-hhid="${encodedHhid}" data-municipality="${encodedMunicipality}" data-barangay="${encodedBarangay}" type="button">
-            Create CSR
+            Create
           </button>
         </div>
       </article>`;
@@ -2144,9 +2534,11 @@
   }
 
   function showLoginUI() {
+    setAppBootScreenVisible(false);
     hideCsrWorkspace();
     if (loginSection) {
       loginSection.classList.remove("hidden");
+      loginSection.classList.add("flex");
     }
     if (dataTableHeader) {
       dataTableHeader.classList.add("hidden");
@@ -2170,9 +2562,11 @@
   }
 
   function showRestoreOnlyUI() {
+    setAppBootScreenVisible(false);
     hideCsrWorkspace();
     if (loginSection) {
       loginSection.classList.remove("hidden");
+      loginSection.classList.add("flex");
     }
     if (dataTableHeader) {
       dataTableHeader.classList.add("hidden");
@@ -2297,25 +2691,15 @@
     setCardsLoading(true);
 
     try {
-      const hasWriteAccess = isHttpContext()
-        ? true
-        : await ensureDownloadsDirectoryWriteAccess(true);
-      if (!hasWriteAccess) {
-        showToast(
-          "Folder access not granted. Please allow read/write access to your downloads folder."
-        );
-        return;
-      }
-
       const latestRows =
         pendingMunicipalityRows ||
         (await fetchSheetData(activeMunicipalityForCards, true));
 
-      const savedToMunicipalityFile = await silentlySaveMunicipalityJson(
+      const municipalitySaveResult = await silentlySaveMunicipalityJson(
         activeMunicipalityForCards,
         latestRows
       );
-      if (!savedToMunicipalityFile) {
+      if (municipalitySaveResult === "failed") {
         showToast(
           "Update blocked: unable to write municipality JSON file. Please grant folder permission and try again."
         );
@@ -2347,7 +2731,21 @@
       const orphanCleanupPending = getOrphanCleanupPending(activeMunicipalityForCards);
       hasPendingMunicipalityUpdate = orphanCleanupPending;
       setUpdateDataButtonVisible(orphanCleanupPending);
-      if (orphanCleanupPending) {
+      if (municipalitySaveResult === "storage_write_failed") {
+        const hint = await getRuntimeWriteFailureHint();
+        showToast(
+          `Municipality data updated, but local file save is blocked on this device. Please check folder permissions.${hint ? ` ${hint}` : ""}`,
+          "error",
+          5000
+        );
+      } else if (municipalitySaveResult === "server_write_failed") {
+        const hint = await getRuntimeWriteFailureHint();
+        showToast(
+          `Municipality data updated, but app storage write failed on this device. Please check folder permissions.${hint ? ` ${hint}` : ""}`,
+          "error",
+          5000
+        );
+      } else if (orphanCleanupPending) {
         showToast("Municipality data updated. CSR cleanup still pending.");
       } else {
         showToast("Municipality data updated.", "success", 3000);
@@ -2364,23 +2762,34 @@
   }
 
   async function silentlySaveMunicipalityJson(sheetName, rows) {
-    if (isHttpContext()) {
-      return saveSheetJsonViaServer(sheetName, rows);
-    }
-
     const fileName = `${toSheetJsonBaseName(sheetName)}.json`;
     const json = JSON.stringify(rows, null, 2);
 
+    if (isHttpContext()) {
+      const savedViaServer = await saveSheetJsonViaServer(sheetName, rows);
+      if (savedViaServer) {
+        return "saved";
+      }
+      // In Electron HTTP mode, avoid browser download fallback because it prompts Save As.
+      // Keep update flow non-blocking and surface a warning toast instead.
+      return "server_write_failed";
+    }
+
     const initialHandleReady = await ensureDownloadsDirectoryWriteAccess(false);
     if (!initialHandleReady) {
-      return false;
+      return "storage_write_failed";
     }
 
     try {
-      return await writeMunicipalityJsonToHandle(downloadsDirectoryHandle, fileName, json);
+      const wroteToHandle = await writeMunicipalityJsonToHandle(
+        downloadsDirectoryHandle,
+        fileName,
+        json
+      );
+      return wroteToHandle ? "saved" : "failed";
     } catch (error) {
       if (!isRecoverableWriteError(error)) {
-        return false;
+        return "storage_write_failed";
       }
 
       // Stored handle may be stale or permission may have changed.
@@ -2388,17 +2797,18 @@
       downloadsDirectoryHandle = null;
       const recoveredHandleReady = await ensureDownloadsDirectoryWriteAccess(false);
       if (!recoveredHandleReady) {
-        return false;
+        return "storage_write_failed";
       }
 
       try {
-        return await writeMunicipalityJsonToHandle(
+        const wroteAfterRecovery = await writeMunicipalityJsonToHandle(
           downloadsDirectoryHandle,
           fileName,
           json
         );
+        return wroteAfterRecovery ? "saved" : "failed";
       } catch (_) {
-        return false;
+        return "storage_write_failed";
       }
     }
   }
@@ -2822,10 +3232,6 @@
   }
 
   function confirmUserAction(message) {
-    if (!isElectronRuntime()) {
-      return Promise.resolve(window.confirm(message));
-    }
-
     return new Promise((resolve) => {
       const overlay = document.createElement("div");
       overlay.className =
@@ -2884,6 +3290,15 @@
     recommendationExportButton.disabled = !!isBusy;
     recommendationExportButton.classList.toggle("opacity-60", !!isBusy);
     recommendationExportButton.classList.toggle("cursor-not-allowed", !!isBusy);
+  }
+
+  function setScsrRecommendationExportButtonBusy(isBusy) {
+    if (!scsrRecommendationExportButton) {
+      return;
+    }
+    scsrRecommendationExportButton.disabled = !!isBusy;
+    scsrRecommendationExportButton.classList.toggle("opacity-60", !!isBusy);
+    scsrRecommendationExportButton.classList.toggle("cursor-not-allowed", !!isBusy);
   }
 
   function maybeShowDatasetOfflinePopup(error) {
@@ -2962,95 +3377,1009 @@
     if (
       typeof window.jQuery === "undefined" ||
       !window.jQuery.fn ||
-      !window.jQuery.fn.summernote ||
-      !document.getElementById("summernote")
+      !window.jQuery.fn.summernote
     ) {
       return;
     }
 
-    window.jQuery("#summernote").summernote({
-      placeholder: "Provide a detailed narrative of the Case Development.",
-      tabsize: 2,
-      tabDisable: true,
-      height: 500,
-      focus: true,
-      toolbar: [
-        ["style", ["style"]],
-        ["font", ["bold", "underline", "clear"]],
-        ["color", ["color"]],
-        ["para", ["ul", "ol", "paragraph"]],
-        ["table", ["table"]],
-        ["insert", ["link", "picture", "video"]],
-        ["view", ["fullscreen", "codeview", "help"]],
-      ],
-      callbacks: {
-        onInit: () => {
-          caseDevelopmentSummernoteReady = true;
-          applySavedCaseDevelopmentDetails();
-        },
-        onPaste: (event) => {
-          try {
-            const originalEvent = event && event.originalEvent ? event.originalEvent : event;
-            const clipboardData = originalEvent && originalEvent.clipboardData
-              ? originalEvent.clipboardData
-              : (window.clipboardData || null);
-            if (!clipboardData || typeof clipboardData.getData !== "function") {
-              return;
-            }
-            const rawHtml = String(clipboardData.getData("text/html") || "");
-            const rawText = String(clipboardData.getData("text/plain") || "");
-            const sanitizedHtml = sanitizeCaseDevelopmentPastedHtml(rawHtml);
-            if (!sanitizedHtml && !rawText) {
-              return;
-            }
-            if (originalEvent && typeof originalEvent.preventDefault === "function") {
-              originalEvent.preventDefault();
-            } else if (event && typeof event.preventDefault === "function") {
-              event.preventDefault();
-            }
-            const currentHtml = normalizeCaseDevelopmentHtmlForStorage(
-              window.jQuery("#summernote").summernote("code")
-            );
-            const editorIsEmpty = !normalizeText(currentHtml);
-            if (sanitizedHtml) {
-              if (editorIsEmpty) {
-                window.jQuery("#summernote").summernote("code", sanitizedHtml);
-              } else {
-                document.execCommand("insertHTML", false, sanitizedHtml);
+    if (document.getElementById("summernote")) {
+      window.jQuery("#summernote").summernote({
+        placeholder: "Provide a detailed narrative.",
+        tabsize: 2,
+        tabDisable: true,
+        height: 500,
+        focus: true,
+        toolbar: [
+          ["style", ["style"]],
+          ["font", ["bold", "underline", "clear"]],
+          ["color", ["color"]],
+          ["para", ["ul", "ol", "paragraph"]],
+          ["table", ["table"]],
+          ["insert", ["link", "picture", "video"]],
+          ["view", ["fullscreen", "codeview", "help"]],
+        ],
+        callbacks: {
+          onInit: () => {
+            caseDevelopmentSummernoteReady = true;
+            bindSummernoteEnterAsLineBreak("#summernote");
+            applySavedCaseDevelopmentDetails();
+          },
+          onPaste: (event) => {
+            try {
+              const originalEvent = event && event.originalEvent ? event.originalEvent : event;
+              const clipboardData = originalEvent && originalEvent.clipboardData
+                ? originalEvent.clipboardData
+                : (window.clipboardData || null);
+              if (!clipboardData || typeof clipboardData.getData !== "function") {
+                return;
               }
-            } else {
-              document.execCommand("insertText", false, rawText);
+              const rawHtml = String(clipboardData.getData("text/html") || "");
+              const rawText = String(clipboardData.getData("text/plain") || "");
+              const sanitizedHtml = sanitizeCaseDevelopmentPastedHtml(rawHtml);
+              if (!sanitizedHtml && !rawText) {
+                return;
+              }
+              if (originalEvent && typeof originalEvent.preventDefault === "function") {
+                originalEvent.preventDefault();
+              } else if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
+              }
+              const currentHtml = normalizeCaseDevelopmentHtmlForStorage(
+                window.jQuery("#summernote").summernote("code")
+              );
+              const editorIsEmpty = !normalizeText(currentHtml);
+              if (sanitizedHtml) {
+                if (editorIsEmpty) {
+                  window.jQuery("#summernote").summernote("code", sanitizedHtml);
+                } else {
+                  document.execCommand("insertHTML", false, sanitizedHtml);
+                }
+              } else {
+                document.execCommand("insertText", false, rawText);
+              }
+            } catch (_) {
+              // Keep default paste behavior if sanitizer fails.
             }
-          } catch (_) {
-            // Keep default paste behavior if sanitizer fails.
+          },
+          onChange: () => {
+            setCaseDevelopmentFieldError(!normalizeText(getCaseDevelopmentEditorHtml()));
+            scheduleActiveNarrativeAutoSave();
+            refreshExportValidationGlow();
+          },
+          onBlur: () => {
+            if (shouldNormalizeCaseDevelopmentOnBlur(getActiveRecordWorkflowType())) {
+              const normalizedOnBlur = getCaseDevelopmentEditorHtml();
+              setCaseDevelopmentEditorHtml(normalizedOnBlur);
+            }
+            setCaseDevelopmentFieldError(!normalizeText(getCaseDevelopmentEditorHtml()));
+            flushActiveNarrativeAutoSave(true);
+            refreshExportValidationGlow();
+          },
+        },
+      });
+    }
+
+    if (document.getElementById("scsr-background-summernote")) {
+      window.jQuery("#scsr-background-summernote").summernote({
+        placeholder: "Provide a detailed background narrative.",
+        tabsize: 2,
+        tabDisable: true,
+        height: 500,
+        focus: false,
+        toolbar: [
+          ["style", ["style"]],
+          ["font", ["bold", "underline", "clear"]],
+          ["color", ["color"]],
+          ["para", ["ul", "ol", "paragraph"]],
+          ["table", ["table"]],
+          ["insert", ["link", "picture", "video"]],
+          ["view", ["fullscreen", "codeview", "help"]],
+        ],
+        callbacks: {
+          onInit: () => {
+            scsrBackgroundSummernoteReady = true;
+            bindSummernoteEnterAsLineBreak("#scsr-background-summernote");
+            renderScsrBackgroundTabs();
+            applySavedScsrBackgroundDetails();
+          },
+          onPaste: (event) => {
+            try {
+              const originalEvent = event && event.originalEvent ? event.originalEvent : event;
+              const clipboardData = originalEvent && originalEvent.clipboardData
+                ? originalEvent.clipboardData
+                : (window.clipboardData || null);
+              if (!clipboardData || typeof clipboardData.getData !== "function") {
+                return;
+              }
+              const rawHtml = String(clipboardData.getData("text/html") || "");
+              const rawText = String(clipboardData.getData("text/plain") || "");
+              const sanitizedHtml = sanitizeCaseDevelopmentPastedHtml(rawHtml);
+              if (!sanitizedHtml && !rawText) {
+                return;
+              }
+              if (originalEvent && typeof originalEvent.preventDefault === "function") {
+                originalEvent.preventDefault();
+              } else if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
+              }
+              const currentHtml = normalizeCaseDevelopmentHtmlForStorage(
+                window.jQuery("#scsr-background-summernote").summernote("code")
+              );
+              const editorIsEmpty = !normalizeText(currentHtml);
+              if (sanitizedHtml) {
+                if (editorIsEmpty) {
+                  window.jQuery("#scsr-background-summernote").summernote("code", sanitizedHtml);
+                } else {
+                  document.execCommand("insertHTML", false, sanitizedHtml);
+                }
+              } else {
+                document.execCommand("insertText", false, rawText);
+              }
+            } catch (_) {
+              // Keep default paste behavior if sanitizer fails.
+            }
+          },
+          onChange: () => {
+            scheduleScsrBackgroundAutoSave();
+            setScsrBackgroundFieldError(!normalizeText(getScsrBackgroundEditorHtml()));
+            refreshExportValidationGlow();
+          },
+          onBlur: () => {
+            flushScsrBackgroundAutoSave(true);
+            setScsrBackgroundFieldError(!normalizeText(getScsrBackgroundEditorHtml()));
+            refreshExportValidationGlow();
+          },
+        },
+      });
+    }
+
+    if (document.getElementById("scsr-case-assessment-summernote")) {
+      window.jQuery("#scsr-case-assessment-summernote").summernote({
+        placeholder: "Provide a detailed case assessment narrative.",
+        tabsize: 2,
+        tabDisable: true,
+        height: 500,
+        focus: false,
+        toolbar: [
+          ["style", ["style"]],
+          ["font", ["bold", "underline", "clear"]],
+          ["color", ["color"]],
+          ["para", ["ul", "ol", "paragraph"]],
+          ["table", ["table"]],
+          ["insert", ["link", "picture", "video"]],
+          ["view", ["fullscreen", "codeview", "help"]],
+        ],
+        callbacks: {
+          onInit: () => {
+            scsrCaseAssessmentSummernoteReady = true;
+            bindSummernoteEnterAsLineBreak("#scsr-case-assessment-summernote");
+            applySavedScsrCaseAssessmentDetails();
+          },
+          onPaste: (event) => {
+            try {
+              const originalEvent = event && event.originalEvent ? event.originalEvent : event;
+              const clipboardData = originalEvent && originalEvent.clipboardData
+                ? originalEvent.clipboardData
+                : (window.clipboardData || null);
+              if (!clipboardData || typeof clipboardData.getData !== "function") {
+                return;
+              }
+              const rawHtml = String(clipboardData.getData("text/html") || "");
+              const rawText = String(clipboardData.getData("text/plain") || "");
+              const sanitizedHtml = sanitizeCaseDevelopmentPastedHtml(rawHtml);
+              if (!sanitizedHtml && !rawText) {
+                return;
+              }
+              if (originalEvent && typeof originalEvent.preventDefault === "function") {
+                originalEvent.preventDefault();
+              } else if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
+              }
+              const currentHtml = normalizeCaseDevelopmentHtmlForStorage(
+                window.jQuery("#scsr-case-assessment-summernote").summernote("code")
+              );
+              const editorIsEmpty = !normalizeText(currentHtml);
+              if (sanitizedHtml) {
+                if (editorIsEmpty) {
+                  window.jQuery("#scsr-case-assessment-summernote").summernote("code", sanitizedHtml);
+                } else {
+                  document.execCommand("insertHTML", false, sanitizedHtml);
+                }
+              } else {
+                document.execCommand("insertText", false, rawText);
+              }
+            } catch (_) {
+              // Keep default paste behavior if sanitizer fails.
+            }
+          },
+          onChange: () => {
+            scheduleScsrCaseAssessmentAutoSave();
+            setScsrCaseAssessmentFieldError(!normalizeText(getScsrCaseAssessmentEditorHtml()));
+            refreshExportValidationGlow();
+          },
+          onBlur: () => {
+            flushScsrCaseAssessmentAutoSave(true);
+            setScsrCaseAssessmentFieldError(!normalizeText(getScsrCaseAssessmentEditorHtml()));
+            refreshExportValidationGlow();
+          },
+        },
+      });
+    }
+
+    if (document.getElementById("scsr-case-management-evaluation-summernote")) {
+      window.jQuery("#scsr-case-management-evaluation-summernote").summernote({
+        placeholder: "Provide a detailed case management evaluation narrative.",
+        tabsize: 2,
+        tabDisable: true,
+        height: 500,
+        focus: false,
+        toolbar: [
+          ["style", ["style"]],
+          ["font", ["bold", "underline", "clear"]],
+          ["color", ["color"]],
+          ["para", ["ul", "ol", "paragraph"]],
+          ["table", ["table"]],
+          ["insert", ["link", "picture", "video"]],
+          ["view", ["fullscreen", "codeview", "help"]],
+        ],
+        callbacks: {
+          onInit: () => {
+            scsrCaseManagementEvaluationSummernoteReady = true;
+            bindSummernoteEnterAsLineBreak("#scsr-case-management-evaluation-summernote");
+            applySavedScsrCaseManagementEvaluationDetails();
+          },
+          onPaste: (event) => {
+            try {
+              const originalEvent = event && event.originalEvent ? event.originalEvent : event;
+              const clipboardData = originalEvent && originalEvent.clipboardData
+                ? originalEvent.clipboardData
+                : (window.clipboardData || null);
+              if (!clipboardData || typeof clipboardData.getData !== "function") {
+                return;
+              }
+              const rawHtml = String(clipboardData.getData("text/html") || "");
+              const rawText = String(clipboardData.getData("text/plain") || "");
+              const sanitizedHtml = sanitizeCaseDevelopmentPastedHtml(rawHtml);
+              if (!sanitizedHtml && !rawText) {
+                return;
+              }
+              if (originalEvent && typeof originalEvent.preventDefault === "function") {
+                originalEvent.preventDefault();
+              } else if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
+              }
+              const currentHtml = normalizeCaseDevelopmentHtmlForStorage(
+                window.jQuery("#scsr-case-management-evaluation-summernote").summernote("code")
+              );
+              const editorIsEmpty = !normalizeText(currentHtml);
+              if (sanitizedHtml) {
+                if (editorIsEmpty) {
+                  window.jQuery("#scsr-case-management-evaluation-summernote").summernote("code", sanitizedHtml);
+                } else {
+                  document.execCommand("insertHTML", false, sanitizedHtml);
+                }
+              } else {
+                document.execCommand("insertText", false, rawText);
+              }
+            } catch (_) {
+              // Keep default paste behavior if sanitizer fails.
+            }
+          },
+          onChange: () => {
+            scheduleScsrCaseManagementEvaluationAutoSave();
+            setScsrCaseManagementEvaluationFieldError(!normalizeText(getScsrCaseManagementEvaluationEditorHtml()));
+            refreshExportValidationGlow();
+          },
+          onBlur: () => {
+            flushScsrCaseManagementEvaluationAutoSave(true);
+            setScsrCaseManagementEvaluationFieldError(!normalizeText(getScsrCaseManagementEvaluationEditorHtml()));
+            refreshExportValidationGlow();
+          },
+        },
+      });
+    }
+  }
+
+  function shouldNormalizeCaseDevelopmentOnBlur(workflowType) {
+    const normalizedWorkflow = normalizeWorkflowType(workflowType);
+    // Dedicated behavior: CSR and SCSR normalize on stepper transitions, not on blur.
+    if (normalizedWorkflow === "CSR" || normalizedWorkflow === "SCSR") {
+      return false;
+    }
+    return true;
+  }
+
+  function normalizeCsrCaseDevelopmentOnStepSwitch(previousStep, nextStep) {
+    if (normalizeWorkflowType(getActiveRecordWorkflowType()) !== "CSR") {
+      return;
+    }
+    if (previousStep !== 3 || nextStep === 3) {
+      return;
+    }
+    const normalizedOnStepSwitch = getCaseDevelopmentEditorHtml();
+    const collapsedOnStepSwitch = collapseCsrNarrativeSpacingHtml(normalizedOnStepSwitch);
+    setCaseDevelopmentEditorHtml(collapsedOnStepSwitch);
+  }
+
+  function collapseCsrNarrativeSpacingHtml(value) {
+    const raw = String(value || "");
+    if (!raw.trim() || typeof document === "undefined") {
+      return raw;
+    }
+    try {
+      const container = document.createElement("div");
+      container.innerHTML = raw;
+
+      const isIgnorableTextNode = (node) => {
+        if (!node || node.nodeType !== 3) {
+          return false;
+        }
+        return !String(node.textContent || "").replace(/[\u00A0\s\u200B]+/g, "");
+      };
+
+      const isEmptyParagraph = (node) => {
+        if (!node || node.nodeType !== 1 || String(node.tagName || "").toUpperCase() !== "P") {
+          return false;
+        }
+        const text = String(node.textContent || "")
+          .replace(/\u00A0/g, " ")
+          .replace(/\u200B/g, "")
+          .trim();
+        return text.length === 0;
+      };
+
+      const unwrapPlainDivParagraphGroups = (root) => {
+        if (!root || !root.querySelectorAll) {
+          return;
+        }
+        Array.from(root.querySelectorAll("div")).forEach((div) => {
+          if (!div || div.attributes.length > 0) {
+            return;
           }
-        },
-        onChange: () => {
-          setCaseDevelopmentFieldError(!normalizeText(getCaseDevelopmentEditorHtml()));
-          scheduleCaseDevelopmentAutoSave();
-          refreshExportValidationGlow();
-        },
-        onBlur: () => {
-          const normalizedOnBlur = getCaseDevelopmentEditorHtml();
-          setCaseDevelopmentEditorHtml(normalizedOnBlur);
-          setCaseDevelopmentFieldError(!normalizeText(getCaseDevelopmentEditorHtml()));
-          flushCaseDevelopmentAutoSave(true);
-          refreshExportValidationGlow();
-        },
-      },
+          const children = Array.from(div.childNodes || []);
+          if (!children.length) {
+            return;
+          }
+          const onlyParagraphsOrWhitespace = children.every((child) => {
+            if (isIgnorableTextNode(child)) {
+              return true;
+            }
+            return child.nodeType === 1 && String(child.tagName || "").toUpperCase() === "P";
+          });
+          if (!onlyParagraphsOrWhitespace) {
+            return;
+          }
+          const fragment = document.createDocumentFragment();
+          children.forEach((child) => {
+            if (isIgnorableTextNode(child)) {
+              return;
+            }
+            fragment.appendChild(child);
+          });
+          div.replaceWith(fragment);
+        });
+      };
+
+      const mergeAdjacentParagraphs = (root) => {
+        if (!root || !root.childNodes || root.childNodes.length === 0) {
+          return;
+        }
+        Array.from(root.children || []).forEach((child) => mergeAdjacentParagraphs(child));
+        let cursor = root.firstChild;
+        while (cursor) {
+          if (isIgnorableTextNode(cursor)) {
+            const next = cursor.nextSibling;
+            cursor.remove();
+            cursor = next;
+            continue;
+          }
+          if (!(cursor.nodeType === 1 && String(cursor.tagName || "").toUpperCase() === "P")) {
+            cursor = cursor.nextSibling;
+            continue;
+          }
+          if (isEmptyParagraph(cursor)) {
+            const next = cursor.nextSibling;
+            cursor.remove();
+            cursor = next;
+            continue;
+          }
+
+          let next = cursor.nextSibling;
+          while (next && isIgnorableTextNode(next)) {
+            const removableGap = next;
+            next = next.nextSibling;
+            removableGap.remove();
+          }
+          while (next && next.nodeType === 1 && String(next.tagName || "").toUpperCase() === "P") {
+            if (isEmptyParagraph(next)) {
+              const removableEmpty = next;
+              next = next.nextSibling;
+              removableEmpty.remove();
+              while (next && isIgnorableTextNode(next)) {
+                const removableGap = next;
+                next = next.nextSibling;
+                removableGap.remove();
+              }
+              continue;
+            }
+            cursor.appendChild(document.createElement("br"));
+            while (next.firstChild) {
+              cursor.appendChild(next.firstChild);
+            }
+            const merged = next;
+            next = next.nextSibling;
+            merged.remove();
+            while (next && isIgnorableTextNode(next)) {
+              const removableGap = next;
+              next = next.nextSibling;
+              removableGap.remove();
+            }
+          }
+          cursor = next || cursor.nextSibling;
+        }
+      };
+
+      const getPreviousMeaningfulSibling = (node) => {
+        let cursor = node ? node.previousSibling : null;
+        while (cursor) {
+          if (!isIgnorableTextNode(cursor)) {
+            return cursor;
+          }
+          const previous = cursor.previousSibling;
+          cursor.remove();
+          cursor = previous;
+        }
+        return null;
+      };
+
+      const getNextMeaningfulSibling = (node) => {
+        let cursor = node ? node.nextSibling : null;
+        while (cursor) {
+          if (!isIgnorableTextNode(cursor)) {
+            return cursor;
+          }
+          const next = cursor.nextSibling;
+          cursor.remove();
+          cursor = next;
+        }
+        return null;
+      };
+
+      const isBlockElementNode = (node) => {
+        if (!node || node.nodeType !== 1) {
+          return false;
+        }
+        const tag = String(node.tagName || "").toUpperCase();
+        return (
+          tag === "P" ||
+          tag === "DIV" ||
+          tag === "LI" ||
+          tag === "UL" ||
+          tag === "OL" ||
+          tag === "TABLE" ||
+          tag === "BLOCKQUOTE"
+        );
+      };
+
+      const removeInterBlockBreakNodes = (root) => {
+        if (!root || !root.querySelectorAll) {
+          return;
+        }
+        Array.from(root.querySelectorAll("br")).forEach((br) => {
+          const previous = getPreviousMeaningfulSibling(br);
+          const next = getNextMeaningfulSibling(br);
+          if (!previous || !next) {
+            br.remove();
+            return;
+          }
+          if (isBlockElementNode(previous) && isBlockElementNode(next)) {
+            br.remove();
+          }
+        });
+      };
+
+      const compressBreakRuns = (root) => {
+        if (!root || !root.childNodes || root.childNodes.length === 0) {
+          return;
+        }
+        Array.from(root.children || []).forEach((child) => compressBreakRuns(child));
+
+        let cursor = root.firstChild;
+        while (cursor) {
+          const current = cursor;
+          const isBreak =
+            current.nodeType === 1 && String(current.tagName || "").toUpperCase() === "BR";
+          if (!isBreak) {
+            cursor = current.nextSibling;
+            continue;
+          }
+
+          let runTail = current;
+          let next = runTail.nextSibling;
+          while (next) {
+            if (isIgnorableTextNode(next)) {
+              const removableGap = next;
+              next = next.nextSibling;
+              removableGap.remove();
+              continue;
+            }
+            const nextIsBreak =
+              next.nodeType === 1 && String(next.tagName || "").toUpperCase() === "BR";
+            if (!nextIsBreak) {
+              break;
+            }
+            runTail = next;
+            next = runTail.nextSibling;
+          }
+
+          while (current.nextSibling && current.nextSibling !== next) {
+            current.nextSibling.remove();
+          }
+          cursor = next;
+        }
+      };
+
+      const trimBoundaryBreaksInBlocks = (root) => {
+        if (!root || !root.querySelectorAll) {
+          return;
+        }
+        Array.from(root.querySelectorAll("p, div, li")).forEach((block) => {
+          let head = block.firstChild;
+          while (head) {
+            if (isIgnorableTextNode(head)) {
+              const next = head.nextSibling;
+              head.remove();
+              head = next;
+              continue;
+            }
+            const isBreak =
+              head.nodeType === 1 && String(head.tagName || "").toUpperCase() === "BR";
+            if (isBreak) {
+              const next = head.nextSibling;
+              head.remove();
+              head = next;
+              continue;
+            }
+            break;
+          }
+
+          let tail = block.lastChild;
+          while (tail) {
+            if (isIgnorableTextNode(tail)) {
+              const previous = tail.previousSibling;
+              tail.remove();
+              tail = previous;
+              continue;
+            }
+            const isBreak =
+              tail.nodeType === 1 && String(tail.tagName || "").toUpperCase() === "BR";
+            if (isBreak) {
+              const previous = tail.previousSibling;
+              tail.remove();
+              tail = previous;
+              continue;
+            }
+            break;
+          }
+        });
+      };
+
+      unwrapPlainDivParagraphGroups(container);
+      removeInterBlockBreakNodes(container);
+      compressBreakRuns(container);
+      trimBoundaryBreaksInBlocks(container);
+      return String(container.innerHTML || "").trim();
+    } catch (_) {
+      return raw;
+    }
+  }
+
+  function bindSummernoteEnterAsLineBreak(editorSelector) {
+    if (
+      !editorSelector ||
+      typeof window.jQuery === "undefined" ||
+      !window.jQuery.fn
+    ) {
+      return;
+    }
+    const host = window.jQuery(editorSelector);
+    if (!host.length) {
+      return;
+    }
+    const editable = host.next(".note-editor").find(".note-editable");
+    if (!editable.length) {
+      return;
+    }
+    editable.off("keydown.csrEnterLineBreak");
+    editable.on("keydown.csrEnterLineBreak", (event) => {
+      if (!event || String(event.key || "") !== "Enter") {
+        return;
+      }
+      if (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+      const selection = typeof window.getSelection === "function" ? window.getSelection() : null;
+      const anchorNode = selection && selection.anchorNode ? selection.anchorNode : event.target;
+      const contextNode =
+        anchorNode && anchorNode.nodeType === 1 ? anchorNode : anchorNode && anchorNode.parentNode;
+      if (contextNode && typeof contextNode.closest === "function") {
+        if (contextNode.closest("li, td, th, blockquote")) {
+          return;
+        }
+      }
+      event.preventDefault();
+      try {
+        if (typeof document.execCommand === "function") {
+          document.execCommand("insertHTML", false, "<br>");
+        }
+      } catch (_) {
+        try {
+          if (typeof document.execCommand === "function") {
+            document.execCommand("insertHTML", false, "<br>");
+          }
+        } catch (_) {
+          // Keep editor usable if line-break insertion fails.
+        }
+      }
     });
   }
 
   function bindStepperEvents() {
-    stepTriggers.forEach((trigger) => {
-      trigger.addEventListener("click", () => {
-        const step = Number(trigger.dataset.stepTrigger);
-        if (!Number.isInteger(step) || step < 1 || step > CSR_STEP_COUNT) {
-          return;
-        }
-        setActiveCsrStep(step);
-      });
+    if (!csrStepper) {
+      return;
+    }
+    csrStepper.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-step-trigger]");
+      if (!trigger || !csrStepper.contains(trigger)) {
+        return;
+      }
+      const step = Number(trigger.dataset.stepTrigger);
+      const maxSteps = getCurrentWorkflowStepCount();
+      if (!Number.isInteger(step) || step < 1 || step > maxSteps) {
+        return;
+      }
+      setActiveCsrStep(step);
     });
+  }
+
+  function refreshStepperTriggers() {
+    stepTriggers = csrStepper
+      ? Array.from(csrStepper.querySelectorAll("[data-step-trigger]"))
+      : [];
+  }
+
+  function normalizeWorkflowType(value) {
+    return String(value || "").trim().toUpperCase() === "SCSR" ? "SCSR" : "CSR";
+  }
+
+  function getDatasetKindFromWorkflowType(workflowType) {
+    return normalizeWorkflowType(workflowType) === "SCSR" ? "scsr" : "csr";
+  }
+
+  function getActiveDatasetKind() {
+    return getDatasetKindFromWorkflowType(activeWorkflowType);
+  }
+
+  function setBasicInfoFieldRequired(fieldId, isRequired) {
+    const field = document.getElementById(fieldId);
+    if (!field) {
+      return;
+    }
+    if (isRequired) {
+      field.setAttribute("data-basic-edit-required", "1");
+    } else {
+      field.removeAttribute("data-basic-edit-required");
+      clearBasicInfoFieldError(field);
+    }
+  }
+
+  function setPrevWellBeingDatalistOptions(options) {
+    const datalist = document.getElementById(PREV_WELLBEING_DATALIST_ID);
+    if (!datalist) {
+      return;
+    }
+    datalist.innerHTML = (Array.isArray(options) ? options : [])
+      .map((value) => `<option value="${escapeHtml(value)}"></option>`)
+      .join("");
+  }
+
+  function applyBasicInfoFormMode() {
+    const isScsr = getActiveRecordWorkflowType() === "SCSR";
+
+    if (basicInfoSectionTitle) {
+      basicInfoSectionTitle.textContent = isScsr ? "Identifying Information" : "Beneficiary Profile";
+    }
+    if (basicGranteeNameLabel) {
+      basicGranteeNameLabel.textContent = isScsr ? "Client's Name" : "Grantee Name";
+    }
+    if (basicSourceOfInfoLabel) {
+      basicSourceOfInfoLabel.textContent = isScsr ? "Source of Income" : "Source of Info";
+    }
+    if (basicPrevWellBeingLabel) {
+      basicPrevWellBeingLabel.textContent = isScsr
+        ? "Level of Well-Being"
+        : "Current Level of Well-being";
+    }
+
+    if (nationalIdFieldWrap) {
+      nationalIdFieldWrap.classList.toggle("hidden", isScsr);
+    }
+    if (yearRegistrationFieldWrap) {
+      yearRegistrationFieldWrap.classList.toggle("hidden", isScsr);
+    }
+    if (yearsProgramFieldWrap) {
+      yearsProgramFieldWrap.classList.toggle("hidden", isScsr);
+    }
+    if (scsrIncomeFieldsWrap) {
+      scsrIncomeFieldsWrap.classList.toggle("hidden", !isScsr);
+    }
+    applyPerCapitaIncomeFieldMode(isScsr);
+
+    if (isScsr) {
+      setFieldValue("edit-national-id", "");
+      setFieldValue("edit-year-registration", "");
+      setFieldValue("edit-years-program", "");
+      setFieldValue("edit-source-of-info", "");
+      const prevWellBeingField = document.getElementById("edit-prev-wellbeing");
+      if (prevWellBeingField) {
+        prevWellBeingField.placeholder = "e.g. Level 2 - Subsistence";
+        if (document.getElementById(PREV_WELLBEING_DATALIST_ID)) {
+          prevWellBeingField.setAttribute("list", PREV_WELLBEING_DATALIST_ID);
+        }
+      }
+      setPrevWellBeingDatalistOptions(SCSR_PREV_WELLBEING_OPTIONS);
+      const sourceOfIncomeField = document.getElementById(SOURCE_OF_INFO_FIELD_ID);
+      if (sourceOfIncomeField) {
+        sourceOfIncomeField.placeholder = "e.g. Food Vendor";
+        sourceOfIncomeField.removeAttribute("list");
+        sourceOfIncomeField.setAttribute("autocomplete", "off");
+      }
+      setBasicInfoFieldRequired("edit-national-id", false);
+      setBasicInfoFieldRequired("edit-year-registration", false);
+      setBasicInfoFieldRequired("edit-years-program", false);
+    } else {
+      const prevWellBeingField = document.getElementById("edit-prev-wellbeing");
+      if (prevWellBeingField) {
+        prevWellBeingField.placeholder = "Level 2 - Subsistence Index Score : 2.52484";
+        if (document.getElementById(PREV_WELLBEING_DATALIST_ID)) {
+          prevWellBeingField.setAttribute("list", PREV_WELLBEING_DATALIST_ID);
+        }
+      }
+      setPrevWellBeingDatalistOptions(CSR_PREV_WELLBEING_OPTIONS);
+      const sourceOfInfoField = document.getElementById(SOURCE_OF_INFO_FIELD_ID);
+      if (sourceOfInfoField) {
+        sourceOfInfoField.placeholder = "e.g. Grantee";
+        if (document.getElementById(SOURCE_OF_INFO_DATALIST_ID)) {
+          sourceOfInfoField.setAttribute("list", SOURCE_OF_INFO_DATALIST_ID);
+        }
+        sourceOfInfoField.removeAttribute("autocomplete");
+      }
+      setBasicInfoFieldRequired("edit-national-id", true);
+      setBasicInfoFieldRequired("edit-year-registration", true);
+      setBasicInfoFieldRequired("edit-years-program", true);
+    }
+    syncScsrPerCapitaIncomeField();
+  }
+
+  function getCurrentWorkflowStepCount() {
+    return activeWorkflowType === "SCSR" ? SCSR_STEP_COUNT : CSR_STEP_COUNT;
+  }
+
+  function getCurrentWorkflowStepTitles() {
+    return activeWorkflowType === "SCSR"
+      ? SCSR_STEP_TITLES
+      : CSR_STEP_TITLES;
+  }
+
+  function getNarrativeRecordKeyForWorkflow(workflowType) {
+    return normalizeWorkflowType(workflowType) === "SCSR"
+      ? "presentingProblem"
+      : "caseDevelopment";
+  }
+
+  function getCurrentNarrativeRecordKey() {
+    return getNarrativeRecordKeyForWorkflow(
+      (currentCsrRecord && currentCsrRecord.workflowType) || activeWorkflowType
+    );
+  }
+
+  function getNarrativeSectionLabelForWorkflow(workflowType) {
+    return normalizeWorkflowType(workflowType) === "SCSR"
+      ? "Presenting Problem"
+      : "Case Development";
+  }
+
+  function getCurrentNarrativeSectionLabel() {
+    return getNarrativeSectionLabelForWorkflow(
+      (currentCsrRecord && currentCsrRecord.workflowType) || activeWorkflowType
+    );
+  }
+
+  function isValidScsrBackgroundTabKey(tabKey) {
+    return SCSR_BACKGROUND_TABS.some((item) => item.key === normalizeText(tabKey));
+  }
+
+  function getScsrBackgroundRecordStore() {
+    const store =
+      currentCsrRecord &&
+      currentCsrRecord.backgroundInformation &&
+      typeof currentCsrRecord.backgroundInformation === "object"
+        ? currentCsrRecord.backgroundInformation
+        : null;
+    return store || {};
+  }
+
+  function getScsrBackgroundActiveTabFromStore() {
+    const preferred = normalizeText(getScsrBackgroundRecordStore().activeTab);
+    if (isValidScsrBackgroundTabKey(preferred)) {
+      return preferred;
+    }
+    return SCSR_BACKGROUND_TABS[0].key;
+  }
+
+  function getScsrBackgroundTabsStore() {
+    const tabs = getScsrBackgroundRecordStore().tabs;
+    return tabs && typeof tabs === "object" ? tabs : {};
+  }
+
+  function getScsrBackgroundTabEntry(tabKey) {
+    const safeTabKey = isValidScsrBackgroundTabKey(tabKey)
+      ? normalizeText(tabKey)
+      : SCSR_BACKGROUND_TABS[0].key;
+    const tabs = getScsrBackgroundTabsStore();
+    const entry = tabs[safeTabKey];
+    return entry && typeof entry === "object" ? entry : {};
+  }
+
+  function normalizeScsrBackgroundTabsStoreInMemory() {
+    if (
+      !currentCsrRecord ||
+      !currentCsrRecord.backgroundInformation ||
+      typeof currentCsrRecord.backgroundInformation !== "object"
+    ) {
+      return;
+    }
+    const existingTabs =
+      currentCsrRecord.backgroundInformation.tabs &&
+      typeof currentCsrRecord.backgroundInformation.tabs === "object"
+        ? currentCsrRecord.backgroundInformation.tabs
+        : {};
+    let changed = false;
+    const nextTabs = { ...existingTabs };
+    SCSR_BACKGROUND_TABS.forEach((item) => {
+      const entry = existingTabs[item.key];
+      if (!entry || typeof entry !== "object") {
+        return;
+      }
+      const normalizedHtml = normalizeCaseDevelopmentHtmlForStorage(entry.html);
+      if (normalizedHtml !== String(entry.html || "")) {
+        nextTabs[item.key] = {
+          ...entry,
+          html: normalizedHtml,
+        };
+        changed = true;
+      }
+    });
+    if (changed) {
+      currentCsrRecord.backgroundInformation = {
+        ...currentCsrRecord.backgroundInformation,
+        tabs: nextTabs,
+      };
+    }
+  }
+
+  function renderScsrBackgroundTabs() {
+    if (!scsrBackgroundTabList) {
+      return;
+    }
+    scsrBackgroundTabList.innerHTML = SCSR_BACKGROUND_TABS.map((item) => {
+      const isActive = item.key === activeScsrBackgroundTabKey;
+      const isInvalid = scsrBackgroundInvalidTabKeys.has(item.key);
+      const activeClasses = isActive
+        ? "bg-primary text-white border-primary"
+        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-blue-600 hover:text-white hover:border-blue-600";
+      const invalidClasses = isInvalid
+        ? " ring-1 ring-red-500 border-red-500 text-red-600 dark:text-red-300"
+        : "";
+      return `<button type="button" data-scsr-background-tab="${escapeHtml(item.key)}" class="px-4 py-2 rounded-lg border text-sm font-semibold transition-colors ${activeClasses}${invalidClasses}">${escapeHtml(item.label)}</button>`;
+    }).join("");
+  }
+
+  function renderWorkflowStepper() {
+    const stepTitles = getCurrentWorkflowStepTitles();
+    if (csrStepperMobile) {
+      csrStepperMobile.innerHTML = stepTitles
+        .map((title, index) => {
+          const step = index + 1;
+          return `<button type="button" data-step-trigger="${step}" class="flex items-center gap-3 px-3 py-2">
+            <div class="flex items-center justify-center w-8 h-8 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 rounded-full font-medium">${step}</div>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400">${escapeHtml(title)}</span>
+          </button>`;
+        })
+        .join("");
+    }
+
+    if (csrStepperDesktop) {
+      let desktopMarkup = "";
+      stepTitles.forEach((title, index) => {
+        const step = index + 1;
+        desktopMarkup += `<button type="button" data-step-trigger="${step}" class="flex flex-col items-center w-[120px] text-center bg-transparent border-0 p-0">
+            <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 font-semibold text-sm">${step}</div>
+            <span class="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400 leading-tight">${escapeHtml(title)}</span>
+          </button>`;
+        if (step < stepTitles.length) {
+          desktopMarkup += '<div class="h-[2px] w-14 bg-slate-300 dark:bg-slate-600 rounded-full"></div>';
+        }
+      });
+      csrStepperDesktop.innerHTML = desktopMarkup;
+    }
+
+    refreshStepperTriggers();
+  }
+
+  function setWorkflowType(type) {
+    const normalized = normalizeWorkflowType(type);
+    activeWorkflowType = normalized;
+    renderWorkflowStepper();
+    applyBasicInfoFormMode();
+    renderScsrBackgroundTabs();
+    if (activeWorkflowType !== "CSR") {
+      exportValidationArmed = false;
+      exportInvalidSteps = new Set();
+    }
+  }
+
+  function openWorkflowTypeModal(cardData) {
+    if (!workflowTypeModal) {
+      void openWorkflowForCard(cardData, "CSR");
+      return;
+    }
+    pendingWorkflowCardData = cardData && typeof cardData === "object"
+      ? { ...cardData }
+      : null;
+    workflowTypeModal.classList.remove("hidden");
+    workflowTypeModal.classList.add("flex");
+  }
+
+  function closeWorkflowTypeModal() {
+    if (!workflowTypeModal) {
+      pendingWorkflowCardData = null;
+      return;
+    }
+    workflowTypeModal.classList.add("hidden");
+    workflowTypeModal.classList.remove("flex");
+    pendingWorkflowCardData = null;
+  }
+
+  function setWorkflowTypeModalButtonsDisabled(isDisabled) {
+    if (workflowTypeCsrButton) {
+      workflowTypeCsrButton.disabled = !!isDisabled;
+      workflowTypeCsrButton.classList.toggle("opacity-60", !!isDisabled);
+      workflowTypeCsrButton.classList.toggle("cursor-not-allowed", !!isDisabled);
+    }
+    if (workflowTypeScsrButton) {
+      workflowTypeScsrButton.disabled = !!isDisabled;
+      workflowTypeScsrButton.classList.toggle("opacity-60", !!isDisabled);
+      workflowTypeScsrButton.classList.toggle("cursor-not-allowed", !!isDisabled);
+    }
+  }
+
+  async function handleWorkflowTypeSelection(type) {
+    if (!pendingWorkflowCardData) {
+      closeWorkflowTypeModal();
+      return;
+    }
+    const cardData = { ...pendingWorkflowCardData };
+    setWorkflowTypeModalButtonsDisabled(true);
+    try {
+      await openWorkflowForCard(cardData, type);
+      closeWorkflowTypeModal();
+    } catch (error) {
+      console.error("Open workflow failed:", error);
+      showToast("Unable to open workflow. Please try again.");
+    } finally {
+      setWorkflowTypeModalButtonsDisabled(false);
+    }
   }
 
   async function handleHouseholdGridClick(event) {
@@ -3058,16 +4387,26 @@
     if (!button) {
       return;
     }
+    const cardData = {
+      name: normalizeText(button.getAttribute("data-name")),
+      hhid: normalizeText(button.getAttribute("data-hhid")),
+      municipality: normalizeText(button.getAttribute("data-municipality")),
+      barangay: normalizeText(button.getAttribute("data-barangay")),
+    };
+    openWorkflowTypeModal(cardData);
+  }
 
-    button.disabled = true;
+  async function openWorkflowForCard(cardData, type) {
+    const selectedType = normalizeWorkflowType(type);
+    if (currentCsrRecord && currentCsrRecord.csrId) {
+      flushAllAutoSaveQueues();
+    }
+    setWorkflowType(selectedType);
+    const datasetKind = getActiveDatasetKind();
+    const municipality = normalizeText(cardData && cardData.municipality).toUpperCase();
     try {
-      const cardData = {
-        name: normalizeText(button.getAttribute("data-name")),
-        hhid: normalizeText(button.getAttribute("data-hhid")),
-        municipality: normalizeText(button.getAttribute("data-municipality")),
-        barangay: normalizeText(button.getAttribute("data-barangay")),
-      };
-      const existingRecord = await getExistingCsrRecordForCardSafe(cardData);
+      await cleanupWorkflowIsolationForMunicipality(municipality, selectedType);
+      const existingRecord = await getExistingCsrRecordForCardSafe(cardData, selectedType);
       if (existingRecord) {
         const promptKey =
           buildHouseholdKey(cardData) || String(existingRecord.csrId || "");
@@ -3078,8 +4417,8 @@
             const completedOnLabel = formatCompletionDateLabel(completionState.completedAt);
             showToast(
               completedOnLabel
-                ? `Completed CSR already exists (completed on ${completedOnLabel}). Opening existing record.`
-                : "Completed CSR already exists. Opening existing record.",
+                ? `Completed ${selectedType} already exists (completed on ${completedOnLabel}). Opening existing record.`
+                : `Completed ${selectedType} already exists. Opening existing record.`,
               "pending",
               6000
             );
@@ -3087,13 +4426,18 @@
           csrOpenConfirmShownKeys.add(promptKey);
         }
       }
-      const result = await createOrGetCsrRecord(cardData);
+      await ensureMunicipalityDbFile(
+        municipality,
+        datasetKind
+      );
+      const result = await createOrGetCsrRecord(cardData, selectedType);
       let recordToOpen = result.record;
       if (!result.isNew && result.record && result.record.csrId) {
         try {
           const refreshedRecord = await getCsrRecordById(
             result.record.csrId,
-            normalizeText(cardData && cardData.municipality).toUpperCase()
+            municipality,
+            selectedType
           );
           if (refreshedRecord) {
             recordToOpen = refreshedRecord;
@@ -3102,9 +4446,15 @@
           // Keep original open flow if refresh-by-id fails.
         }
       }
+      recordToOpen = await hydrateRecordFromCounterpartWorkflow(recordToOpen);
       currentCsrRecord = recordToOpen;
       applySavedBasicInfoEditDetails();
       applySavedCaseDevelopmentDetails();
+      applySavedScsrBackgroundDetails();
+      applySavedScsrCaseAssessmentDetails();
+      applySavedScsrPlanImplementationDetails();
+      applySavedScsrCaseManagementEvaluationDetails();
+      applySavedScsrRecommendationDetails();
       applySavedInterventionsProvidedDetails();
       applySavedHouseholdInterventionPlanDetails();
       applySavedRecommendationDetails();
@@ -3114,26 +4464,27 @@
         recordToOpen && recordToOpen.cardData,
         recordToOpen && recordToOpen.csrId
       );
-      void populateFamilyCompositionFromSelectedCard(
-        recordToOpen && recordToOpen.cardData
-      );
+      if (selectedType === "CSR") {
+        void populateFamilyCompositionFromSelectedCard(
+          recordToOpen && recordToOpen.cardData
+        );
+      }
       setCsrViewState({
         mode: "workspace",
         csrId: String(recordToOpen.csrId || ""),
+        workflowType: selectedType,
         activeStep: 1,
       });
       showToast(
         result.isNew
-          ? `CSR ${recordToOpen.csrId} created.`
-          : `CSR ${recordToOpen.csrId} opened.`,
+          ? `${selectedType} ${recordToOpen.csrId} created.`
+          : `${selectedType} ${recordToOpen.csrId} opened.`,
         "success",
         3000
       );
     } catch (error) {
-      console.error("Create CSR failed:", error);
-      showToast("Unable to create CSR. Please try again.");
-    } finally {
-      button.disabled = false;
+      console.error("Open workflow failed:", error);
+      showToast("Unable to open workflow. Please try again.");
     }
   }
 
@@ -3153,24 +4504,38 @@
   function hideCsrWorkspace() {
     flushBasicInfoAutoSave();
     flushFamilyCompositionAutoSave();
-    flushCaseDevelopmentAutoSave(true);
+    flushActiveNarrativeAutoSave(true);
+    flushScsrBackgroundAutoSave(true);
+    flushScsrCaseAssessmentAutoSave(true);
+    flushScsrCaseManagementEvaluationAutoSave(true);
+    flushScsrPlanImplementationDraftAutoSave(true);
+    flushScsrPlanImplementationAutoSave(true);
+    flushScsrRecommendationAutoSave(true);
     flushInterventionsProvidedDraftAutoSave(true);
     flushInterventionsProvidedAutoSave(true);
     flushHouseholdInterventionPlanDraftAutoSave(true);
     flushHouseholdInterventionPlanAutoSave(true);
     flushRecommendationAutoSave(true);
     closeFamilyCompositionRestoreModal();
+    closeScsrPlanImplementationModal();
     closeInterventionsProvidedModal();
     closeHouseholdInterventionPlanModal();
+    renderScsrPlanImplementationRows([]);
     renderInterventionsProvidedRows([]);
     renderHouseholdInterventionPlanRows([]);
     latestFamilyCompositionRows = [];
     setFamilyCompositionSaveStatus("", "neutral");
     setCaseDevelopmentSaveStatus("", "neutral");
+    setScsrBackgroundSaveStatus("", "neutral");
+    setScsrCaseAssessmentSaveStatus("", "neutral");
+    setScsrCaseManagementEvaluationSaveStatus("", "neutral");
+    setScsrPlanImplementationSaveStatus("", "neutral");
+    setScsrRecommendationSaveStatus("", "neutral");
     setInterventionsProvidedSaveStatus("", "neutral");
     setHouseholdInterventionPlanSaveStatus("", "neutral");
     setRecommendationSaveStatus("", "neutral");
     clearModalFieldError(recommendationTextField);
+    clearModalFieldError(scsrRecommendationTextField);
     exportValidationArmed = false;
     setExportInvalidSteps([]);
     if (csrStepper) {
@@ -3188,33 +4553,83 @@
   }
 
   function setActiveCsrStep(step) {
-    const previousStep = activeCsrStep;
-    if (previousStep === 1 && step !== 1) {
-      flushBasicInfoAutoSave();
+    const maxSteps = getCurrentWorkflowStepCount();
+    if (!Number.isInteger(step) || step < 1 || step > maxSteps) {
+      return;
     }
-    if (previousStep === 2 && step !== 2) {
-      flushFamilyCompositionAutoSave();
+    const previousStep = activeCsrStep;
+    if (previousStep !== step) {
+      normalizeActiveNarrativeEditorForStep(previousStep, activeWorkflowType);
+      normalizeCsrCaseDevelopmentOnStepSwitch(previousStep, step);
+    }
+    if (activeWorkflowType === "CSR") {
+      if (previousStep === 1 && step !== 1) {
+        flushBasicInfoAutoSave();
+      }
+      if (previousStep === 2 && step !== 2) {
+        flushFamilyCompositionAutoSave();
+      }
+      if (previousStep === 4 && step !== 4) {
+        flushInterventionsProvidedDraftAutoSave(true);
+        flushInterventionsProvidedAutoSave(true);
+      }
+      if (previousStep === 5 && step !== 5) {
+        flushHouseholdInterventionPlanDraftAutoSave(true);
+        flushHouseholdInterventionPlanAutoSave(true);
+      }
+      if (previousStep === 6 && step !== 6) {
+        flushRecommendationAutoSave(true);
+      }
+    } else if (activeWorkflowType === "SCSR") {
+      if (previousStep === 2 && step !== 2) {
+        flushFamilyCompositionAutoSave();
+      }
+      if (previousStep === 4 && step !== 4) {
+        flushScsrBackgroundAutoSave(true);
+      }
+      if (previousStep === 5 && step !== 5) {
+        flushScsrCaseAssessmentAutoSave(true);
+      }
+      if (previousStep === 6 && step !== 6) {
+        flushScsrPlanImplementationDraftAutoSave(true);
+        flushScsrPlanImplementationAutoSave(true);
+      }
+      if (previousStep === 7 && step !== 7) {
+        flushScsrCaseManagementEvaluationAutoSave(true);
+      }
+      if (previousStep === 8 && step !== 8) {
+        flushScsrRecommendationAutoSave(true);
+      }
     }
     if (previousStep === 3 && step !== 3) {
-      flushCaseDevelopmentAutoSave(true);
-    }
-    if (previousStep === 4 && step !== 4) {
-      flushInterventionsProvidedDraftAutoSave(true);
-      flushInterventionsProvidedAutoSave(true);
-    }
-    if (previousStep === 5 && step !== 5) {
-      flushHouseholdInterventionPlanDraftAutoSave(true);
-      flushHouseholdInterventionPlanAutoSave(true);
-    }
-    if (previousStep === 6 && step !== 6) {
-      flushRecommendationAutoSave(true);
+      flushActiveNarrativeAutoSave(true);
     }
     activeCsrStep = step;
 
-    stepSections.forEach((section) => {
-      const sectionStep = Number(section.dataset.stepSection);
-      section.classList.toggle("hidden", sectionStep !== step);
-    });
+    if (activeWorkflowType === "CSR") {
+      stepSections.forEach((section) => {
+        const sectionStep = Number(section.dataset.stepSection);
+        const sectionWorkflow = normalizeText(section.dataset.workflow).toUpperCase();
+        const isOtherWorkflow = sectionWorkflow && sectionWorkflow !== "CSR";
+        section.classList.toggle("hidden", sectionStep !== step || isOtherWorkflow);
+      });
+    } else {
+      stepSections.forEach((section) => {
+        const sectionStep = Number(section.dataset.stepSection);
+        const sectionWorkflow = normalizeText(section.dataset.workflow).toUpperCase();
+        const isOtherWorkflow = sectionWorkflow && sectionWorkflow !== "SCSR";
+        const shouldShow =
+          (step === 1 && sectionStep === 1) ||
+          (step === 2 && sectionStep === 2) ||
+          (step === 3 && sectionStep === 3) ||
+          (step === 4 && sectionStep === 4) ||
+          (step === 5 && sectionStep === 5) ||
+          (step === 6 && sectionStep === 6) ||
+          (step === 7 && sectionStep === 7) ||
+          (step === 8 && sectionStep === 8);
+        section.classList.toggle("hidden", !shouldShow || isOtherWorkflow);
+      });
+    }
 
     stepTriggers.forEach((trigger) => {
       const triggerStep = Number(trigger.dataset.stepTrigger);
@@ -3257,14 +4672,34 @@
       setCsrViewState({
         mode: "workspace",
         csrId: String(currentCsrRecord.csrId || ""),
+        workflowType: normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType),
         activeStep: step,
       });
+    }
+    if (currentCsrRecord) {
       if (step === 2) {
         void populateFamilyCompositionFromSelectedCard(currentCsrRecord.cardData);
       }
-      if (step === 3 && previousStep !== 3) {
-        applySavedCaseDevelopmentDetails();
-      }
+    }
+    if (currentCsrRecord && step === 3 && previousStep !== 3) {
+      applySavedCaseDevelopmentDetails();
+    }
+    if (currentCsrRecord && activeWorkflowType === "SCSR" && step === 4) {
+      applySavedScsrBackgroundDetails();
+    }
+    if (currentCsrRecord && activeWorkflowType === "SCSR" && step === 5) {
+      applySavedScsrCaseAssessmentDetails();
+    }
+    if (currentCsrRecord && activeWorkflowType === "SCSR" && step === 6) {
+      applySavedScsrPlanImplementationDetails();
+    }
+    if (currentCsrRecord && activeWorkflowType === "SCSR" && step === 7) {
+      applySavedScsrCaseManagementEvaluationDetails();
+    }
+    if (currentCsrRecord && activeWorkflowType === "SCSR" && step === 8) {
+      applySavedScsrRecommendationDetails();
+    }
+    if (currentCsrRecord && activeWorkflowType === "CSR") {
       if (step === 6) {
         applySavedRecommendationDetails();
       }
@@ -3272,10 +4707,11 @@
   }
 
   function setExportInvalidSteps(stepNumbers) {
+    const maxSteps = getCurrentWorkflowStepCount();
     exportInvalidSteps = new Set(
       (Array.isArray(stepNumbers) ? stepNumbers : [])
         .map((value) => Number(value))
-        .filter((value) => Number.isInteger(value) && value >= 1 && value <= CSR_STEP_COUNT)
+        .filter((value) => Number.isInteger(value) && value >= 1 && value <= maxSteps)
     );
     applyExportValidationGlow();
   }
@@ -3361,16 +4797,81 @@
     editor.classList.toggle("ring-red-500", Boolean(hasError));
   }
 
-  function collectStepperExportValidation(options) {
+  function setScsrBackgroundFieldError(hasError) {
+    const editor = document.querySelector("#scsr-background-information-section .note-editor");
+    if (!editor) {
+      return;
+    }
+    editor.classList.toggle("border-red-500", Boolean(hasError));
+    editor.classList.toggle("ring-1", Boolean(hasError));
+    editor.classList.toggle("ring-red-500", Boolean(hasError));
+  }
+
+  function setScsrCaseAssessmentFieldError(hasError) {
+    const editor = document.querySelector("#scsr-case-assessment-section .note-editor");
+    if (!editor) {
+      return;
+    }
+    editor.classList.toggle("border-red-500", Boolean(hasError));
+    editor.classList.toggle("ring-1", Boolean(hasError));
+    editor.classList.toggle("ring-red-500", Boolean(hasError));
+  }
+
+  function setScsrCaseManagementEvaluationFieldError(hasError) {
+    const editor = document.querySelector("#scsr-case-management-evaluation-section .note-editor");
+    if (!editor) {
+      return;
+    }
+    editor.classList.toggle("border-red-500", Boolean(hasError));
+    editor.classList.toggle("ring-1", Boolean(hasError));
+    editor.classList.toggle("ring-red-500", Boolean(hasError));
+  }
+
+  function collectScsrBackgroundValidation(options) {
     const config = {
       markFields: false,
       ...options,
     };
-    const invalidSteps = [];
-    const messages = [];
+    const tabsStore = getScsrBackgroundTabsStore();
+    const tabHtmlByKey = {};
+    SCSR_BACKGROUND_TABS.forEach((item) => {
+      tabHtmlByKey[item.key] = normalizeCaseDevelopmentHtmlForStorage(
+        tabsStore[item.key] && tabsStore[item.key].html
+      );
+    });
 
-    const basicFields = getBasicInfoRequiredFields();
-    let stepOneInvalid = false;
+    if (isValidScsrBackgroundTabKey(activeScsrBackgroundTabKey) && scsrBackgroundSummernoteReady) {
+      tabHtmlByKey[activeScsrBackgroundTabKey] = normalizeCaseDevelopmentHtmlForStorage(
+        getScsrBackgroundEditorHtml()
+      );
+    }
+
+    const missingTabKeys = SCSR_BACKGROUND_TABS
+      .map((item) => item.key)
+      .filter((key) => !normalizeText(tabHtmlByKey[key]));
+
+    scsrBackgroundInvalidTabKeys = new Set(missingTabKeys);
+    renderScsrBackgroundTabs();
+
+    if (config.markFields) {
+      setScsrBackgroundFieldError(scsrBackgroundInvalidTabKeys.has(activeScsrBackgroundTabKey));
+    }
+
+    return {
+      valid: missingTabKeys.length === 0,
+      missingTabKeys,
+    };
+  }
+
+  function collectCsrBasicInfoStepValidation(options) {
+    const config = {
+      markFields: false,
+      ...options,
+    };
+    const requiredFieldIds = new Set(getBasicInfoRequiredFieldIds("CSR"));
+    const basicFields = getBasicInfoRequiredFields("CSR");
+    let hasInvalidField = false;
+
     basicFields.forEach((field) => {
       const invalid = isBasicInfoFieldEmpty(field);
       if (config.markFields) {
@@ -3381,44 +4882,155 @@
         }
       }
       if (invalid) {
-        stepOneInvalid = true;
+        hasInvalidField = true;
       }
     });
-    const yearsInProgram = getFieldValue("edit-years-program");
+
+    if (basicSexInput) {
+      const sexInvalid = !normalizeText(basicSexInput.value);
+      if (sexInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(basicSexInput);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(basicSexInput);
+      }
+    }
+
+    if (basicCivilStatusInput) {
+      const civilStatusInvalid = !normalizeText(basicCivilStatusInput.value);
+      if (civilStatusInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(basicCivilStatusInput);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(basicCivilStatusInput);
+      }
+    }
+
     const yearsField = document.getElementById("edit-years-program");
-    if (!/^\d{1,2}$/.test(yearsInProgram || "")) {
-      stepOneInvalid = true;
-      if (config.markFields) {
-        setBasicInfoFieldError(yearsField);
+    const yearsInProgram = getFieldValue("edit-years-program");
+    if (requiredFieldIds.has("edit-years-program") && yearsField) {
+      if (!/^\d{1,2}$/.test(yearsInProgram || "")) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(yearsField);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(yearsField);
       }
-    } else if (config.markFields) {
-      clearBasicInfoFieldError(yearsField);
     }
+
     const contactInfoField = document.getElementById("edit-contact-info");
-    const contactInfoInvalid = isContactInfoValueInvalid(
-      contactInfoField ? contactInfoField.value : ""
-    );
-    if (contactInfoInvalid) {
-      stepOneInvalid = true;
-      if (config.markFields) {
-        setBasicInfoFieldError(contactInfoField);
+    if (requiredFieldIds.has("edit-contact-info") && contactInfoField) {
+      const contactInfoInvalid = isContactInfoValueInvalid(contactInfoField.value);
+      if (contactInfoInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(contactInfoField);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(contactInfoField);
       }
-    } else if (config.markFields) {
-      clearBasicInfoFieldError(contactInfoField);
     }
+
     const nationalIdField = document.getElementById("edit-national-id");
-    const nationalIdInvalid = isNationalIdValueInvalid(
-      nationalIdField ? nationalIdField.value : ""
-    );
-    if (nationalIdInvalid) {
-      stepOneInvalid = true;
-      if (config.markFields) {
-        setBasicInfoFieldError(nationalIdField);
+    if (requiredFieldIds.has("edit-national-id") && nationalIdField) {
+      const nationalIdInvalid = isNationalIdValueInvalid(nationalIdField.value);
+      if (nationalIdInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(nationalIdField);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(nationalIdField);
       }
-    } else if (config.markFields) {
-      clearBasicInfoFieldError(nationalIdField);
     }
-    if (stepOneInvalid) {
+
+    return { valid: !hasInvalidField };
+  }
+
+  function collectScsrBasicInfoStepValidation(options) {
+    const config = {
+      markFields: false,
+      ...options,
+    };
+    const requiredFieldIds = new Set(getBasicInfoRequiredFieldIds("SCSR"));
+    const basicFields = getBasicInfoRequiredFields("SCSR");
+    let hasInvalidField = false;
+
+    basicFields.forEach((field) => {
+      const invalid = isBasicInfoFieldEmpty(field);
+      if (config.markFields) {
+        if (invalid) {
+          setBasicInfoFieldError(field);
+        } else {
+          clearBasicInfoFieldError(field);
+        }
+      }
+      if (invalid) {
+        hasInvalidField = true;
+      }
+    });
+
+    if (basicSexInput) {
+      const sexInvalid = !normalizeText(basicSexInput.value);
+      if (sexInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(basicSexInput);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(basicSexInput);
+      }
+    }
+
+    if (basicCivilStatusInput) {
+      const civilStatusInvalid = !normalizeText(basicCivilStatusInput.value);
+      if (civilStatusInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(basicCivilStatusInput);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(basicCivilStatusInput);
+      }
+    }
+
+    const contactInfoField = document.getElementById("edit-contact-info");
+    if (requiredFieldIds.has("edit-contact-info") && contactInfoField) {
+      const contactInfoInvalid = isContactInfoValueInvalid(contactInfoField.value);
+      if (contactInfoInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(contactInfoField);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(contactInfoField);
+      }
+    }
+
+    return { valid: !hasInvalidField };
+  }
+
+  function collectBasicInfoStepValidation(options) {
+    return activeWorkflowType === "SCSR"
+      ? collectScsrBasicInfoStepValidation(options)
+      : collectCsrBasicInfoStepValidation(options);
+  }
+
+  function collectStepperExportValidation(options) {
+    const config = {
+      markFields: false,
+      ...options,
+    };
+    const invalidSteps = [];
+    const messages = [];
+
+    const basicInfoValidation = collectBasicInfoStepValidation({ markFields: config.markFields });
+    if (!basicInfoValidation.valid) {
       invalidSteps.push(1);
       messages.push("Basic Information has missing or invalid fields.");
     }
@@ -3436,32 +5048,89 @@
     }
     if (stepThreeInvalid) {
       invalidSteps.push(3);
-      messages.push("Case Development is required.");
+      messages.push(`${getCurrentNarrativeSectionLabel()} is required.`);
     }
 
-    const hasInterventions = getInterventionsProvidedItems().length > 0;
-    if (!hasInterventions) {
-      invalidSteps.push(4);
-      messages.push("Interventions Provided requires at least one added intervention.");
-    }
-
-    const hasHouseholdPlans = getHouseholdInterventionPlanItems().length > 0;
-    if (!hasHouseholdPlans) {
-      invalidSteps.push(5);
-      messages.push("Household Intervention Plan requires at least one added plan.");
-    }
-
-    const recommendationMissing = !normalizeText(recommendationTextField && recommendationTextField.value);
-    if (config.markFields) {
-      if (recommendationMissing) {
-        setModalFieldError(recommendationTextField);
-      } else {
-        clearModalFieldError(recommendationTextField);
+    if (activeWorkflowType === "SCSR") {
+      const backgroundValidation = collectScsrBackgroundValidation({
+        markFields: config.markFields,
+      });
+      if (!backgroundValidation.valid) {
+        invalidSteps.push(4);
+        messages.push("Background Information is required for all tabs.");
       }
-    }
-    if (recommendationMissing) {
-      invalidSteps.push(6);
-      messages.push("Recommendation input is required.");
+
+      const caseAssessmentHtml = getScsrCaseAssessmentEditorHtml() ||
+        (currentCsrRecord &&
+          currentCsrRecord.caseAssessment &&
+          currentCsrRecord.caseAssessment.html);
+      const caseAssessmentInvalid = !normalizeText(caseAssessmentHtml);
+      if (config.markFields) {
+        setScsrCaseAssessmentFieldError(caseAssessmentInvalid);
+      }
+      if (caseAssessmentInvalid) {
+        invalidSteps.push(5);
+        messages.push("Case Assessment is required.");
+      }
+
+      const hasPlanImplementationItems = getScsrPlanImplementationItems().length > 0;
+      if (!hasPlanImplementationItems) {
+        invalidSteps.push(6);
+        messages.push("Intervention Plan/Plan Implementation requires at least one added item.");
+      }
+
+      const caseManagementEvaluationHtml = getScsrCaseManagementEvaluationEditorHtml() ||
+        (currentCsrRecord &&
+          currentCsrRecord.caseManagementEvaluation &&
+          currentCsrRecord.caseManagementEvaluation.html);
+      const caseManagementEvaluationInvalid = !normalizeText(caseManagementEvaluationHtml);
+      if (config.markFields) {
+        setScsrCaseManagementEvaluationFieldError(caseManagementEvaluationInvalid);
+      }
+      if (caseManagementEvaluationInvalid) {
+        invalidSteps.push(7);
+        messages.push("Case Management Evaluation is required.");
+      }
+
+      const scsrRecommendationMissing = !normalizeText(
+        scsrRecommendationTextField && scsrRecommendationTextField.value
+      );
+      if (config.markFields) {
+        if (scsrRecommendationMissing) {
+          setModalFieldError(scsrRecommendationTextField);
+        } else {
+          clearModalFieldError(scsrRecommendationTextField);
+        }
+      }
+      if (scsrRecommendationMissing) {
+        invalidSteps.push(8);
+        messages.push("Case Recommendation input is required.");
+      }
+    } else {
+      const hasInterventions = getInterventionsProvidedItems().length > 0;
+      if (!hasInterventions) {
+        invalidSteps.push(4);
+        messages.push("Interventions Provided requires at least one added intervention.");
+      }
+
+      const hasHouseholdPlans = getHouseholdInterventionPlanItems().length > 0;
+      if (!hasHouseholdPlans) {
+        invalidSteps.push(5);
+        messages.push("Household Intervention Plan requires at least one added plan.");
+      }
+
+      const recommendationMissing = !normalizeText(recommendationTextField && recommendationTextField.value);
+      if (config.markFields) {
+        if (recommendationMissing) {
+          setModalFieldError(recommendationTextField);
+        } else {
+          clearModalFieldError(recommendationTextField);
+        }
+      }
+      if (recommendationMissing) {
+        invalidSteps.push(6);
+        messages.push("Recommendation input is required.");
+      }
     }
 
     return {
@@ -3484,7 +5153,7 @@
   }
 
   function bindBasicInfoEditValidationListeners() {
-    getBasicInfoRequiredFields().forEach((field) => {
+    getAllBasicInfoValidationFields().forEach((field) => {
       const eventName =
         field.tagName === "SELECT"
           ? "change"
@@ -3503,13 +5172,40 @@
   }
 
   function bindBasicInfoAutoSaveListeners() {
-    getBasicInfoRequiredFields().forEach((field) => {
+    getAllBasicInfoValidationFields().forEach((field) => {
       const eventName = field.tagName === "SELECT" ? "change" : "input";
       field.addEventListener(eventName, scheduleBasicInfoAutoSave);
       if (eventName !== "change") {
         field.addEventListener("change", scheduleBasicInfoAutoSave);
       }
     });
+
+    [monthlyIncomeField, perCapitaIncomeField].forEach((field) => {
+      if (!field) {
+        return;
+      }
+      field.addEventListener("input", scheduleBasicInfoAutoSave);
+      field.addEventListener("change", scheduleBasicInfoAutoSave);
+      field.addEventListener("blur", scheduleBasicInfoAutoSave);
+    });
+
+    [basicGranteeNameInput, basicSexInput, basicCivilStatusInput].forEach((field) => {
+      if (!field) {
+        return;
+      }
+      const eventName = field.tagName === "SELECT" ? "change" : "input";
+      field.addEventListener(eventName, scheduleBasicInfoAutoSave);
+      if (eventName !== "change") {
+        field.addEventListener("change", scheduleBasicInfoAutoSave);
+      }
+      field.addEventListener("blur", scheduleBasicInfoAutoSave);
+    });
+
+    if (basicBirthdayInput) {
+      basicBirthdayInput.addEventListener("input", handleBasicBirthdayInputChange);
+      basicBirthdayInput.addEventListener("change", handleBasicBirthdayInputChange);
+      basicBirthdayInput.addEventListener("blur", handleBasicBirthdayInputChange);
+    }
   }
 
   function bindFamilyCompositionEvents() {
@@ -3519,9 +5215,64 @@
     familyCompositionList.addEventListener("click", handleFamilyCompositionListClick);
     familyCompositionList.addEventListener("input", handleFamilyCompositionInputChange);
     familyCompositionList.addEventListener("change", handleFamilyCompositionInputChange);
+    familyCompositionList.addEventListener("toggle", handleFamilyCompositionAccordionToggle, true);
     if (familyCompositionRestoreList) {
       familyCompositionRestoreList.addEventListener("click", handleFamilyCompositionRestoreListClick);
     }
+  }
+
+  function bindScsrBackgroundEvents() {
+    if (scsrBackgroundTabList) {
+      scsrBackgroundTabList.addEventListener("click", handleScsrBackgroundTabClick);
+    }
+  }
+
+  function bindScsrPlanImplementationEvents() {
+    if (scsrPlanImplementationAddButton) {
+      scsrPlanImplementationAddButton.addEventListener("click", () => {
+        handleScsrPlanImplementationAddRowClick();
+      });
+    }
+    if (scsrPlanImplementationCloseButton) {
+      scsrPlanImplementationCloseButton.addEventListener("click", closeScsrPlanImplementationModal);
+    }
+    if (scsrPlanImplementationCancelButton) {
+      scsrPlanImplementationCancelButton.addEventListener("click", closeScsrPlanImplementationModal);
+    }
+    if (scsrPlanImplementationModal) {
+      scsrPlanImplementationModal.addEventListener("click", (event) => {
+        if (event.target === scsrPlanImplementationModal) {
+          closeScsrPlanImplementationModal();
+        }
+      });
+    }
+    if (scsrPlanImplementationModalSaveButton) {
+      scsrPlanImplementationModalSaveButton.addEventListener("click", () => {
+        void handleScsrPlanImplementationSaveClick();
+      });
+    }
+    if (scsrPlanImplementationList) {
+      scsrPlanImplementationList.addEventListener("click", handleScsrPlanImplementationListClick);
+      scsrPlanImplementationList.addEventListener("input", handleScsrPlanImplementationInlineInputChange);
+      scsrPlanImplementationList.addEventListener("change", handleScsrPlanImplementationInlineInputChange);
+    }
+    [
+      scsrPlanObjectiveField,
+      scsrPlanActivitiesField,
+      scsrPlanTimeframeField,
+      scsrPlanPersonResponsibleField,
+      scsrPlanMaterialsNeededField,
+      scsrPlanExpectedOutputField,
+    ].forEach((field) => {
+      if (!field) {
+        return;
+      }
+      field.addEventListener("input", () => autoResizeTextareaField(field));
+      field.addEventListener("input", scheduleScsrPlanImplementationDraftAutoSave);
+      field.addEventListener("change", scheduleScsrPlanImplementationDraftAutoSave);
+      field.addEventListener("input", () => clearModalFieldError(field));
+      field.addEventListener("change", () => clearModalFieldError(field));
+    });
   }
 
   function bindEducationalAttainmentLiveSync() {
@@ -3575,6 +5326,8 @@
       }
       field.addEventListener("input", scheduleInterventionsProvidedDraftAutoSave);
       field.addEventListener("change", scheduleInterventionsProvidedDraftAutoSave);
+      field.addEventListener("input", () => autoResizeTextareaField(field));
+      field.addEventListener("change", () => autoResizeTextareaField(field));
       field.addEventListener("input", () => clearModalFieldError(field));
       field.addEventListener("change", () => clearModalFieldError(field));
     });
@@ -3609,6 +5362,7 @@
     if (!target || !target.matches("[data-ip-field][data-ip-index]")) {
       return;
     }
+    autoResizeTextareaField(target);
     if (!currentCsrRecord || !currentCsrRecord.csrId) {
       return;
     }
@@ -3679,12 +5433,15 @@
     const safeValues = values || {};
     if (interventionsProvidedTextField) {
       interventionsProvidedTextField.value = normalizeText(safeValues.intervention);
+      autoResizeTextareaField(interventionsProvidedTextField);
     }
     if (interventionsProvidedDateField) {
       interventionsProvidedDateField.value = normalizeText(safeValues.dateCompleted);
+      autoResizeTextareaField(interventionsProvidedDateField);
     }
     if (interventionsProvidedPartiesField) {
       interventionsProvidedPartiesField.value = normalizeText(safeValues.involvedParties);
+      autoResizeTextareaField(interventionsProvidedPartiesField);
     }
   }
 
@@ -3853,13 +5610,13 @@
         return `
           <tr class="bg-white dark:bg-[#1a2632] hover:bg-slate-50 dark:hover:bg-[#1e2b38] transition-colors">
             <td class="px-6 py-4 align-top">
-              <textarea data-ip-index="${index}" data-ip-field="intervention" rows="3" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm">${intervention}</textarea>
+              <textarea data-ip-index="${index}" data-ip-field="intervention" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${intervention}</textarea>
             </td>
             <td class="px-6 py-4 align-top">
-              <input data-ip-index="${index}" data-ip-field="dateCompleted" type="text" value="${dateCompleted}" class="w-full h-10 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm" />
+              <textarea data-ip-index="${index}" data-ip-field="dateCompleted" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${dateCompleted}</textarea>
             </td>
             <td class="px-6 py-4 align-top">
-              <input data-ip-index="${index}" data-ip-field="involvedParties" type="text" value="${involvedParties}" class="w-full h-10 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm" />
+              <textarea data-ip-index="${index}" data-ip-field="involvedParties" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${involvedParties}</textarea>
             </td>
             <td class="px-6 py-4 align-top text-center">
               <div class="flex items-center justify-center">
@@ -3871,6 +5628,7 @@
           </tr>`;
       })
       .join("");
+    autoResizeTextareasWithin(interventionsProvidedList);
     refreshExportValidationGlow();
   }
 
@@ -4018,6 +5776,566 @@
     setActiveCsrStep(3);
   }
 
+  function isActiveScsrPresentingProblemRecord() {
+    return !!(
+      currentCsrRecord &&
+      currentCsrRecord.csrId &&
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) === "SCSR"
+    );
+  }
+
+  function isActiveScsrCaseAssessmentRecord() {
+    return !!(
+      currentCsrRecord &&
+      currentCsrRecord.csrId &&
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) === "SCSR"
+    );
+  }
+
+  function isActiveScsrCaseManagementEvaluationRecord() {
+    return !!(
+      currentCsrRecord &&
+      currentCsrRecord.csrId &&
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) === "SCSR"
+    );
+  }
+
+  function isActiveScsrPlanImplementationRecord() {
+    return !!(
+      currentCsrRecord &&
+      currentCsrRecord.csrId &&
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) === "SCSR"
+    );
+  }
+
+  function isActiveScsrBackgroundRecord() {
+    return !!(
+      currentCsrRecord &&
+      currentCsrRecord.csrId &&
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) === "SCSR"
+    );
+  }
+
+  function isActiveScsrRecommendationRecord() {
+    return !!(
+      currentCsrRecord &&
+      currentCsrRecord.csrId &&
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) === "SCSR"
+    );
+  }
+
+  function getActiveRecordWorkflowType() {
+    return normalizeWorkflowType(
+      (currentCsrRecord && currentCsrRecord.workflowType) || activeWorkflowType
+    );
+  }
+
+  function isActiveScsrBasicInfoRecord() {
+    return !!currentCsrRecord && !!currentCsrRecord.csrId && getActiveRecordWorkflowType() === "SCSR";
+  }
+
+  function isActiveScsrFamilyCompositionRecord() {
+    return !!currentCsrRecord && !!currentCsrRecord.csrId && getActiveRecordWorkflowType() === "SCSR";
+  }
+
+  function isActiveFamilyCompositionRecord() {
+    return !!currentCsrRecord && !!currentCsrRecord.csrId;
+  }
+
+  function handleScsrPlanImplementationAddRowClick() {
+    if (!isActiveScsrPlanImplementationRecord()) {
+      showToast("No active SCSR selected.");
+      return;
+    }
+    const items = getScsrPlanImplementationItemsRaw();
+    items.push({
+      specificObjective: "",
+      activities: "",
+      timeframe: "",
+      personResponsible: "",
+      materialsNeeded: "",
+      expectedOutput: "",
+    });
+    currentCsrRecord.interventionPlanImplementation = {
+      ...(currentCsrRecord.interventionPlanImplementation || {}),
+      items,
+    };
+    renderScsrPlanImplementationRows(items);
+    const focusField = scsrPlanImplementationList.querySelector(
+      `[data-spi-index="${items.length - 1}"][data-spi-field="specificObjective"]`
+    );
+    if (focusField && typeof focusField.focus === "function") {
+      focusField.focus();
+    }
+  }
+
+  function handleScsrPlanImplementationInlineInputChange(event) {
+    const target = event && event.target;
+    if (!target || !target.matches("[data-spi-field][data-spi-index]")) {
+      return;
+    }
+    autoResizeTextareaField(target);
+    if (!isActiveScsrPlanImplementationRecord()) {
+      return;
+    }
+    const field = normalizeText(target.getAttribute("data-spi-field"));
+    const index = Number.parseInt(target.getAttribute("data-spi-index"), 10);
+    if (!Number.isInteger(index) || index < 0) {
+      return;
+    }
+    const allowedFields = new Set([
+      "specificObjective",
+      "activities",
+      "timeframe",
+      "personResponsible",
+      "materialsNeeded",
+      "expectedOutput",
+    ]);
+    if (!allowedFields.has(field)) {
+      return;
+    }
+    const items = getScsrPlanImplementationItemsRaw();
+    if (index >= items.length) {
+      return;
+    }
+    items[index][field] = normalizeText(target.value);
+    currentCsrRecord.interventionPlanImplementation = {
+      ...(currentCsrRecord.interventionPlanImplementation || {}),
+      items,
+    };
+    scheduleScsrPlanImplementationAutoSave();
+  }
+
+  function getScsrPlanImplementationItemsRaw() {
+    const stored =
+      currentCsrRecord &&
+      currentCsrRecord.interventionPlanImplementation &&
+      Array.isArray(currentCsrRecord.interventionPlanImplementation.items)
+        ? currentCsrRecord.interventionPlanImplementation.items
+        : [];
+    return stored.map((item) => ({
+      specificObjective: normalizeText(item && item.specificObjective),
+      activities: normalizeText(item && item.activities),
+      timeframe: normalizeText(item && item.timeframe),
+      personResponsible: normalizeText(item && item.personResponsible),
+      materialsNeeded: normalizeText(item && item.materialsNeeded),
+      expectedOutput: normalizeText(item && item.expectedOutput),
+    }));
+  }
+
+  function getScsrPlanImplementationItems() {
+    return getScsrPlanImplementationItemsRaw()
+      .filter((item) =>
+        item.specificObjective ||
+        item.activities ||
+        item.timeframe ||
+        item.personResponsible ||
+        item.materialsNeeded ||
+        item.expectedOutput
+      );
+  }
+
+  function collectScsrPlanImplementationDraftFromForm() {
+    return {
+      specificObjective: normalizeText(scsrPlanObjectiveField && scsrPlanObjectiveField.value),
+      activities: normalizeText(scsrPlanActivitiesField && scsrPlanActivitiesField.value),
+      timeframe: normalizeText(scsrPlanTimeframeField && scsrPlanTimeframeField.value),
+      personResponsible: normalizeText(scsrPlanPersonResponsibleField && scsrPlanPersonResponsibleField.value),
+      materialsNeeded: normalizeText(scsrPlanMaterialsNeededField && scsrPlanMaterialsNeededField.value),
+      expectedOutput: normalizeText(scsrPlanExpectedOutputField && scsrPlanExpectedOutputField.value),
+    };
+  }
+
+  function autoResizeTextareaField(field) {
+    if (!field || String(field.tagName || "").toUpperCase() !== "TEXTAREA") {
+      return;
+    }
+    const computed = window.getComputedStyle ? window.getComputedStyle(field) : null;
+    const borderTop = computed ? Number.parseFloat(computed.borderTopWidth || "0") || 0 : 0;
+    const borderBottom = computed ? Number.parseFloat(computed.borderBottomWidth || "0") || 0 : 0;
+    const minHeight = field.dataset && field.dataset.autoResizeMinHeight
+      ? Number.parseFloat(field.dataset.autoResizeMinHeight) || 0
+      : 0;
+    field.style.height = "auto";
+    field.style.height = `${Math.max(field.scrollHeight + borderTop + borderBottom, minHeight)}px`;
+  }
+
+  function autoResizeTextareasWithin(root) {
+    if (!root || typeof root.querySelectorAll !== "function") {
+      return;
+    }
+    root.querySelectorAll('textarea[data-auto-resize="true"]').forEach((field) => {
+      autoResizeTextareaField(field);
+    });
+  }
+
+  function hasScsrPlanImplementationDraftValues(draft) {
+    return !!(
+      draft &&
+      (
+        normalizeText(draft.specificObjective) ||
+        normalizeText(draft.activities) ||
+        normalizeText(draft.timeframe) ||
+        normalizeText(draft.personResponsible) ||
+        normalizeText(draft.materialsNeeded) ||
+        normalizeText(draft.expectedOutput)
+      )
+    );
+  }
+
+  function fillScsrPlanImplementationFormValues(values) {
+    const safeValues = values || {};
+    if (scsrPlanObjectiveField) {
+      scsrPlanObjectiveField.value = normalizeText(safeValues.specificObjective);
+      autoResizeTextareaField(scsrPlanObjectiveField);
+    }
+    if (scsrPlanActivitiesField) {
+      scsrPlanActivitiesField.value = normalizeText(safeValues.activities);
+      autoResizeTextareaField(scsrPlanActivitiesField);
+    }
+    if (scsrPlanTimeframeField) {
+      scsrPlanTimeframeField.value = normalizeText(safeValues.timeframe);
+      autoResizeTextareaField(scsrPlanTimeframeField);
+    }
+    if (scsrPlanPersonResponsibleField) {
+      scsrPlanPersonResponsibleField.value = normalizeText(safeValues.personResponsible);
+      autoResizeTextareaField(scsrPlanPersonResponsibleField);
+    }
+    if (scsrPlanMaterialsNeededField) {
+      scsrPlanMaterialsNeededField.value = normalizeText(safeValues.materialsNeeded);
+      autoResizeTextareaField(scsrPlanMaterialsNeededField);
+    }
+    if (scsrPlanExpectedOutputField) {
+      scsrPlanExpectedOutputField.value = normalizeText(safeValues.expectedOutput);
+      autoResizeTextareaField(scsrPlanExpectedOutputField);
+    }
+  }
+
+  function scheduleScsrPlanImplementationDraftAutoSave() {
+    if (
+      !isActiveScsrPlanImplementationRecord() ||
+      !scsrPlanImplementationModal ||
+      scsrPlanImplementationModal.classList.contains("hidden")
+    ) {
+      return;
+    }
+    if (scsrPlanImplementationDraftAutoSaveTimer) {
+      window.clearTimeout(scsrPlanImplementationDraftAutoSaveTimer);
+      scsrPlanImplementationDraftAutoSaveTimer = null;
+    }
+    scsrPlanImplementationDraftAutoSaveTimer = window.setTimeout(() => {
+      scsrPlanImplementationDraftAutoSaveTimer = null;
+      void persistScsrPlanImplementationDraft({ showToastOnError: false });
+    }, INTERVENTIONS_PROVIDED_DRAFT_AUTOSAVE_DELAY_MS);
+  }
+
+  function flushScsrPlanImplementationDraftAutoSave(forcePersist) {
+    const shouldForcePersist = Boolean(forcePersist);
+    if (!isActiveScsrPlanImplementationRecord()) {
+      if (scsrPlanImplementationDraftAutoSaveTimer) {
+        window.clearTimeout(scsrPlanImplementationDraftAutoSaveTimer);
+        scsrPlanImplementationDraftAutoSaveTimer = null;
+      }
+      return;
+    }
+    if (scsrPlanImplementationDraftAutoSaveTimer) {
+      window.clearTimeout(scsrPlanImplementationDraftAutoSaveTimer);
+      scsrPlanImplementationDraftAutoSaveTimer = null;
+      void persistScsrPlanImplementationDraft({ showToastOnError: false });
+      return;
+    }
+    if (shouldForcePersist) {
+      void persistScsrPlanImplementationDraft({ showToastOnError: false });
+    }
+  }
+
+  async function persistScsrPlanImplementationDraft(options) {
+    const config = {
+      showToastOnError: true,
+      ...options,
+    };
+    if (!isActiveScsrPlanImplementationRecord()) {
+      return false;
+    }
+    const draft = collectScsrPlanImplementationDraftFromForm();
+    const existingStore = currentCsrRecord.interventionPlanImplementation || {};
+    const nextStore = { ...existingStore };
+    if (hasScsrPlanImplementationDraftValues(draft)) {
+      const isEditMode =
+        Number.isInteger(scsrPlanImplementationEditingIndex) &&
+        scsrPlanImplementationEditingIndex >= 0;
+      nextStore.draft = {
+        mode: isEditMode ? "edit" : "add",
+        editIndex: isEditMode ? scsrPlanImplementationEditingIndex : null,
+        ...draft,
+        savedAt: new Date().toISOString(),
+      };
+    } else {
+      delete nextStore.draft;
+    }
+    currentCsrRecord.interventionPlanImplementation = nextStore;
+    try {
+      await persistCsrRecord(currentCsrRecord);
+      return true;
+    } catch (_) {
+      if (config.showToastOnError) {
+        showToast("Unable to save SCSR intervention draft right now.");
+      }
+      return false;
+    }
+  }
+
+  function scheduleScsrPlanImplementationAutoSave() {
+    if (!isActiveScsrPlanImplementationRecord()) {
+      return;
+    }
+    if (scsrPlanImplementationAutoSaveTimer) {
+      window.clearTimeout(scsrPlanImplementationAutoSaveTimer);
+      scsrPlanImplementationAutoSaveTimer = null;
+    }
+    setScsrPlanImplementationSaveStatus("Saving changes...", "pending");
+    scsrPlanImplementationAutoSaveTimer = window.setTimeout(() => {
+      scsrPlanImplementationAutoSaveTimer = null;
+      void persistScsrPlanImplementationDetails({
+        isAutoSave: true,
+        showToastOnError: false,
+      });
+    }, INTERVENTIONS_PROVIDED_AUTOSAVE_DELAY_MS);
+  }
+
+  function flushScsrPlanImplementationAutoSave(forcePersist) {
+    const shouldForcePersist = Boolean(forcePersist);
+    if (!isActiveScsrPlanImplementationRecord()) {
+      if (scsrPlanImplementationAutoSaveTimer) {
+        window.clearTimeout(scsrPlanImplementationAutoSaveTimer);
+        scsrPlanImplementationAutoSaveTimer = null;
+      }
+      return;
+    }
+    if (scsrPlanImplementationAutoSaveTimer) {
+      window.clearTimeout(scsrPlanImplementationAutoSaveTimer);
+      scsrPlanImplementationAutoSaveTimer = null;
+      void persistScsrPlanImplementationDetails({
+        isAutoSave: true,
+        showToastOnError: false,
+      });
+      return;
+    }
+    if (shouldForcePersist) {
+      void persistScsrPlanImplementationDetails({
+        isAutoSave: true,
+        showToastOnError: false,
+      });
+    }
+  }
+
+  async function persistScsrPlanImplementationDetails(options) {
+    const config = {
+      isAutoSave: true,
+      showToastOnError: true,
+      ...options,
+    };
+    if (!isActiveScsrPlanImplementationRecord()) {
+      return false;
+    }
+
+    const items = getScsrPlanImplementationItemsRaw();
+    currentCsrRecord.interventionPlanImplementation = {
+      ...(currentCsrRecord.interventionPlanImplementation || {}),
+      items,
+      savedAt: new Date().toISOString(),
+      lastSaveMode: config.isAutoSave ? "autosave" : "manual",
+    };
+
+    try {
+      await persistCsrRecord(currentCsrRecord);
+      const savedAtLabel = formatSaveTimeLabel(currentCsrRecord.interventionPlanImplementation.savedAt);
+      const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
+      setScsrPlanImplementationSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
+      return true;
+    } catch (_) {
+      const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
+      setScsrPlanImplementationSaveStatus(failedLabel, "error");
+      if (config.showToastOnError) {
+        showToast("Unable to save Intervention Plan/Plan Implementation right now.");
+      }
+      return false;
+    }
+  }
+
+  function renderScsrPlanImplementationRows(items) {
+    if (!scsrPlanImplementationList) {
+      return;
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      scsrPlanImplementationList.innerHTML =
+        '<tr class="bg-white dark:bg-[#1a2632]"><td colspan="7" class="px-6 py-6 text-center text-slate-500 dark:text-slate-400">No plan items added yet.</td></tr>';
+      refreshExportValidationGlow();
+      return;
+    }
+    scsrPlanImplementationList.innerHTML = items
+      .map((item, index) => {
+        const specificObjective = escapeHtml(item.specificObjective || "");
+        const activities = escapeHtml(item.activities || "");
+        const timeframe = escapeHtml(item.timeframe || "");
+        const personResponsible = escapeHtml(item.personResponsible || "");
+        const materialsNeeded = escapeHtml(item.materialsNeeded || "");
+        const expectedOutput = escapeHtml(item.expectedOutput || "");
+        return `
+          <tr class="bg-white dark:bg-[#1a2632] hover:bg-slate-50 dark:hover:bg-[#1e2b38] transition-colors">
+            <td class="px-6 py-4 align-top"><textarea data-spi-index="${index}" data-spi-field="specificObjective" data-auto-resize="true" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${specificObjective}</textarea></td>
+            <td class="px-6 py-4 align-top"><textarea data-spi-index="${index}" data-spi-field="activities" data-auto-resize="true" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${activities}</textarea></td>
+            <td class="px-6 py-4 align-top"><textarea data-spi-index="${index}" data-spi-field="timeframe" data-auto-resize="true" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${timeframe}</textarea></td>
+            <td class="px-6 py-4 align-top"><textarea data-spi-index="${index}" data-spi-field="personResponsible" data-auto-resize="true" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${personResponsible}</textarea></td>
+            <td class="px-6 py-4 align-top"><textarea data-spi-index="${index}" data-spi-field="materialsNeeded" data-auto-resize="true" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${materialsNeeded}</textarea></td>
+            <td class="px-6 py-4 align-top"><textarea data-spi-index="${index}" data-spi-field="expectedOutput" data-auto-resize="true" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${expectedOutput}</textarea></td>
+            <td class="px-6 py-4 align-top text-center">
+              <div class="flex items-center justify-center">
+                <button type="button" data-spi-delete-index="${index}" class="p-2.5 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:bg-slate-700 rounded transition-colors" title="Delete">
+                  <span class="material-symbols-outlined text-[24px]">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+      })
+      .join("");
+    autoResizeTextareasWithin(scsrPlanImplementationList);
+    refreshExportValidationGlow();
+  }
+
+  async function deleteScsrPlanImplementationRow(index) {
+    if (!isActiveScsrPlanImplementationRecord()) {
+      return;
+    }
+    const items = getScsrPlanImplementationItemsRaw();
+    if (!Number.isInteger(index) || index < 0 || index >= items.length) {
+      return;
+    }
+    const nextItems = items.filter((_, itemIndex) => itemIndex !== index);
+    currentCsrRecord.interventionPlanImplementation = {
+      ...(currentCsrRecord.interventionPlanImplementation || {}),
+      items: nextItems,
+    };
+    renderScsrPlanImplementationRows(nextItems);
+    scheduleScsrPlanImplementationAutoSave();
+    showToast("Plan item removed.", "success", 2500);
+  }
+
+  function applySavedScsrPlanImplementationDetails() {
+    scsrPlanImplementationEditingIndex = null;
+    renderScsrPlanImplementationRows(getScsrPlanImplementationItemsRaw());
+    const savedAt = normalizeText(
+      currentCsrRecord &&
+      currentCsrRecord.interventionPlanImplementation &&
+      currentCsrRecord.interventionPlanImplementation.savedAt
+    );
+    if (savedAt) {
+      const mode = normalizeText(
+        currentCsrRecord &&
+        currentCsrRecord.interventionPlanImplementation &&
+        currentCsrRecord.interventionPlanImplementation.lastSaveMode
+      );
+      const label = mode === "autosave" ? "Auto-saved" : "Saved";
+      setScsrPlanImplementationSaveStatus(`${label} ${formatSaveTimeLabel(savedAt)}`, "success");
+      return;
+    }
+    setScsrPlanImplementationSaveStatus("", "neutral");
+  }
+
+  function closeScsrPlanImplementationModal() {
+    if (!scsrPlanImplementationModal) {
+      return;
+    }
+    flushScsrPlanImplementationDraftAutoSave(true);
+    scsrPlanImplementationModal.classList.add("hidden");
+    scsrPlanImplementationModal.classList.remove("flex");
+    scsrPlanImplementationEditingIndex = null;
+    if (scsrPlanImplementationModalTitle) {
+      scsrPlanImplementationModalTitle.textContent = "Add Plan Item";
+    }
+    [
+      scsrPlanObjectiveField,
+      scsrPlanActivitiesField,
+      scsrPlanTimeframeField,
+      scsrPlanPersonResponsibleField,
+      scsrPlanMaterialsNeededField,
+      scsrPlanExpectedOutputField,
+    ].forEach((field) => clearModalFieldError(field));
+    fillScsrPlanImplementationFormValues(null);
+  }
+
+  function handleScsrPlanImplementationListClick(event) {
+    const deleteButton = event.target.closest("[data-spi-delete-index]");
+    if (!deleteButton) {
+      return;
+    }
+    const index = Number.parseInt(deleteButton.getAttribute("data-spi-delete-index"), 10);
+    void deleteScsrPlanImplementationRow(index);
+  }
+
+  async function handleScsrPlanImplementationSaveClick() {
+    if (!isActiveScsrPlanImplementationRecord()) {
+      showToast("No active SCSR selected.");
+      return;
+    }
+    const validation = validateRequiredModalFields([
+      scsrPlanObjectiveField,
+      scsrPlanActivitiesField,
+      scsrPlanTimeframeField,
+      scsrPlanPersonResponsibleField,
+      scsrPlanMaterialsNeededField,
+      scsrPlanExpectedOutputField,
+    ]);
+    if (!validation.valid) {
+      showToast("Please complete all required fields.");
+      if (validation.firstInvalidField && typeof validation.firstInvalidField.focus === "function") {
+        validation.firstInvalidField.focus();
+      }
+      return;
+    }
+
+    const payload = {
+      specificObjective: normalizeText(scsrPlanObjectiveField && scsrPlanObjectiveField.value),
+      activities: normalizeText(scsrPlanActivitiesField && scsrPlanActivitiesField.value),
+      timeframe: normalizeText(scsrPlanTimeframeField && scsrPlanTimeframeField.value),
+      personResponsible: normalizeText(scsrPlanPersonResponsibleField && scsrPlanPersonResponsibleField.value),
+      materialsNeeded: normalizeText(scsrPlanMaterialsNeededField && scsrPlanMaterialsNeededField.value),
+      expectedOutput: normalizeText(scsrPlanExpectedOutputField && scsrPlanExpectedOutputField.value),
+    };
+
+    const items = getScsrPlanImplementationItems();
+    const isEditMode =
+      Number.isInteger(scsrPlanImplementationEditingIndex) &&
+      scsrPlanImplementationEditingIndex >= 0 &&
+      scsrPlanImplementationEditingIndex < items.length;
+    if (isEditMode) {
+      items[scsrPlanImplementationEditingIndex] = payload;
+    } else {
+      items.unshift(payload);
+    }
+
+    currentCsrRecord.interventionPlanImplementation = {
+      ...(currentCsrRecord.interventionPlanImplementation || {}),
+      items,
+    };
+    if (scsrPlanImplementationDraftAutoSaveTimer) {
+      window.clearTimeout(scsrPlanImplementationDraftAutoSaveTimer);
+      scsrPlanImplementationDraftAutoSaveTimer = null;
+    }
+    delete currentCsrRecord.interventionPlanImplementation.draft;
+    renderScsrPlanImplementationRows(items);
+    closeScsrPlanImplementationModal();
+    scheduleScsrPlanImplementationAutoSave();
+    showToast(isEditMode ? "Plan item updated." : "Plan item added.", "success", 2500);
+  }
+
+  function handleScsrPlanImplementationBackClick() {
+    flushScsrPlanImplementationDraftAutoSave(true);
+    flushScsrPlanImplementationAutoSave(true);
+    closeScsrPlanImplementationModal();
+    setActiveCsrStep(5);
+  }
+
   function bindHouseholdInterventionPlanEvents() {
     if (householdInterventionPlanAddButton) {
       householdInterventionPlanAddButton.addEventListener("click", () => {
@@ -4059,6 +6377,8 @@
       }
       field.addEventListener("input", scheduleHouseholdInterventionPlanDraftAutoSave);
       field.addEventListener("change", scheduleHouseholdInterventionPlanDraftAutoSave);
+      field.addEventListener("input", () => autoResizeTextareaField(field));
+      field.addEventListener("change", () => autoResizeTextareaField(field));
       field.addEventListener("input", () => clearModalFieldError(field));
       field.addEventListener("change", () => clearModalFieldError(field));
     });
@@ -4095,6 +6415,7 @@
     if (!target || !target.matches("[data-hip-field][data-hip-index]")) {
       return;
     }
+    autoResizeTextareaField(target);
     if (!currentCsrRecord || !currentCsrRecord.csrId) {
       return;
     }
@@ -4188,18 +6509,23 @@
     const safeValues = values || {};
     if (householdInterventionPlanObjectivesField) {
       householdInterventionPlanObjectivesField.value = normalizeText(safeValues.objectives);
+      autoResizeTextareaField(householdInterventionPlanObjectivesField);
     }
     if (householdInterventionPlanActivitiesField) {
       householdInterventionPlanActivitiesField.value = normalizeText(safeValues.activities);
+      autoResizeTextareaField(householdInterventionPlanActivitiesField);
     }
     if (householdInterventionPlanResponsibleField) {
       householdInterventionPlanResponsibleField.value = normalizeText(safeValues.responsible);
+      autoResizeTextareaField(householdInterventionPlanResponsibleField);
     }
     if (householdInterventionPlanTimelineField) {
       householdInterventionPlanTimelineField.value = normalizeText(safeValues.timeline);
+      autoResizeTextareaField(householdInterventionPlanTimelineField);
     }
     if (householdInterventionPlanOutcomeField) {
       householdInterventionPlanOutcomeField.value = normalizeText(safeValues.outcome);
+      autoResizeTextareaField(householdInterventionPlanOutcomeField);
     }
   }
 
@@ -4370,19 +6696,19 @@
         return `
           <tr class="bg-white dark:bg-[#1a2632] hover:bg-slate-50 dark:hover:bg-[#1e2b38] transition-colors">
             <td class="px-6 py-4 align-top">
-              <textarea data-hip-index="${index}" data-hip-field="objectives" rows="3" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm">${objectives}</textarea>
+              <textarea data-hip-index="${index}" data-hip-field="objectives" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${objectives}</textarea>
             </td>
             <td class="px-6 py-4 align-top">
-              <textarea data-hip-index="${index}" data-hip-field="activities" rows="3" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm">${activities}</textarea>
+              <textarea data-hip-index="${index}" data-hip-field="activities" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${activities}</textarea>
             </td>
             <td class="px-6 py-4 align-top">
-              <textarea data-hip-index="${index}" data-hip-field="responsible" rows="2" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm">${responsible}</textarea>
+              <textarea data-hip-index="${index}" data-hip-field="responsible" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${responsible}</textarea>
             </td>
             <td class="px-6 py-4 align-top">
-              <input data-hip-index="${index}" data-hip-field="timeline" type="text" value="${timeline}" class="w-full h-10 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm" />
+              <textarea data-hip-index="${index}" data-hip-field="timeline" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${timeline}</textarea>
             </td>
             <td class="px-6 py-4 align-top">
-              <textarea data-hip-index="${index}" data-hip-field="outcome" rows="3" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm">${outcome}</textarea>
+              <textarea data-hip-index="${index}" data-hip-field="outcome" data-auto-resize="true" data-auto-resize-min-height="40" rows="1" class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm resize-none overflow-hidden leading-6">${outcome}</textarea>
             </td>
             <td class="px-4 py-4 align-top text-center">
               <div class="flex items-center justify-center">
@@ -4394,6 +6720,7 @@
           </tr>`;
       })
       .join("");
+    autoResizeTextareasWithin(householdInterventionPlanList);
     refreshExportValidationGlow();
   }
 
@@ -4581,6 +6908,69 @@
     });
   }
 
+  function bindScsrRecommendationEvents() {
+    [
+      scsrRecommendationReviewedBySaveButton,
+      scsrRecommendationApprovedBySaveButton,
+    ].forEach((button) => {
+      if (!button) {
+        return;
+      }
+      button.addEventListener("click", handleScsrRecommendationDefaultNameSaveClick);
+    });
+
+    if (scsrRecommendationTextField) {
+      scsrRecommendationTextField.addEventListener("input", () => {
+        clearModalFieldError(scsrRecommendationTextField);
+      });
+    }
+
+    [
+      scsrRecommendationDateField,
+      scsrRecommendationTextField,
+      scsrRecommendationPreparedByField,
+    ].forEach((field) => {
+      if (!field) {
+        return;
+      }
+      field.addEventListener("input", scheduleScsrRecommendationAutoSave);
+      field.addEventListener("change", scheduleScsrRecommendationAutoSave);
+      field.addEventListener("input", refreshExportValidationGlow);
+      field.addEventListener("change", refreshExportValidationGlow);
+    });
+  }
+
+  function getScsrRecommendationDefaultNames() {
+    let stored = null;
+    try {
+      const raw = window.localStorage.getItem(SCSR_RECOMMENDATION_DEFAULT_NAMES_KEY);
+      if (raw) {
+        stored = JSON.parse(raw);
+      }
+    } catch (_) {
+      stored = null;
+    }
+    return {
+      reviewedBy:
+        normalizeText(stored && stored.reviewedBy) ||
+        RECOMMENDATION_DEFAULT_NAMES.reviewedBy,
+      approvedBy: normalizeText(stored && stored.approvedBy) || SCSR_RECOMMENDATION_APPROVED_BY,
+    };
+  }
+
+  function setScsrRecommendationDefaultNames(names) {
+    const payload = {
+      reviewedBy: normalizeText(names && names.reviewedBy),
+      approvedBy: normalizeText(names && names.approvedBy) || SCSR_RECOMMENDATION_APPROVED_BY,
+    };
+    try {
+      window.localStorage.setItem(SCSR_RECOMMENDATION_DEFAULT_NAMES_KEY, JSON.stringify(payload));
+    } catch (_) {
+      // Ignore storage failures.
+    }
+    return payload;
+  }
+
   function getRecommendationDefaultNames() {
     let stored = null;
     try {
@@ -4627,6 +7017,224 @@
     } catch (_) {
       return "";
     }
+  }
+
+  function formatBasicInfoBirthdayForDisplay(value) {
+    const iso = toFamilyCompositionBirthdayIso(value);
+    if (!iso) {
+      return normalizeText(value);
+    }
+    const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) {
+      return normalizeText(value);
+    }
+    const year = Number.parseInt(match[1], 10);
+    const month = Number.parseInt(match[2], 10);
+    const day = Number.parseInt(match[3], 10);
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+      return normalizeText(value);
+    }
+    const displayDate = new Date(Date.UTC(year, month - 1, day));
+    try {
+      return displayDate.toLocaleDateString("en-PH", {
+        timeZone: "UTC",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (_) {
+      return normalizeText(value);
+    }
+  }
+
+  function computeAgeFromBirthday(value) {
+    const iso = toFamilyCompositionBirthdayIso(value);
+    const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) {
+      return "";
+    }
+    const birthYear = Number.parseInt(match[1], 10);
+    const birthMonth = Number.parseInt(match[2], 10);
+    const birthDay = Number.parseInt(match[3], 10);
+    if (
+      !Number.isFinite(birthYear) ||
+      !Number.isFinite(birthMonth) ||
+      !Number.isFinite(birthDay)
+    ) {
+      return "";
+    }
+    const todayIso = getPhilippinesTodayIsoDate();
+    const todayMatch = todayIso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!todayMatch) {
+      return "";
+    }
+    const todayYear = Number.parseInt(todayMatch[1], 10);
+    const todayMonth = Number.parseInt(todayMatch[2], 10);
+    const todayDay = Number.parseInt(todayMatch[3], 10);
+    if (
+      !Number.isFinite(todayYear) ||
+      !Number.isFinite(todayMonth) ||
+      !Number.isFinite(todayDay)
+    ) {
+      return "";
+    }
+    let age = todayYear - birthYear;
+    if (todayMonth < birthMonth || (todayMonth === birthMonth && todayDay < birthDay)) {
+      age -= 1;
+    }
+    if (!Number.isFinite(age) || age < 0) {
+      return "";
+    }
+    return String(age);
+  }
+
+  function applyBasicInfoBirthdayAndAgeValues(birthdayValue, fallbackAge) {
+    const birthdayIso = toFamilyCompositionBirthdayIso(birthdayValue);
+    if (basicBirthdayInput) {
+      basicBirthdayInput.value = birthdayIso;
+    }
+    if (basicAgeInput) {
+      basicAgeInput.value = computeAgeFromBirthday(birthdayIso) || normalizeText(fallbackAge);
+    }
+  }
+
+  function normalizeSexForComparison(value) {
+    return normalizeText(value)
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, "")
+      .trim();
+  }
+
+  function resolveBasicSexValue(value) {
+    if (!basicSexInput) {
+      return "";
+    }
+    const normalizedTarget = normalizeSexForComparison(value);
+    if (!normalizedTarget) {
+      return "";
+    }
+    const options = Array.from(basicSexInput.options || []);
+    const directMatch = options.find(
+      (option) => normalizeSexForComparison(option.value) === normalizedTarget
+    );
+    if (directMatch) {
+      return directMatch.value;
+    }
+    if (normalizedTarget === "M") {
+      return "MALE";
+    }
+    if (normalizedTarget === "F") {
+      return "FEMALE";
+    }
+    return "";
+  }
+
+  function setBasicSexValue(value, fallbackValue) {
+    if (!basicSexInput) {
+      return;
+    }
+    const resolved =
+      resolveBasicSexValue(value) ||
+      resolveBasicSexValue(fallbackValue) ||
+      "";
+    basicSexInput.value = resolved;
+  }
+
+  function normalizeCivilStatusForComparison(value) {
+    return normalizeText(value)
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, " ")
+      .trim();
+  }
+
+  function resolveBasicCivilStatusValue(value) {
+    if (!basicCivilStatusInput) {
+      return "";
+    }
+    const normalizedTarget = normalizeCivilStatusForComparison(value);
+    if (!normalizedTarget) {
+      return "";
+    }
+    const options = Array.from(basicCivilStatusInput.options || []);
+    const directMatch = options.find(
+      (option) => normalizeCivilStatusForComparison(option.value) === normalizedTarget
+    );
+    if (directMatch) {
+      return directMatch.value;
+    }
+
+    const aliasMap = new Map([
+      ["DIVORCED SEPARATED", "Divorced / Separated"],
+      ["DIVORCED OR SEPARATED", "Divorced / Separated"],
+      ["MARRIED WITH SPOUSE MIGRANT", "Married with spouse migrant"],
+      ["MARRIED WITH SPOUSE PRESENT", "Married with spouse present"],
+    ]);
+    const aliased = aliasMap.get(normalizedTarget);
+    if (!aliased) {
+      return "";
+    }
+    const aliasMatch = options.find((option) => option.value === aliased);
+    return aliasMatch ? aliasMatch.value : "";
+  }
+
+  function setBasicCivilStatusValue(value, fallbackValue) {
+    if (!basicCivilStatusInput) {
+      return;
+    }
+    const resolved =
+      resolveBasicCivilStatusValue(value) ||
+      resolveBasicCivilStatusValue(fallbackValue) ||
+      "";
+    basicCivilStatusInput.value = resolved;
+  }
+
+  function applySavedBasicInfoSharedFieldEdits(editDetails, prefilledDetails) {
+    const safeEditDetails = editDetails && typeof editDetails === "object" ? editDetails : {};
+    const safePrefilledDetails =
+      prefilledDetails && typeof prefilledDetails === "object" ? prefilledDetails : {};
+
+    if (basicGranteeNameInput) {
+      basicGranteeNameInput.value =
+        normalizeText(safeEditDetails.granteeName) ||
+        normalizeText(safePrefilledDetails.name) ||
+        normalizeText(basicGranteeNameInput.value);
+    }
+    setBasicSexValue(
+      normalizeText(safeEditDetails.sex),
+      normalizeText(safePrefilledDetails.sex) || normalizeText(basicSexInput && basicSexInput.value)
+    );
+    applyBasicInfoBirthdayAndAgeValues(
+      normalizeText(safeEditDetails.birthday) || normalizeText(safePrefilledDetails.birthday),
+      normalizeText(safeEditDetails.age) || normalizeText(safePrefilledDetails.age)
+    );
+    setBasicCivilStatusValue(
+      normalizeText(safeEditDetails.civilStatus),
+      normalizeText(safePrefilledDetails.civilStatus) || normalizeText(basicCivilStatusInput.value)
+    );
+  }
+
+  function reapplySavedBasicInfoSharedFieldEdits() {
+    const basicInformation =
+      currentCsrRecord &&
+      currentCsrRecord.basicInformation &&
+      typeof currentCsrRecord.basicInformation === "object"
+        ? currentCsrRecord.basicInformation
+        : null;
+    if (!basicInformation) {
+      return;
+    }
+    applySavedBasicInfoSharedFieldEdits(
+      basicInformation.editDetails,
+      basicInformation.prefilled
+    );
+  }
+
+  function handleBasicBirthdayInputChange() {
+    applyBasicInfoBirthdayAndAgeValues(
+      basicBirthdayInput && basicBirthdayInput.value,
+      ""
+    );
+    scheduleBasicInfoAutoSave();
   }
 
   function applyRecommendationDefaultNamesToInputs() {
@@ -4736,6 +7344,83 @@
     }
   }
 
+  function applyScsrRecommendationStaticPrefill() {
+    if (scsrRecommendationDateField && !normalizeText(scsrRecommendationDateField.value)) {
+      scsrRecommendationDateField.value = getPhilippinesTodayIsoDate();
+    }
+    const defaults = getScsrRecommendationDefaultNames();
+    if (scsrRecommendationReviewedByField && !normalizeText(scsrRecommendationReviewedByField.value)) {
+      scsrRecommendationReviewedByField.value = defaults.reviewedBy;
+    }
+    if (scsrRecommendationApprovedByField && !normalizeText(scsrRecommendationApprovedByField.value)) {
+      scsrRecommendationApprovedByField.value = defaults.approvedBy;
+    }
+  }
+
+  function collectScsrRecommendationDetails() {
+    return {
+      date: normalizeText(scsrRecommendationDateField && scsrRecommendationDateField.value),
+      recommendationText: normalizeText(scsrRecommendationTextField && scsrRecommendationTextField.value),
+      preparedBy: normalizeText(scsrRecommendationPreparedByField && scsrRecommendationPreparedByField.value),
+      reviewedBy: normalizeText(scsrRecommendationReviewedByField && scsrRecommendationReviewedByField.value),
+      approvedBy: normalizeText(scsrRecommendationApprovedByField && scsrRecommendationApprovedByField.value),
+    };
+  }
+
+  function applyScsrRecommendationDetailsToInputs(details) {
+    const safe = details || {};
+    if (scsrRecommendationDateField) {
+      scsrRecommendationDateField.value = normalizeText(safe.date);
+    }
+    if (scsrRecommendationTextField) {
+      scsrRecommendationTextField.value = normalizeText(safe.recommendationText);
+    }
+    if (scsrRecommendationPreparedByField) {
+      scsrRecommendationPreparedByField.value = normalizeText(safe.preparedBy);
+    }
+    if (scsrRecommendationReviewedByField) {
+      scsrRecommendationReviewedByField.value = normalizeText(safe.reviewedBy);
+    }
+    if (scsrRecommendationApprovedByField) {
+      scsrRecommendationApprovedByField.value = normalizeText(safe.approvedBy);
+    }
+  }
+
+  function applySavedScsrRecommendationDetails() {
+    if (!isActiveScsrRecommendationRecord()) {
+      return;
+    }
+    const savedDetails =
+      currentCsrRecord &&
+      currentCsrRecord.scsrRecommendation &&
+      typeof currentCsrRecord.scsrRecommendation === "object"
+        ? currentCsrRecord.scsrRecommendation
+        : null;
+    if (savedDetails && savedDetails.details && typeof savedDetails.details === "object") {
+      applyScsrRecommendationDetailsToInputs(savedDetails.details);
+    } else {
+      applyScsrRecommendationDetailsToInputs(null);
+    }
+    applyScsrRecommendationStaticPrefill();
+    void fillScsrPreparedByFromMls();
+    const savedAt = normalizeText(
+      currentCsrRecord &&
+      currentCsrRecord.scsrRecommendation &&
+      currentCsrRecord.scsrRecommendation.savedAt
+    );
+    if (savedAt) {
+      const mode = normalizeText(
+        currentCsrRecord &&
+        currentCsrRecord.scsrRecommendation &&
+        currentCsrRecord.scsrRecommendation.lastSaveMode
+      );
+      const label = mode === "autosave" ? "Auto-saved" : "Saved";
+      setScsrRecommendationSaveStatus(`${label} ${formatSaveTimeLabel(savedAt)}`, "success");
+    } else {
+      setScsrRecommendationSaveStatus("", "neutral");
+    }
+  }
+
   async function fillPreparedByFromMls() {
     if (!recommendationPreparedByField || normalizeText(recommendationPreparedByField.value)) {
       return;
@@ -4771,16 +7456,79 @@
     }
   }
 
+  async function fillScsrPreparedByFromMls() {
+    if (
+      !isActiveScsrRecommendationRecord() ||
+      !scsrRecommendationPreparedByField ||
+      normalizeText(scsrRecommendationPreparedByField.value)
+    ) {
+      return;
+    }
+    if (scsrRecommendationPreparedByFetchPromise) {
+      await scsrRecommendationPreparedByFetchPromise;
+      return;
+    }
+    scsrRecommendationPreparedByFetchPromise = (async () => {
+      try {
+        const uiSession = getUiSession();
+        const userId = normalizeText(uiSession && uiSession.id);
+        if (!userId) {
+          return;
+        }
+        const mlsRows = await fetchSheetData(LOGIN_SHEET);
+        const userRecord = findUserById(mlsRows, userId);
+        const name = normalizeText(
+          userRecord &&
+          (userRecord.NAMES || userRecord.NAME || userRecord.FULL_NAME)
+        );
+        if (
+          isActiveScsrRecommendationRecord() &&
+          name &&
+          scsrRecommendationPreparedByField &&
+          !normalizeText(scsrRecommendationPreparedByField.value)
+        ) {
+          scsrRecommendationPreparedByField.value = name;
+          scheduleScsrRecommendationAutoSave();
+          refreshExportValidationGlow();
+        }
+      } catch (_) {
+        // Keep form usable even when MLS fetch is unavailable.
+      }
+    })();
+    try {
+      await scsrRecommendationPreparedByFetchPromise;
+    } finally {
+      scsrRecommendationPreparedByFetchPromise = null;
+    }
+  }
+
   async function persistRecommendationDetails(options) {
     const config = {
       isAutoSave: false,
       showToastOnError: true,
       ...options,
     };
-    if (!currentCsrRecord || !currentCsrRecord.csrId) {
+    if (
+      !currentCsrRecord ||
+      !currentCsrRecord.csrId ||
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) !== "CSR"
+    ) {
       return false;
     }
     const details = collectRecommendationDetails();
+    if (config.isAutoSave) {
+      const existingDetails =
+        currentCsrRecord &&
+        currentCsrRecord.recommendation &&
+        currentCsrRecord.recommendation.details &&
+        typeof currentCsrRecord.recommendation.details === "object"
+          ? currentCsrRecord.recommendation.details
+          : {};
+      details.reviewedBy = normalizeText(existingDetails.reviewedBy) || details.reviewedBy;
+      details.notedBy = normalizeText(existingDetails.notedBy) || details.notedBy;
+      details.approvedBy = normalizeText(existingDetails.approvedBy) || details.approvedBy;
+      details.mswdOfficer = normalizeText(existingDetails.mswdOfficer) || details.mswdOfficer;
+    }
     currentCsrRecord.recommendation = {
       ...(currentCsrRecord.recommendation || {}),
       details,
@@ -4798,6 +7546,53 @@
       setRecommendationSaveStatus(failedLabel, "error");
       if (config.showToastOnError) {
         showToast("Unable to save Recommendation right now.");
+      }
+      return false;
+    }
+  }
+
+  async function persistScsrRecommendationDetails(options) {
+    const config = {
+      isAutoSave: false,
+      showToastOnError: true,
+      ...options,
+    };
+    if (
+      !currentCsrRecord ||
+      !currentCsrRecord.csrId ||
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) !== "SCSR"
+    ) {
+      return false;
+    }
+    const details = collectScsrRecommendationDetails();
+    if (config.isAutoSave) {
+      const existingDetails =
+        currentCsrRecord &&
+        currentCsrRecord.scsrRecommendation &&
+        currentCsrRecord.scsrRecommendation.details &&
+        typeof currentCsrRecord.scsrRecommendation.details === "object"
+          ? currentCsrRecord.scsrRecommendation.details
+          : {};
+      details.reviewedBy = normalizeText(existingDetails.reviewedBy) || details.reviewedBy;
+      details.approvedBy = normalizeText(existingDetails.approvedBy) || details.approvedBy;
+    }
+    currentCsrRecord.scsrRecommendation = {
+      ...(currentCsrRecord.scsrRecommendation || {}),
+      details,
+      savedAt: new Date().toISOString(),
+      lastSaveMode: config.isAutoSave ? "autosave" : "manual",
+    };
+    try {
+      await persistCsrRecord(currentCsrRecord);
+      const savedAtLabel = formatSaveTimeLabel(currentCsrRecord.scsrRecommendation.savedAt);
+      const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
+      setScsrRecommendationSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
+      return true;
+    } catch (_) {
+      const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
+      setScsrRecommendationSaveStatus(failedLabel, "error");
+      if (config.showToastOnError) {
+        showToast("Unable to save Case Recommendation right now.");
       }
       return false;
     }
@@ -4856,17 +7651,217 @@
     if (recommendationMswdOfficerField) {
       recommendationMswdOfficerField.value = savedDefaults.mswdOfficer;
     }
-    await persistRecommendationDetails({
-      isAutoSave: false,
-      showToastOnError: false,
-    });
+    const appliedGlobally = await applyCsrRecommendationDefaultsGlobally(savedDefaults);
+    if (!appliedGlobally) {
+      await persistRecommendationDetails({
+        isAutoSave: false,
+        showToastOnError: false,
+      });
+      showToast("Default name saved locally only (global update failed).", "pending", 2800);
+      return;
+    }
     refreshExportValidationGlow();
-    showToast("Default name saved.", "success", 2200);
+    showToast("Default name saved globally for this municipality.", "success", 2600);
+  }
+
+  async function applyCsrRecommendationDefaultsGlobally(defaults) {
+    const safeDefaults = {
+      reviewedBy: normalizeText(defaults && defaults.reviewedBy),
+      notedBy: normalizeText(defaults && defaults.notedBy),
+      approvedBy: normalizeText(defaults && defaults.approvedBy),
+      mswdOfficer: normalizeText(defaults && defaults.mswdOfficer),
+    };
+    const municipality = normalizeText(
+      (currentCsrRecord &&
+        currentCsrRecord.cardData &&
+        currentCsrRecord.cardData.municipality) ||
+      getActiveMunicipalityForCards()
+    ).toUpperCase();
+    if (!municipality) {
+      return false;
+    }
+    try {
+      const records = await getPrimaryCsrRecordsForMunicipality(municipality, "CSR");
+      if (!Array.isArray(records) || !records.length) {
+        return true;
+      }
+      const activeCsrId = String(currentCsrRecord && currentCsrRecord.csrId ? currentCsrRecord.csrId : "");
+      const timestamp = new Date().toISOString();
+      for (const record of records) {
+        if (!record || normalizeWorkflowType(record.workflowType) !== "CSR") {
+          continue;
+        }
+        const existingRecommendation =
+          record.recommendation && typeof record.recommendation === "object"
+            ? record.recommendation
+            : {};
+        const existingDetails =
+          existingRecommendation.details && typeof existingRecommendation.details === "object"
+            ? existingRecommendation.details
+            : {};
+        const nextDetails = {
+          ...existingDetails,
+          reviewedBy: safeDefaults.reviewedBy,
+          notedBy: safeDefaults.notedBy,
+          approvedBy: safeDefaults.approvedBy,
+          mswdOfficer: safeDefaults.mswdOfficer,
+        };
+        const hasChanged =
+          normalizeText(existingDetails.reviewedBy) !== safeDefaults.reviewedBy ||
+          normalizeText(existingDetails.notedBy) !== safeDefaults.notedBy ||
+          normalizeText(existingDetails.approvedBy) !== safeDefaults.approvedBy ||
+          normalizeText(existingDetails.mswdOfficer) !== safeDefaults.mswdOfficer;
+        if (!hasChanged) {
+          continue;
+        }
+        const nextRecord = {
+          ...record,
+          recommendation: {
+            ...existingRecommendation,
+            details: nextDetails,
+            savedAt: timestamp,
+            lastSaveMode: "autosave",
+          },
+        };
+        await saveCsrRecordToPrimaryStorage(nextRecord);
+        if (activeCsrId && String(record.csrId || "") === activeCsrId) {
+          currentCsrRecord = nextRecord;
+        }
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function handleScsrRecommendationDefaultNameSaveClick(event) {
+    const button = event && event.currentTarget;
+    if (!button) {
+      return;
+    }
+    const defaults = getScsrRecommendationDefaultNames();
+    const map = {
+      "scsr-recommendation-reviewed-by-save-btn": {
+        field: scsrRecommendationReviewedByField,
+        key: "reviewedBy",
+      },
+      "scsr-recommendation-approved-by-save-btn": {
+        field: scsrRecommendationApprovedByField,
+        key: "approvedBy",
+      },
+    };
+    const target = map[String(button.id || "")];
+    if (!target || !target.field) {
+      return;
+    }
+    const value = normalizeText(target.field.value);
+    if (!value) {
+      showToast("Name is required before saving default.");
+      if (typeof target.field.focus === "function") {
+        target.field.focus();
+      }
+      return;
+    }
+    const nextDefaults = {
+      ...defaults,
+      [target.key]: value,
+    };
+    const savedDefaults = setScsrRecommendationDefaultNames(nextDefaults);
+    if (scsrRecommendationReviewedByField) {
+      scsrRecommendationReviewedByField.value = savedDefaults.reviewedBy;
+    }
+    if (scsrRecommendationApprovedByField) {
+      scsrRecommendationApprovedByField.value = savedDefaults.approvedBy;
+    }
+    const appliedGlobally = await applyScsrRecommendationDefaultsGlobally(savedDefaults);
+    if (!appliedGlobally) {
+      await persistScsrRecommendationDetails({
+        isAutoSave: false,
+        showToastOnError: false,
+      });
+      showToast("Default name saved locally only (global update failed).", "pending", 2800);
+      return;
+    }
+    refreshExportValidationGlow();
+    showToast("Default name saved globally for SCSR in this municipality.", "success", 2800);
+  }
+
+  async function applyScsrRecommendationDefaultsGlobally(defaults) {
+    const safeDefaults = {
+      reviewedBy: normalizeText(defaults && defaults.reviewedBy),
+      approvedBy: normalizeText(defaults && defaults.approvedBy),
+    };
+    const municipality = normalizeText(
+      (currentCsrRecord &&
+        currentCsrRecord.cardData &&
+        currentCsrRecord.cardData.municipality) ||
+      getActiveMunicipalityForCards()
+    ).toUpperCase();
+    if (!municipality) {
+      return false;
+    }
+    try {
+      const records = await getPrimaryCsrRecordsForMunicipality(municipality, "SCSR");
+      if (!Array.isArray(records) || !records.length) {
+        return true;
+      }
+      const activeCsrId = String(currentCsrRecord && currentCsrRecord.csrId ? currentCsrRecord.csrId : "");
+      const timestamp = new Date().toISOString();
+      for (const record of records) {
+        if (!record || normalizeWorkflowType(record.workflowType) !== "SCSR") {
+          continue;
+        }
+        const existingStore =
+          record.scsrRecommendation && typeof record.scsrRecommendation === "object"
+            ? record.scsrRecommendation
+            : {};
+        const existingDetails =
+          existingStore.details && typeof existingStore.details === "object"
+            ? existingStore.details
+            : {};
+        const nextDetails = {
+          ...existingDetails,
+          reviewedBy: safeDefaults.reviewedBy,
+          approvedBy: safeDefaults.approvedBy,
+        };
+        const hasChanged =
+          normalizeText(existingDetails.reviewedBy) !== safeDefaults.reviewedBy ||
+          normalizeText(existingDetails.approvedBy) !== safeDefaults.approvedBy;
+        if (!hasChanged) {
+          continue;
+        }
+        const nextRecord = {
+          ...record,
+          scsrRecommendation: {
+            ...existingStore,
+            details: nextDetails,
+            savedAt: timestamp,
+            lastSaveMode: "autosave",
+          },
+        };
+        await saveCsrRecordToPrimaryStorage(nextRecord);
+        if (activeCsrId && String(record.csrId || "") === activeCsrId) {
+          currentCsrRecord = nextRecord;
+        }
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   function handleRecommendationBackClick() {
     flushRecommendationAutoSave(true);
     setActiveCsrStep(5);
+  }
+
+  function handleScsrRecommendationBackClick() {
+    if (!isActiveScsrRecommendationRecord()) {
+      setActiveCsrStep(7);
+      return;
+    }
+    flushScsrRecommendationAutoSave(true);
+    setActiveCsrStep(7);
   }
 
   async function ensureRecommendationSavedForOutput() {
@@ -4925,7 +7920,7 @@
     try {
       flushBasicInfoAutoSave();
       flushFamilyCompositionAutoSave();
-      flushCaseDevelopmentAutoSave(true);
+      flushActiveNarrativeAutoSave(true);
       flushInterventionsProvidedDraftAutoSave(true);
       flushInterventionsProvidedAutoSave(true);
       flushHouseholdInterventionPlanDraftAutoSave(true);
@@ -4960,7 +7955,7 @@
         );
         upsertExportProgressToast(100, "Completed");
         showToast(
-          `${normalizeText(exportResult && exportResult.fileName) || fileName} saved to Desktop\\CSR.`,
+          `${normalizeText(exportResult && exportResult.fileName) || fileName} saved to Desktop\\Social Case Report\\CSR.`,
           "success",
           3200
         );
@@ -4968,7 +7963,7 @@
       } catch (error) {
         const details = normalizeText(error && error.message);
         showToast(
-          details || "Unable to save PDF to Desktop\\CSR.",
+          details || "Unable to save PDF to Desktop\\Social Case Report\\CSR.",
           "error",
           4600
         );
@@ -4976,6 +7971,112 @@
     } finally {
       recommendationPdfExportInProgress = false;
       setRecommendationExportButtonBusy(false);
+      window.setTimeout(removeExportProgressToast, 900);
+      if (exportSucceeded) {
+        queueSafeRedirectToDataTableAfterExport();
+      }
+    }
+  }
+
+  async function ensureScsrRecommendationSavedForOutput() {
+    if (!isActiveScsrRecommendationRecord()) {
+      showToast("No active SCSR selected.");
+      return false;
+    }
+    if (!normalizeText(scsrRecommendationTextField && scsrRecommendationTextField.value)) {
+      setModalFieldError(scsrRecommendationTextField);
+      showToast("Case Recommendation input is required.");
+      if (scsrRecommendationTextField && typeof scsrRecommendationTextField.focus === "function") {
+        scsrRecommendationTextField.focus();
+      }
+      return false;
+    }
+    clearModalFieldError(scsrRecommendationTextField);
+    const saved = await persistScsrRecommendationDetails({
+      showToastOnError: true,
+    });
+    return !!saved;
+  }
+
+  async function handleScsrRecommendationPrintPreviewClick() {
+    if (!isActiveScsrRecommendationRecord()) {
+      showToast("No active SCSR selected.");
+      return;
+    }
+    clearModalFieldError(scsrRecommendationTextField);
+    flushScsrRecommendationAutoSave(true);
+    const opened = await openScsrTemplateWithCurrentData();
+    if (opened) {
+      showToast("SCSR template opened.", "success", 2200);
+      return;
+    }
+    showToast("Unable to open SCSR template.", "error", 3000);
+  }
+
+  async function handleScsrRecommendationExportClick() {
+    if (scsrRecommendationPdfExportInProgress) {
+      showToast("Export already running. Please wait.", "pending", 2200);
+      return;
+    }
+    let exportSucceeded = false;
+    scsrRecommendationPdfExportInProgress = true;
+    setScsrRecommendationExportButtonBusy(true);
+    upsertExportProgressToast(5, "Starting");
+    try {
+      flushBasicInfoAutoSave();
+      flushFamilyCompositionAutoSave();
+      flushActiveNarrativeAutoSave(true);
+      flushScsrBackgroundAutoSave(true);
+      flushScsrCaseAssessmentAutoSave(true);
+      flushScsrPlanImplementationDraftAutoSave(true);
+      flushScsrPlanImplementationAutoSave(true);
+      flushScsrCaseManagementEvaluationAutoSave(true);
+      flushScsrRecommendationAutoSave(true);
+      exportValidationArmed = true;
+      upsertExportProgressToast(0, "Checking required fields...");
+      const validation = collectStepperExportValidation({ markFields: true });
+      setExportInvalidSteps(validation.invalidSteps);
+      if (!validation.valid) {
+        removeExportProgressToast();
+        if (validation.firstInvalidStep) {
+          setActiveCsrStep(validation.firstInvalidStep);
+        }
+        showToast(validation.message || "Please complete required fields before export.");
+        return;
+      }
+      upsertExportProgressToast(22, "Saving data");
+      const saved = await ensureScsrRecommendationSavedForOutput();
+      if (!saved) {
+        return;
+      }
+      setExportInvalidSteps([]);
+      upsertExportProgressToast(45, "Preparing PDF");
+      const fileName = buildScsrPdfFileName();
+      const payload = await buildScsrTemplatePayload();
+      upsertExportProgressToast(78, "Saving file");
+      try {
+        const exportResult = await saveScsrPdfToDesktop(fileName, null, payload);
+        await markCurrentCsrRecordAsCompleted(
+          normalizeText(exportResult && exportResult.fileName) || fileName
+        );
+        upsertExportProgressToast(100, "Completed");
+        showToast(
+          `${normalizeText(exportResult && exportResult.fileName) || fileName} saved to Desktop\\Social Case Report\\SCSR.`,
+          "success",
+          3200
+        );
+        exportSucceeded = true;
+      } catch (error) {
+        const details = normalizeText(error && error.message);
+        showToast(
+          details || "Unable to save PDF to Desktop\\Social Case Report\\SCSR.",
+          "error",
+          4600
+        );
+      }
+    } finally {
+      scsrRecommendationPdfExportInProgress = false;
+      setScsrRecommendationExportButtonBusy(false);
       window.setTimeout(removeExportProgressToast, 900);
       if (exportSucceeded) {
         queueSafeRedirectToDataTableAfterExport();
@@ -4993,7 +8094,11 @@
     window.setTimeout(() => {
       const workspaceStillVisible =
         !!csrStepper && !csrStepper.classList.contains("hidden");
-      if (!workspaceStillVisible || recommendationPdfExportInProgress) {
+      if (
+        !workspaceStillVisible ||
+        recommendationPdfExportInProgress ||
+        scsrRecommendationPdfExportInProgress
+      ) {
         return;
       }
       handleReturnToSelectionClick();
@@ -5011,6 +8116,19 @@
       .replace(/\s+/g, " ")
       .trim();
     return `${safe || "CSR"}.pdf`;
+  }
+
+  function buildScsrPdfFileName() {
+    const live = collectBasicInfoForTemplate();
+    const fallbackName = normalizeText(
+      currentCsrRecord && currentCsrRecord.cardData && currentCsrRecord.cardData.name
+    );
+    const clientName = normalizeText(live && live.granteeName) || fallbackName || "SCSR";
+    const safe = clientName
+      .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return `${safe || "SCSR"}.pdf`;
   }
 
   function wait(ms) {
@@ -5060,16 +8178,63 @@
     return responseBody;
   }
 
+  async function saveScsrPdfToDesktop(fileName, pdfBlob, payload) {
+    const requestBody = { fileName };
+    if (payload && typeof payload === "object") {
+      requestBody.payload = payload;
+    } else if (pdfBlob) {
+      requestBody.base64Pdf = await blobToBase64(pdfBlob);
+    } else {
+      throw new Error("No export payload provided.");
+    }
+    const response = await fetch("/api/export/scsr-pdf", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+    let responseBody = null;
+    try {
+      responseBody = await response.json();
+    } catch (_) {
+      responseBody = null;
+    }
+    if (!response.ok || !responseBody || responseBody.ok !== true) {
+      throw new Error((responseBody && responseBody.error) || "Unable to save PDF.");
+    }
+    return responseBody;
+  }
+
   async function openCsrTemplateWithCurrentData() {
     try {
       const wrotePayload = await writeCsrTemplatePayloadSnapshot();
       if (!wrotePayload) {
         return false;
       }
-      if (openCsrTemplateInModalPreview()) {
+      if (await openCsrTemplateInModalPreview()) {
         return true;
       }
       const templateWindow = window.open(`csr-template.html?printMode=1&t=${Date.now()}`, "_blank");
+      if (!templateWindow) {
+        return false;
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function openScsrTemplateWithCurrentData() {
+    try {
+      const wrotePayload = await writeScsrTemplatePayloadSnapshot();
+      if (!wrotePayload) {
+        return false;
+      }
+      if (await openScsrTemplateInModalPreview()) {
+        return true;
+      }
+      const templateWindow = window.open(`scsr-template.html?printMode=1&t=${Date.now()}`, "_blank");
       if (!templateWindow) {
         return false;
       }
@@ -5098,16 +8263,168 @@
     }
   }
 
-  function openCsrTemplateInModalPreview() {
+  async function writeScsrTemplatePayloadSnapshot() {
+    if (!isActiveScsrRecommendationRecord()) {
+      return false;
+    }
+    try {
+      const payload = await buildScsrTemplatePayload();
+      const serialized = JSON.stringify(payload);
+      window.sessionStorage.setItem(SCSR_TEMPLATE_PAYLOAD_KEY, serialized);
+      try {
+        window.localStorage.setItem(SCSR_TEMPLATE_PAYLOAD_KEY, serialized);
+      } catch (_) {
+        // Ignore localStorage failures; sessionStorage remains available.
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function waitForRecommendationPreviewReady(timeoutMs = 7000) {
+    if (!recommendationPreviewIframe) {
+      return false;
+    }
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const previewWindow = recommendationPreviewIframe.contentWindow;
+      if (previewWindow && previewWindow.__CSR_EXPORT_READY__) {
+        return true;
+      }
+      await wait(120);
+    }
+    return false;
+  }
+
+  function setRecommendationPreviewLoadingVisible(isVisible) {
+    if (!recommendationPreviewLoading) {
+      return;
+    }
+    recommendationPreviewLoading.classList.toggle("hidden", !isVisible);
+  }
+
+  function setRecommendationPreviewIframeVisible(isVisible) {
+    if (!recommendationPreviewIframe) {
+      return;
+    }
+    recommendationPreviewIframe.style.visibility = isVisible ? "visible" : "hidden";
+  }
+
+  async function openCsrTemplateInModalPreview() {
     if (!recommendationPreviewModal || !recommendationPreviewIframe) {
       return false;
     }
+    setRecommendationPreviewLoadingVisible(true);
+    setRecommendationPreviewIframeVisible(false);
     recommendationPreviewModal.classList.remove("hidden");
     recommendationPreviewModal.classList.add("flex");
     recommendationPreviewIframe.setAttribute(
       "src",
       `csr-template.html?embedded=1&printMode=1&t=${Date.now()}`
     );
+    const ready = await waitForRecommendationPreviewReady();
+    setRecommendationPreviewIframeVisible(true);
+    setRecommendationPreviewLoadingVisible(false);
+    if (!ready) {
+      showToast("Preview is taking longer than expected. Layout may still be settling.", "pending", 2600);
+    }
+    return true;
+  }
+
+  async function waitForScsrRecommendationPreviewReady(timeoutMs = 7000) {
+    if (!scsrRecommendationPreviewIframe) {
+      return false;
+    }
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const previewWindow = scsrRecommendationPreviewIframe.contentWindow;
+      if (previewWindow && previewWindow.__CSR_EXPORT_READY__) {
+        return true;
+      }
+      await wait(120);
+    }
+    return false;
+  }
+
+  function getScsrRecommendationPreviewLayoutSignature() {
+    if (!scsrRecommendationPreviewIframe) {
+      return "";
+    }
+    const previewWindow = scsrRecommendationPreviewIframe.contentWindow;
+    const previewDocument = previewWindow && previewWindow.document;
+    if (!previewWindow || !previewDocument) {
+      return "";
+    }
+    const pages = Array.from(
+      previewDocument.querySelectorAll(".page-container")
+    ).filter((page) => {
+      return !page.classList.contains("hidden") && !page.classList.contains("template-page");
+    });
+    const pageCount = pages.length;
+    const body = previewDocument.body;
+    const bodyHeight = body ? body.scrollHeight : 0;
+    const root = previewDocument.documentElement;
+    const readyAttr = root ? root.getAttribute("data-csr-export-ready") || "" : "";
+    return `${readyAttr}|${pageCount}|${bodyHeight}`;
+  }
+
+  async function waitForScsrRecommendationPreviewStable(timeoutMs = 8500, settleMs = 420) {
+    const ready = await waitForScsrRecommendationPreviewReady(timeoutMs);
+    if (!ready) {
+      return false;
+    }
+    const start = Date.now();
+    let lastSignature = "";
+    let stableSince = 0;
+    while (Date.now() - start < timeoutMs) {
+      const signature = getScsrRecommendationPreviewLayoutSignature();
+      if (signature && signature === lastSignature) {
+        if (!stableSince) {
+          stableSince = Date.now();
+        }
+        if (Date.now() - stableSince >= settleMs) {
+          return true;
+        }
+      } else {
+        lastSignature = signature;
+        stableSince = 0;
+      }
+      await wait(120);
+    }
+    return false;
+  }
+
+  function setScsrRecommendationPreviewLoadingVisible(isVisible) {
+    if (!scsrRecommendationPreviewLoading) {
+      return;
+    }
+    scsrRecommendationPreviewLoading.classList.toggle("hidden", !isVisible);
+  }
+
+  function setScsrRecommendationPreviewIframeVisible(isVisible) {
+    if (!scsrRecommendationPreviewIframe) {
+      return;
+    }
+    scsrRecommendationPreviewIframe.style.visibility = isVisible ? "visible" : "hidden";
+  }
+
+  async function openScsrTemplateInModalPreview() {
+    if (!scsrRecommendationPreviewModal || !scsrRecommendationPreviewIframe) {
+      return false;
+    }
+    const src = `scsr-template.html?embedded=1&printMode=1&t=${Date.now()}`;
+    setScsrRecommendationPreviewLoadingVisible(true);
+    setScsrRecommendationPreviewIframeVisible(false);
+    scsrRecommendationPreviewModal.classList.remove("hidden");
+    scsrRecommendationPreviewModal.classList.add("flex");
+    scsrRecommendationPreviewIframe.setAttribute("src", src);
+    const ready = await waitForScsrRecommendationPreviewStable();
+    setScsrRecommendationPreviewIframeVisible(true);
+    setScsrRecommendationPreviewLoadingVisible(false);
+    if (!ready) {
+      showToast("Preview is taking longer than expected. Layout may still be settling.", "pending", 2600);
+    }
     return true;
   }
 
@@ -5115,30 +8432,20 @@
     if (!recommendationPreviewModal) {
       return;
     }
+    setRecommendationPreviewLoadingVisible(false);
+    setRecommendationPreviewIframeVisible(true);
     recommendationPreviewModal.classList.add("hidden");
     recommendationPreviewModal.classList.remove("flex");
   }
 
-  async function printRecommendationPreviewIframe() {
-    if (!recommendationPreviewIframe || !recommendationPreviewIframe.contentWindow) {
-      showToast("Preview is not ready for printing.", "error", 2400);
+  function closeScsrRecommendationPreviewModal() {
+    if (!scsrRecommendationPreviewModal) {
       return;
     }
-    const previewWindow = recommendationPreviewIframe.contentWindow;
-    const start = Date.now();
-    while (!previewWindow.__CSR_EXPORT_READY__ && Date.now() - start < 5000) {
-      await wait(120);
-    }
-    if (!previewWindow.__CSR_EXPORT_READY__) {
-      showToast("Preview is still rendering. Please try again in a moment.", "pending", 2600);
-      return;
-    }
-    try {
-      previewWindow.focus();
-      previewWindow.print();
-    } catch (_) {
-      showToast("Unable to print preview content.", "error", 2600);
-    }
+    setScsrRecommendationPreviewLoadingVisible(false);
+    setScsrRecommendationPreviewIframeVisible(true);
+    scsrRecommendationPreviewModal.classList.add("hidden");
+    scsrRecommendationPreviewModal.classList.remove("flex");
   }
 
   async function createTemplateExportTokenUrl(payload) {
@@ -5152,6 +8459,28 @@
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ payload }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body || body.ok !== true) {
+        return "";
+      }
+      return normalizeText(body.url);
+    } catch (_) {
+      return "";
+    }
+  }
+
+  async function createScsrTemplateExportTokenUrl(payload) {
+    if (!isHttpContext()) {
+      return "";
+    }
+    try {
+      const response = await fetch("/api/export/payload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ payload, template: "scsr" }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok || !body || body.ok !== true) {
@@ -5189,8 +8518,37 @@
     }
   }
 
+  async function openScsrRecommendationPreviewInBrowser() {
+    if (!scsrRecommendationPreviewIframe) {
+      showToast("Preview is not ready to open.", "error", 2400);
+      return;
+    }
+    const rawSrc = normalizeText(
+      scsrRecommendationPreviewIframe.getAttribute("src") || scsrRecommendationPreviewIframe.src
+    );
+    if (!rawSrc || rawSrc === "about:blank") {
+      showToast("Preview is not ready to open.", "error", 2400);
+      return;
+    }
+    try {
+      const payload = await buildScsrTemplatePayload();
+      const tokenUrl = await createScsrTemplateExportTokenUrl(payload);
+      const absoluteUrl = tokenUrl || new URL(rawSrc, window.location.href).toString();
+      const opened = window.open(absoluteUrl, "_blank", "noopener,noreferrer");
+      if (!opened && !isElectronRuntime()) {
+        showToast("Unable to open preview in browser.", "error", 2600);
+      }
+    } catch (_) {
+      showToast("Unable to open preview in browser.", "error", 2600);
+    }
+  }
+
   function scheduleRecommendationAutoSave() {
-    if (!currentCsrRecord || !currentCsrRecord.csrId) {
+    if (
+      !currentCsrRecord ||
+      !currentCsrRecord.csrId ||
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) !== "CSR"
+    ) {
       return;
     }
     if (recommendationAutoSaveTimer) {
@@ -5206,7 +8564,36 @@
     }, RECOMMENDATION_AUTOSAVE_DELAY_MS);
   }
 
+  function scheduleScsrRecommendationAutoSave() {
+    if (
+      !isActiveScsrRecommendationRecord()
+    ) {
+      return;
+    }
+    if (scsrRecommendationAutoSaveTimer) {
+      window.clearTimeout(scsrRecommendationAutoSaveTimer);
+    }
+    setScsrRecommendationSaveStatus("Saving changes...", "pending");
+    scsrRecommendationAutoSaveTimer = window.setTimeout(() => {
+      scsrRecommendationAutoSaveTimer = null;
+      void persistScsrRecommendationDetails({
+        isAutoSave: true,
+        showToastOnError: false,
+      });
+    }, RECOMMENDATION_AUTOSAVE_DELAY_MS);
+  }
+
   function flushRecommendationAutoSave(forcePersist) {
+    if (
+      !currentCsrRecord ||
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) !== "CSR"
+    ) {
+      if (recommendationAutoSaveTimer) {
+        window.clearTimeout(recommendationAutoSaveTimer);
+        recommendationAutoSaveTimer = null;
+      }
+      return;
+    }
     const shouldForcePersist = Boolean(forcePersist);
     if (recommendationAutoSaveTimer) {
       window.clearTimeout(recommendationAutoSaveTimer);
@@ -5225,10 +8612,42 @@
     }
   }
 
+  function flushScsrRecommendationAutoSave(forcePersist) {
+    const shouldForcePersist = Boolean(forcePersist);
+    if (!isActiveScsrRecommendationRecord()) {
+      if (scsrRecommendationAutoSaveTimer) {
+        window.clearTimeout(scsrRecommendationAutoSaveTimer);
+        scsrRecommendationAutoSaveTimer = null;
+      }
+      return;
+    }
+    if (scsrRecommendationAutoSaveTimer) {
+      window.clearTimeout(scsrRecommendationAutoSaveTimer);
+      scsrRecommendationAutoSaveTimer = null;
+      void persistScsrRecommendationDetails({
+        isAutoSave: true,
+        showToastOnError: false,
+      });
+      return;
+    }
+    if (shouldForcePersist) {
+      void persistScsrRecommendationDetails({
+        isAutoSave: true,
+        showToastOnError: false,
+      });
+    }
+  }
+
   function flushAllAutoSaveQueues() {
     flushBasicInfoAutoSave();
     flushFamilyCompositionAutoSave();
-    flushCaseDevelopmentAutoSave(true);
+    flushActiveNarrativeAutoSave(true);
+    flushScsrBackgroundAutoSave(true);
+    flushScsrCaseAssessmentAutoSave(true);
+    flushScsrCaseManagementEvaluationAutoSave(true);
+    flushScsrPlanImplementationDraftAutoSave(true);
+    flushScsrPlanImplementationAutoSave(true);
+    flushScsrRecommendationAutoSave(true);
     flushInterventionsProvidedDraftAutoSave(true);
     flushInterventionsProvidedAutoSave(true);
     flushHouseholdInterventionPlanDraftAutoSave(true);
@@ -5338,7 +8757,8 @@
           "NONE",
         sourceOfInfo:
           normalizeText(basicInfoLive.sourceOfInfo) ||
-          normalizeText(basicEdited.sourceOfInfo),
+          normalizeText(basicEdited.sourceOfInfo) ||
+          normalizeText(basicEdited.sourceOfIncome),
         previousWellBeingLevel:
           normalizeText(basicInfoLive.previousWellBeingLevel) ||
           normalizeText(basicEdited.prevWellBeingLevel) ||
@@ -5358,15 +8778,168 @@
     };
   }
 
+  async function buildScsrTemplatePayload() {
+    const basicPrefilled =
+      currentCsrRecord &&
+      currentCsrRecord.basicInformation &&
+      currentCsrRecord.basicInformation.prefilled &&
+      typeof currentCsrRecord.basicInformation.prefilled === "object"
+        ? currentCsrRecord.basicInformation.prefilled
+        : {};
+    const basicEdited =
+      currentCsrRecord &&
+      currentCsrRecord.basicInformation &&
+      currentCsrRecord.basicInformation.editDetails &&
+      typeof currentCsrRecord.basicInformation.editDetails === "object"
+        ? currentCsrRecord.basicInformation.editDetails
+        : collectBasicInfoEditDetails();
+    const familyMembers = await getFamilyCompositionMembersForTemplate();
+    const storedPresentingProblemHtml =
+      currentCsrRecord &&
+      currentCsrRecord.presentingProblem &&
+      currentCsrRecord.presentingProblem.html;
+    const storedCaseAssessmentHtml =
+      currentCsrRecord &&
+      currentCsrRecord.caseAssessment &&
+      currentCsrRecord.caseAssessment.html;
+    const storedCaseManagementEvaluationHtml =
+      currentCsrRecord &&
+      currentCsrRecord.caseManagementEvaluation &&
+      currentCsrRecord.caseManagementEvaluation.html;
+
+    const livePresentingProblemHtml =
+      normalizeWorkflowType(getActiveRecordWorkflowType()) === "SCSR" && activeCsrStep === 3
+        ? getScsrPresentingProblemEditorHtml()
+        : "";
+    const liveCaseAssessmentHtml =
+      normalizeWorkflowType(getActiveRecordWorkflowType()) === "SCSR" && activeCsrStep === 5
+        ? getScsrCaseAssessmentEditorHtml()
+        : "";
+    const liveCaseManagementEvaluationHtml =
+      normalizeWorkflowType(getActiveRecordWorkflowType()) === "SCSR" && activeCsrStep === 7
+        ? getScsrCaseManagementEvaluationEditorHtml()
+        : "";
+
+    const presentingProblemHtml = normalizeCaseDevelopmentHtmlForStorage(
+      livePresentingProblemHtml || storedPresentingProblemHtml
+    );
+    const caseAssessmentHtml = normalizeCaseDevelopmentHtmlForStorage(
+      liveCaseAssessmentHtml || storedCaseAssessmentHtml
+    );
+    const caseManagementEvaluationHtml = normalizeCaseDevelopmentHtmlForStorage(
+      liveCaseManagementEvaluationHtml || storedCaseManagementEvaluationHtml
+    );
+    const scsrRecommendationDetails = collectScsrRecommendationDetails();
+    const live = collectBasicInfoForTemplate();
+    const dateIso =
+      normalizeText(scsrRecommendationDetails.date) ||
+      getPhilippinesTodayIsoDate();
+
+    return {
+      generatedAt: new Date().toISOString(),
+      csrId: normalizeText(currentCsrRecord && currentCsrRecord.csrId),
+      workflowType: "SCSR",
+      basicInfo: {
+        date: dateIso,
+        clientName:
+          normalizeText(live.granteeName) ||
+          normalizeText(basicPrefilled.name) ||
+          normalizeText(currentCsrRecord && currentCsrRecord.cardData && currentCsrRecord.cardData.name),
+        householdId:
+          normalizeText(live.householdId) ||
+          normalizeText(basicPrefilled.hhid) ||
+          normalizeText(currentCsrRecord && currentCsrRecord.cardData && currentCsrRecord.cardData.hhid),
+        hhSet:
+          normalizeText(live.hhSet) ||
+          normalizeText(basicPrefilled.hhSet),
+        sex:
+          normalizeText(live.sex) ||
+          normalizeText(basicPrefilled.sex),
+        birthday:
+          normalizeText(live.birthday) ||
+          normalizeText(basicPrefilled.birthday),
+        age:
+          normalizeText(live.age) ||
+          normalizeText(basicPrefilled.age),
+        placeOfBirth:
+          normalizeText(live.placeOfBirth) ||
+          normalizeText(basicEdited.placeOfBirth),
+        civilStatus:
+          normalizeText(live.civilStatus) ||
+          normalizeText(basicPrefilled.civilStatus),
+        presentAddress:
+          normalizeText(live.presentAddress) ||
+          normalizeText(basicEdited.presentAddress),
+        educationalAttainment:
+          normalizeText(live.educationalAttainment) ||
+          normalizeText(basicEdited.educationalAttainment) ||
+          normalizeText(basicPrefilled.educationalAttainment),
+        contactInfo:
+          normalizeContactInfoForDisplay(
+            normalizeText(live.contactInfo) ||
+            normalizeText(basicEdited.contactInfo)
+          ),
+        religion:
+          normalizeText(live.religion) ||
+          normalizeText(basicEdited.religion),
+        ipAffiliation:
+          normalizeText(live.ipAffiliation) ||
+          normalizeText(basicPrefilled.ipAffiliation) ||
+          "NONE",
+        sourceOfIncome:
+          normalizeText(basicEdited.sourceOfIncome) ||
+          normalizeText(basicEdited.sourceOfInfo) ||
+          normalizeText(live.sourceOfInfo),
+        monthlyIncome:
+          normalizeText(basicEdited.monthlyIncome),
+        perCapitaIncome:
+          normalizeText(basicEdited.perCapitaIncome),
+        levelOfWellBeing:
+          normalizeText(basicEdited.wellBeingLevel) ||
+          normalizeText(live.previousWellBeingLevel),
+        clientStatusOnExit:
+          normalizeText(basicPrefilled.clientStatusOnExit) ||
+          normalizeText(live.clientStatusOnExit),
+      },
+      familyComposition: familyMembers,
+      presentingProblem: {
+        html: presentingProblemHtml,
+      },
+      backgroundInformation: {
+        tabs: SCSR_BACKGROUND_TABS.map((item) => {
+          const entry = getScsrBackgroundTabEntry(item.key);
+          return {
+            key: item.key,
+            label: item.label,
+            html: normalizeCaseDevelopmentHtmlForStorage(entry && entry.html),
+          };
+        }),
+      },
+      caseAssessment: {
+        html: caseAssessmentHtml,
+      },
+      interventionPlanImplementation: getScsrPlanImplementationItems(),
+      caseManagementEvaluation: {
+        html: caseManagementEvaluationHtml,
+      },
+      recommendation: scsrRecommendationDetails,
+    };
+  }
+
   function collectBasicInfoForTemplate() {
+    const birthdayInputValue = normalizeText(basicBirthdayInput && basicBirthdayInput.value);
     return {
       granteeName: normalizeText(basicGranteeNameInput && basicGranteeNameInput.value),
       householdId: normalizeText(basicHhIdInput && basicHhIdInput.value),
       hhSet: normalizeText(basicHhSetInput && basicHhSetInput.value),
-      sex: normalizeText(basicSexInput && basicSexInput.value),
-      birthday: normalizeText(basicBirthdayInput && basicBirthdayInput.value),
-      age: normalizeText(basicAgeInput && basicAgeInput.value),
-      civilStatus: normalizeText(basicCivilStatusInput && basicCivilStatusInput.value),
+      sex: resolveBasicSexValue(
+        normalizeText(basicSexInput && basicSexInput.value)
+      ),
+      birthday: formatBasicInfoBirthdayForDisplay(birthdayInputValue),
+      age: normalizeText(basicAgeInput && basicAgeInput.value) || computeAgeFromBirthday(birthdayInputValue),
+      civilStatus: resolveBasicCivilStatusValue(
+        normalizeText(basicCivilStatusInput && basicCivilStatusInput.value)
+      ),
       ipAffiliation: normalizeText(basicIpAffiliationInput && basicIpAffiliationInput.value),
       clientStatusOnExit: normalizeText(
         basicClientStatusOnExitInput && basicClientStatusOnExitInput.value
@@ -5420,6 +8993,12 @@
         return {
           name: normalizeText(row && (row.NAMES || row.NAME)),
           sex: normalizeText(row && row.SEX),
+          birthday: getMemberFieldValue(
+            membersStore,
+            memberKey,
+            "birthday",
+            formatFamilyCompositionBirthdayValue(row && row.BIRTHDAY)
+          ),
           age: normalizeText(row && row.AGE),
           civilStatus: normalizeText(row && row.CIVIL_STATUS),
           relationship: normalizeText(row && row.RELATION_TO_HH_HEAD),
@@ -5486,6 +9065,9 @@
     if (fieldName === "monthlyIncome") {
       target.value = formatMonthlyIncomeValue(target.value);
     }
+    if (fieldName === "birthday") {
+      target.value = toFamilyCompositionBirthdayIso(target.value);
+    }
     if (fieldName === "educationalAttainment") {
       const memberContainer = target.closest("[data-fc-member-key]");
       const memberKey = normalizeText(
@@ -5497,12 +9079,101 @@
         });
       }
     }
+    syncScsrPerCapitaIncomeField({ scheduleSave: true });
     scheduleFamilyCompositionAutoSave();
     refreshExportValidationGlow();
   }
 
-  function scheduleFamilyCompositionAutoSave() {
+  function getFamilyCompositionAccordionExpandedKeys() {
+    const familyComposition =
+      currentCsrRecord &&
+      currentCsrRecord.familyComposition &&
+      typeof currentCsrRecord.familyComposition === "object"
+        ? currentCsrRecord.familyComposition
+        : null;
+    const ui =
+      familyComposition && familyComposition.ui && typeof familyComposition.ui === "object"
+        ? familyComposition.ui
+        : null;
+    const expandedKeys = Array.isArray(ui && ui.expandedMemberKeys)
+      ? ui.expandedMemberKeys
+      : [];
+    return expandedKeys.map((value) => normalizeText(value)).filter(Boolean);
+  }
+
+  function setFamilyCompositionAccordionExpandedKeys(expandedKeys) {
     if (!currentCsrRecord || !currentCsrRecord.csrId) {
+      return false;
+    }
+    const nextExpandedKeys = Array.from(
+      new Set(
+        (Array.isArray(expandedKeys) ? expandedKeys : [])
+          .map((value) => normalizeText(value))
+          .filter(Boolean)
+      )
+    );
+    const familyComposition =
+      currentCsrRecord.familyComposition && typeof currentCsrRecord.familyComposition === "object"
+        ? currentCsrRecord.familyComposition
+        : {};
+    const currentExpandedKeys = getFamilyCompositionAccordionExpandedKeys();
+    if (
+      currentExpandedKeys.length === nextExpandedKeys.length &&
+      currentExpandedKeys.every((value, index) => value === nextExpandedKeys[index])
+    ) {
+      return false;
+    }
+    currentCsrRecord.familyComposition = {
+      ...familyComposition,
+      ui: {
+        ...(familyComposition.ui && typeof familyComposition.ui === "object"
+          ? familyComposition.ui
+          : {}),
+        expandedMemberKeys: nextExpandedKeys,
+      },
+    };
+    return true;
+  }
+
+  function scheduleFamilyCompositionAccordionStateSave() {
+    if (!currentCsrRecord || !currentCsrRecord.csrId) {
+      return;
+    }
+    if (familyCompositionAccordionStateSaveTimer) {
+      window.clearTimeout(familyCompositionAccordionStateSaveTimer);
+    }
+    familyCompositionAccordionStateSaveTimer = window.setTimeout(() => {
+      familyCompositionAccordionStateSaveTimer = null;
+      void persistCsrRecord(currentCsrRecord);
+    }, 250);
+  }
+
+  function handleFamilyCompositionAccordionToggle(event) {
+    const accordion = event.target;
+    if (
+      !(accordion instanceof window.HTMLDetailsElement) ||
+      !accordion.matches("[data-fc-accordion]")
+    ) {
+      return;
+    }
+    const memberKey = normalizeText(accordion.getAttribute("data-fc-member-key"));
+    if (!memberKey) {
+      return;
+    }
+    const expandedKeys = new Set(getFamilyCompositionAccordionExpandedKeys());
+    if (accordion.open) {
+      expandedKeys.add(memberKey);
+    } else {
+      expandedKeys.delete(memberKey);
+    }
+    const changed = setFamilyCompositionAccordionExpandedKeys(Array.from(expandedKeys));
+    if (changed) {
+      scheduleFamilyCompositionAccordionStateSave();
+    }
+  }
+
+  function scheduleFamilyCompositionAutoSave() {
+    if (!isActiveFamilyCompositionRecord()) {
       return;
     }
     if (familyCompositionAutoSaveTimer) {
@@ -5517,10 +9188,26 @@
   }
 
   function flushFamilyCompositionAutoSave() {
+    if (!isActiveFamilyCompositionRecord()) {
+      if (familyCompositionAutoSaveTimer) {
+        window.clearTimeout(familyCompositionAutoSaveTimer);
+        familyCompositionAutoSaveTimer = null;
+      }
+      if (familyCompositionAccordionStateSaveTimer) {
+        window.clearTimeout(familyCompositionAccordionStateSaveTimer);
+        familyCompositionAccordionStateSaveTimer = null;
+      }
+      return;
+    }
     if (familyCompositionAutoSaveTimer) {
       window.clearTimeout(familyCompositionAutoSaveTimer);
       familyCompositionAutoSaveTimer = null;
       void persistFamilyCompositionEdits({ isAutoSave: true });
+    }
+    if (familyCompositionAccordionStateSaveTimer) {
+      window.clearTimeout(familyCompositionAccordionStateSaveTimer);
+      familyCompositionAccordionStateSaveTimer = null;
+      void persistCsrRecord(currentCsrRecord);
     }
   }
 
@@ -5532,9 +9219,96 @@
     try {
       const container = document.createElement("div");
       container.innerHTML = raw;
+      const cleanNarrativeMarkupTree = (root) => {
+        if (!root || !root.querySelectorAll) {
+          return;
+        }
+        Array.from(root.querySelectorAll("*")).forEach((node) => {
+          const className = String(node.getAttribute("class") || "");
+          if (className) {
+            const keptClasses = className
+              .split(/\s+/)
+              .map((item) => item.trim())
+              .filter(Boolean)
+              .filter((item) => !/^mso/i.test(item));
+            if (keptClasses.length) {
+              node.setAttribute("class", keptClasses.join(" "));
+            } else {
+              node.removeAttribute("class");
+            }
+          }
+          const langValue = String(node.getAttribute("lang") || "");
+          if (langValue) {
+            node.removeAttribute("lang");
+          }
+          const styleValue = String(node.getAttribute("style") || "");
+          if (styleValue) {
+            const filtered = styleValue
+              .split(";")
+              .map((rule) => String(rule || "").trim())
+              .filter(Boolean)
+              .filter((rule) => !/^--/i.test(rule))
+              .filter((rule) => !/^\s*mso-/i.test(rule))
+              .filter((rule) => !/^\s*font-family\s*:/i.test(rule))
+              .filter((rule) => !/^\s*font-size\s*:/i.test(rule))
+              .filter((rule) => !/^\s*line-height\s*:/i.test(rule))
+              .filter((rule) => !/^\s*text-indent\s*:/i.test(rule))
+              .filter((rule) => !/^\s*letter-spacing\s*:/i.test(rule))
+              .filter((rule) => !/^\s*word-spacing\s*:/i.test(rule))
+              .filter((rule) => !/^\s*margin-left\s*:/i.test(rule))
+              .filter((rule) => !/^\s*padding-left\s*:/i.test(rule))
+              .filter((rule) => !/^\s*margin\s*:/i.test(rule))
+              .filter((rule) => !/^\s*margin-top\s*:/i.test(rule))
+              .filter((rule) => !/^\s*margin-bottom\s*:/i.test(rule))
+              .filter((rule) => !/^\s*padding-top\s*:/i.test(rule))
+              .filter((rule) => !/^\s*padding-bottom\s*:/i.test(rule))
+              .join("; ");
+            if (filtered) {
+              node.setAttribute("style", filtered);
+            } else {
+              node.removeAttribute("style");
+            }
+          }
+        });
+        Array.from(root.querySelectorAll("span, div")).forEach((node) => {
+          const tag = String(node.tagName || "").toUpperCase();
+          const hasAttrs = node.attributes && node.attributes.length > 0;
+          const children = Array.from(node.childNodes || []);
+          const hasBlockChild = children.some(
+            (child) =>
+              child.nodeType === 1 &&
+              /^(P|DIV|SECTION|ARTICLE|UL|OL|LI|TABLE|TBODY|THEAD|TR|TD|TH)$/i.test(
+                String(child.tagName || "")
+              )
+          );
+          if (tag === "SPAN" && !hasAttrs) {
+            const fragment = document.createDocumentFragment();
+            while (node.firstChild) {
+              fragment.appendChild(node.firstChild);
+            }
+            node.replaceWith(fragment);
+            return;
+          }
+          if (tag === "DIV" && !hasAttrs && !hasBlockChild) {
+            const paragraph = document.createElement("p");
+            while (node.firstChild) {
+              paragraph.appendChild(node.firstChild);
+            }
+            node.replaceWith(paragraph);
+          }
+        });
+      };
       container
         .querySelectorAll("script,style,iframe,object,embed,svg,math,meta,link")
         .forEach((node) => node.remove());
+      Array.from(container.querySelectorAll("font")).forEach((fontNode) => {
+        const fragment = document.createDocumentFragment();
+        while (fontNode.firstChild) {
+          fragment.appendChild(fontNode.firstChild);
+        }
+        fontNode.replaceWith(fragment);
+      });
+      cleanNarrativeMarkupTree(container);
 
       Array.from(container.querySelectorAll("*")).forEach((node) => {
         Array.from(node.attributes || []).forEach((attr) => {
@@ -5551,6 +9325,32 @@
             node.removeAttribute(attr.name);
           }
         });
+        const styleValue = String(node.getAttribute("style") || "");
+        if (styleValue) {
+          const filtered = styleValue
+            .split(";")
+            .map((rule) => String(rule || "").trim())
+            .filter(Boolean)
+            .filter((rule) => !/^\s*font-family\s*:/i.test(rule))
+            .filter((rule) => !/^\s*font-size\s*:/i.test(rule))
+            .filter((rule) => !/^\s*line-height\s*:/i.test(rule))
+            .filter((rule) => !/^\s*text-indent\s*:/i.test(rule))
+            .filter((rule) => !/^\s*letter-spacing\s*:/i.test(rule))
+            .filter((rule) => !/^\s*word-spacing\s*:/i.test(rule))
+            .filter((rule) => !/^\s*margin-left\s*:/i.test(rule))
+            .filter((rule) => !/^\s*padding-left\s*:/i.test(rule))
+            .filter((rule) => !/^\s*margin\s*:/i.test(rule))
+            .filter((rule) => !/^\s*margin-top\s*:/i.test(rule))
+            .filter((rule) => !/^\s*margin-bottom\s*:/i.test(rule))
+            .filter((rule) => !/^\s*padding-top\s*:/i.test(rule))
+            .filter((rule) => !/^\s*padding-bottom\s*:/i.test(rule))
+            .join("; ");
+          if (filtered) {
+            node.setAttribute("style", filtered);
+          } else {
+            node.removeAttribute("style");
+          }
+        }
       });
 
       const isEmptyNode = (node) => {
@@ -5571,12 +9371,11 @@
         if (text) {
           return false;
         }
-        const html = String(node.innerHTML || "")
-          .replace(/&nbsp;/gi, " ")
-          .replace(/\u00A0/g, " ")
-          .replace(/\s+/g, "")
-          .toLowerCase();
-        return !html || html === "<br>" || html === "<br/>";
+        const children = Array.from(node.childNodes || []);
+        if (!children.length) {
+          return true;
+        }
+        return children.every((child) => isEmptyNode(child));
       };
 
       while (container.firstChild && isEmptyNode(container.firstChild)) {
@@ -5622,6 +9421,79 @@
     try {
       const container = document.createElement("div");
       container.innerHTML = raw;
+      const cleanNarrativeMarkupTree = (root) => {
+        if (!root || !root.querySelectorAll) {
+          return;
+        }
+        Array.from(root.querySelectorAll("*")).forEach((node) => {
+          const className = String(node.getAttribute("class") || "");
+          if (className) {
+            const keptClasses = className
+              .split(/\s+/)
+              .map((item) => item.trim())
+              .filter(Boolean)
+              .filter((item) => !/^mso/i.test(item));
+            if (keptClasses.length) {
+              node.setAttribute("class", keptClasses.join(" "));
+            } else {
+              node.removeAttribute("class");
+            }
+          }
+          if (node.hasAttribute("lang")) {
+            node.removeAttribute("lang");
+          }
+          const styleValue = String(node.getAttribute("style") || "");
+          if (styleValue) {
+            const filtered = styleValue
+              .split(";")
+              .map((rule) => String(rule || "").trim())
+              .filter(Boolean)
+              .filter((rule) => !/^--/i.test(rule))
+              .filter((rule) => !/^\s*mso-/i.test(rule))
+              .filter((rule) => !/^\s*font-family\s*:/i.test(rule))
+              .filter((rule) => !/^\s*font-size\s*:/i.test(rule))
+              .filter((rule) => !/^\s*line-height\s*:/i.test(rule))
+              .filter((rule) => !/^\s*text-indent\s*:/i.test(rule))
+              .filter((rule) => !/^\s*margin-left\s*:/i.test(rule))
+              .filter((rule) => !/^\s*padding-left\s*:/i.test(rule))
+              .filter((rule) => !/^\s*letter-spacing\s*:/i.test(rule))
+              .filter((rule) => !/^\s*word-spacing\s*:/i.test(rule))
+              .join("; ");
+            if (filtered) {
+              node.setAttribute("style", filtered);
+            } else {
+              node.removeAttribute("style");
+            }
+          }
+        });
+        Array.from(root.querySelectorAll("span, div")).forEach((node) => {
+          const tag = String(node.tagName || "").toUpperCase();
+          const hasAttrs = node.attributes && node.attributes.length > 0;
+          const children = Array.from(node.childNodes || []);
+          const hasBlockChild = children.some(
+            (child) =>
+              child.nodeType === 1 &&
+              /^(P|DIV|SECTION|ARTICLE|UL|OL|LI|TABLE|TBODY|THEAD|TR|TD|TH)$/i.test(
+                String(child.tagName || "")
+              )
+          );
+          if (tag === "SPAN" && !hasAttrs) {
+            const fragment = document.createDocumentFragment();
+            while (node.firstChild) {
+              fragment.appendChild(node.firstChild);
+            }
+            node.replaceWith(fragment);
+            return;
+          }
+          if (tag === "DIV" && !hasAttrs && !hasBlockChild) {
+            const paragraph = document.createElement("p");
+            while (node.firstChild) {
+              paragraph.appendChild(node.firstChild);
+            }
+            node.replaceWith(paragraph);
+          }
+        });
+      };
 
       // Enforce consistent typography by removing inline font overrides
       // that can survive paste/clear-format operations.
@@ -5632,6 +9504,7 @@
         }
         fontNode.replaceWith(fragment);
       });
+      cleanNarrativeMarkupTree(container);
       Array.from(container.querySelectorAll("*")).forEach((el) => {
         const styleValue = String(el.getAttribute("style") || "");
         if (!styleValue) {
@@ -5692,6 +9565,164 @@
         trimLeadingIndentWhitespace(el);
       });
 
+      const isTrailingEmptyNode = (node) => {
+        if (!node) {
+          return true;
+        }
+        if (node.nodeType === 3) {
+          return !String(node.textContent || "").replace(/[\u00A0\s]+/g, "");
+        }
+        if (node.nodeType !== 1) {
+          return true;
+        }
+        const tag = String(node.tagName || "").toUpperCase();
+        if (tag === "BR") {
+          return true;
+        }
+        const children = Array.from(node.childNodes || []);
+        if (!children.length) {
+          return !String(node.textContent || "").replace(/[\u00A0\s]+/g, "");
+        }
+        return children.every((child) => isTrailingEmptyNode(child));
+      };
+
+      const trimTrailingLineBreaks = (node) => {
+        if (!node || !node.childNodes || node.childNodes.length === 0) {
+          return;
+        }
+        let cursor = node.lastChild;
+        while (cursor) {
+          if (cursor.nodeType === 3) {
+            const rawText = String(cursor.textContent || "");
+            const trimmedText = rawText.replace(/[\u00A0\s]+$/, "");
+            if (!trimmedText) {
+              const previous = cursor.previousSibling;
+              cursor.remove();
+              cursor = previous;
+              continue;
+            }
+            if (trimmedText !== rawText) {
+              cursor.textContent = trimmedText;
+            }
+            break;
+          }
+          if (isTrailingEmptyNode(cursor)) {
+            const previous = cursor.previousSibling;
+            cursor.remove();
+            cursor = previous;
+            continue;
+          }
+          if (cursor.nodeType === 1) {
+            trimTrailingLineBreaks(cursor);
+            if (isTrailingEmptyNode(cursor)) {
+              const previous = cursor.previousSibling;
+              cursor.remove();
+              cursor = previous;
+              continue;
+            }
+          }
+          break;
+        }
+      };
+      Array.from(container.querySelectorAll("p, li, div")).forEach((el) => {
+        trimTrailingLineBreaks(el);
+      });
+
+      const collapseConsecutiveLineBreaks = (node) => {
+        if (!node || !node.childNodes || node.childNodes.length === 0) {
+          return;
+        }
+        let previousWasBreak = false;
+        Array.from(node.childNodes).forEach((child) => {
+          if (child.nodeType === 1) {
+            collapseConsecutiveLineBreaks(child);
+          }
+          const isBreak =
+            child.nodeType === 1 &&
+            String(child.tagName || "").toUpperCase() === "BR";
+          if (isBreak && previousWasBreak) {
+            child.remove();
+            return;
+          }
+          previousWasBreak = isBreak;
+          if (!isBreak) {
+            previousWasBreak = false;
+          }
+        });
+      };
+      Array.from(container.querySelectorAll("p, li, div")).forEach((el) => {
+        collapseConsecutiveLineBreaks(el);
+      });
+
+      const isSimpleInlineParagraph = (node) => {
+        if (!node || node.nodeType !== 1 || String(node.tagName || "").toUpperCase() !== "P") {
+          return false;
+        }
+        return Array.from(node.children || []).every((child) => {
+          const tag = String(child.tagName || "").toUpperCase();
+          return tag === "BR" || tag === "SPAN" || tag === "STRONG" || tag === "B" ||
+            tag === "EM" || tag === "I" || tag === "U" || tag === "S" || tag === "A";
+        });
+      };
+
+      const mergeAdjacentSimpleParagraphs = (root) => {
+        if (!root || !root.childNodes || root.childNodes.length === 0) {
+          return;
+        }
+        const isSemanticallyEmptyParagraph = (node) => {
+          if (!node || node.nodeType !== 1 || String(node.tagName || "").toUpperCase() !== "P") {
+            return false;
+          }
+          const text = String(node.textContent || "")
+            .replace(/\u00A0/g, " ")
+            .replace(/\u200B/g, "")
+            .trim();
+          return text.length === 0;
+        };
+        const isIgnorableGapNode = (node) => {
+          if (!node) {
+            return true;
+          }
+          if (node.nodeType !== 3) {
+            return false;
+          }
+          return !String(node.textContent || "").replace(/[\u00A0\s]+/g, "");
+        };
+        let cursor = root.firstChild;
+        while (cursor) {
+          if (cursor.nodeType === 1) {
+            mergeAdjacentSimpleParagraphs(cursor);
+          }
+          const current = cursor;
+          let next = current && current.nextSibling;
+          while (next && isIgnorableGapNode(next)) {
+            const removableGap = next;
+            next = next.nextSibling;
+            removableGap.remove();
+          }
+          if (
+            isSimpleInlineParagraph(current) &&
+            next &&
+            isSimpleInlineParagraph(next)
+          ) {
+            if (isSemanticallyEmptyParagraph(next)) {
+              next.remove();
+              continue;
+            }
+            current.appendChild(document.createElement("br"));
+            while (next.firstChild) {
+              current.appendChild(next.firstChild);
+            }
+            next.remove();
+            continue;
+          }
+          cursor = current && current.nextSibling;
+        }
+      };
+      const activeWorkflow = normalizeWorkflowType(getActiveRecordWorkflowType());
+      if (activeWorkflow === "CSR") {
+        mergeAdjacentSimpleParagraphs(container);
+      }
       const isEmptyNode = (node) => {
         if (!node) {
           return true;
@@ -5717,13 +9748,11 @@
         if (textContent) {
           return false;
         }
-        const html = String(el.innerHTML || "")
-          .replace(/&nbsp;/gi, " ")
-          .replace(/\u00A0/g, " ")
-          .replace(/\u200B/g, "")
-          .replace(/\s+/g, "")
-          .toLowerCase();
-        return !html || html === "<br>" || html === "<br/>";
+        const children = Array.from(el.childNodes || []);
+        if (!children.length) {
+          return true;
+        }
+        return children.every((child) => isEmptyNode(child));
       };
 
       while (container.firstChild && isEmptyNode(container.firstChild)) {
@@ -5732,6 +9761,11 @@
       while (container.lastChild && isEmptyNode(container.lastChild)) {
         container.removeChild(container.lastChild);
       }
+      Array.from(container.querySelectorAll("p, li, div")).forEach((el) => {
+        if (el !== container && isEmptyNode(el)) {
+          el.remove();
+        }
+      });
 
       const normalizedHtml = String(container.innerHTML || "").trim();
       return fallbackNormalize(normalizedHtml);
@@ -5772,6 +9806,249 @@
     }
   }
 
+  function getScsrPresentingProblemEditorHtml() {
+    return getCaseDevelopmentEditorHtml();
+  }
+
+  function setScsrPresentingProblemEditorHtml(value) {
+    setCaseDevelopmentEditorHtml(value);
+  }
+
+  function getScsrBackgroundEditorHtml() {
+    if (
+      !scsrBackgroundSummernoteReady ||
+      typeof window.jQuery === "undefined" ||
+      !window.jQuery.fn ||
+      !window.jQuery.fn.summernote
+    ) {
+      return "";
+    }
+    return normalizeCaseDevelopmentHtmlForStorage(
+      window.jQuery("#scsr-background-summernote").summernote("code")
+    );
+  }
+
+  function setScsrBackgroundEditorHtml(value) {
+    if (
+      !scsrBackgroundSummernoteReady ||
+      typeof window.jQuery === "undefined" ||
+      !window.jQuery.fn ||
+      !window.jQuery.fn.summernote
+    ) {
+      return;
+    }
+    scsrBackgroundApplyingEditorValue = true;
+    try {
+      const html = normalizeCaseDevelopmentHtmlForStorage(value);
+      window.jQuery("#scsr-background-summernote").summernote("code", html || "");
+    } finally {
+      scsrBackgroundApplyingEditorValue = false;
+    }
+  }
+
+  function scheduleScsrBackgroundAutoSave() {
+    if (
+      scsrBackgroundApplyingEditorValue ||
+      !scsrBackgroundSummernoteReady ||
+      !isActiveScsrBackgroundRecord()
+    ) {
+      return;
+    }
+    if (scsrBackgroundAutoSaveTimer) {
+      window.clearTimeout(scsrBackgroundAutoSaveTimer);
+      scsrBackgroundAutoSaveTimer = null;
+    }
+    setScsrBackgroundSaveStatus("Saving changes...", "pending");
+    scsrBackgroundAutoSaveTimer = window.setTimeout(() => {
+      scsrBackgroundAutoSaveTimer = null;
+      void persistScsrBackgroundDetails({ isAutoSave: true, showToastOnError: false });
+    }, SCSR_BACKGROUND_AUTOSAVE_DELAY_MS);
+  }
+
+  function flushScsrBackgroundAutoSave(forcePersist) {
+    const shouldForcePersist = Boolean(forcePersist);
+    if (!isActiveScsrBackgroundRecord()) {
+      if (scsrBackgroundAutoSaveTimer) {
+        window.clearTimeout(scsrBackgroundAutoSaveTimer);
+        scsrBackgroundAutoSaveTimer = null;
+      }
+      return;
+    }
+    if (scsrBackgroundAutoSaveTimer) {
+      window.clearTimeout(scsrBackgroundAutoSaveTimer);
+      scsrBackgroundAutoSaveTimer = null;
+      void persistScsrBackgroundDetails({ isAutoSave: true, showToastOnError: false });
+      return;
+    }
+    if (shouldForcePersist) {
+      void persistScsrBackgroundDetails({ isAutoSave: true, showToastOnError: false });
+    }
+  }
+
+  function getScsrCaseAssessmentEditorHtml() {
+    if (
+      !scsrCaseAssessmentSummernoteReady ||
+      typeof window.jQuery === "undefined" ||
+      !window.jQuery.fn ||
+      !window.jQuery.fn.summernote
+    ) {
+      return "";
+    }
+    return normalizeCaseDevelopmentHtmlForStorage(
+      window.jQuery("#scsr-case-assessment-summernote").summernote("code")
+    );
+  }
+
+  function setScsrCaseAssessmentEditorHtml(value) {
+    if (
+      !scsrCaseAssessmentSummernoteReady ||
+      typeof window.jQuery === "undefined" ||
+      !window.jQuery.fn ||
+      !window.jQuery.fn.summernote
+    ) {
+      return;
+    }
+    scsrCaseAssessmentApplyingEditorValue = true;
+    try {
+      const html = normalizeCaseDevelopmentHtmlForStorage(value);
+      window.jQuery("#scsr-case-assessment-summernote").summernote("code", html || "");
+    } finally {
+      scsrCaseAssessmentApplyingEditorValue = false;
+    }
+  }
+
+  function scheduleScsrCaseAssessmentAutoSave() {
+    if (
+      scsrCaseAssessmentApplyingEditorValue ||
+      !scsrCaseAssessmentSummernoteReady ||
+      !isActiveScsrCaseAssessmentRecord()
+    ) {
+      return;
+    }
+    if (scsrCaseAssessmentAutoSaveTimer) {
+      window.clearTimeout(scsrCaseAssessmentAutoSaveTimer);
+      scsrCaseAssessmentAutoSaveTimer = null;
+    }
+    setScsrCaseAssessmentSaveStatus("Saving changes...", "pending");
+    scsrCaseAssessmentAutoSaveTimer = window.setTimeout(() => {
+      scsrCaseAssessmentAutoSaveTimer = null;
+      void persistScsrCaseAssessmentDetails({ isAutoSave: true, showToastOnError: false });
+    }, CASE_DEVELOPMENT_AUTOSAVE_DELAY_MS);
+  }
+
+  function flushScsrCaseAssessmentAutoSave(forcePersist) {
+    const shouldForcePersist = Boolean(forcePersist);
+    if (!isActiveScsrCaseAssessmentRecord()) {
+      if (scsrCaseAssessmentAutoSaveTimer) {
+        window.clearTimeout(scsrCaseAssessmentAutoSaveTimer);
+        scsrCaseAssessmentAutoSaveTimer = null;
+      }
+      return;
+    }
+    if (scsrCaseAssessmentAutoSaveTimer) {
+      window.clearTimeout(scsrCaseAssessmentAutoSaveTimer);
+      scsrCaseAssessmentAutoSaveTimer = null;
+      void persistScsrCaseAssessmentDetails({ isAutoSave: true, showToastOnError: false });
+      return;
+    }
+    if (shouldForcePersist) {
+      void persistScsrCaseAssessmentDetails({ isAutoSave: true, showToastOnError: false });
+    }
+  }
+
+  function getScsrCaseManagementEvaluationEditorHtml() {
+    if (
+      !scsrCaseManagementEvaluationSummernoteReady ||
+      typeof window.jQuery === "undefined" ||
+      !window.jQuery.fn ||
+      !window.jQuery.fn.summernote
+    ) {
+      return "";
+    }
+    return normalizeCaseDevelopmentHtmlForStorage(
+      window.jQuery("#scsr-case-management-evaluation-summernote").summernote("code")
+    );
+  }
+
+  function setScsrCaseManagementEvaluationEditorHtml(value) {
+    if (
+      !scsrCaseManagementEvaluationSummernoteReady ||
+      typeof window.jQuery === "undefined" ||
+      !window.jQuery.fn ||
+      !window.jQuery.fn.summernote
+    ) {
+      return;
+    }
+    scsrCaseManagementEvaluationApplyingEditorValue = true;
+    try {
+      const html = normalizeCaseDevelopmentHtmlForStorage(value);
+      window.jQuery("#scsr-case-management-evaluation-summernote").summernote("code", html || "");
+    } finally {
+      scsrCaseManagementEvaluationApplyingEditorValue = false;
+    }
+  }
+
+  function normalizeActiveNarrativeEditorForStep(step, workflowType) {
+    const normalizedWorkflow = normalizeWorkflowType(workflowType);
+    if (step === 3) {
+      setCaseDevelopmentEditorHtml(getCaseDevelopmentEditorHtml());
+      return;
+    }
+    if (normalizedWorkflow !== "SCSR") {
+      return;
+    }
+    if (step === 4) {
+      setScsrBackgroundEditorHtml(getScsrBackgroundEditorHtml());
+      return;
+    }
+    if (step === 5) {
+      setScsrCaseAssessmentEditorHtml(getScsrCaseAssessmentEditorHtml());
+      return;
+    }
+    if (step === 7) {
+      setScsrCaseManagementEvaluationEditorHtml(getScsrCaseManagementEvaluationEditorHtml());
+    }
+  }
+
+  function scheduleScsrCaseManagementEvaluationAutoSave() {
+    if (
+      scsrCaseManagementEvaluationApplyingEditorValue ||
+      !scsrCaseManagementEvaluationSummernoteReady ||
+      !isActiveScsrCaseManagementEvaluationRecord()
+    ) {
+      return;
+    }
+    if (scsrCaseManagementEvaluationAutoSaveTimer) {
+      window.clearTimeout(scsrCaseManagementEvaluationAutoSaveTimer);
+      scsrCaseManagementEvaluationAutoSaveTimer = null;
+    }
+    setScsrCaseManagementEvaluationSaveStatus("Saving changes...", "pending");
+    scsrCaseManagementEvaluationAutoSaveTimer = window.setTimeout(() => {
+      scsrCaseManagementEvaluationAutoSaveTimer = null;
+      void persistScsrCaseManagementEvaluationDetails({ isAutoSave: true, showToastOnError: false });
+    }, CASE_DEVELOPMENT_AUTOSAVE_DELAY_MS);
+  }
+
+  function flushScsrCaseManagementEvaluationAutoSave(forcePersist) {
+    const shouldForcePersist = Boolean(forcePersist);
+    if (!isActiveScsrCaseManagementEvaluationRecord()) {
+      if (scsrCaseManagementEvaluationAutoSaveTimer) {
+        window.clearTimeout(scsrCaseManagementEvaluationAutoSaveTimer);
+        scsrCaseManagementEvaluationAutoSaveTimer = null;
+      }
+      return;
+    }
+    if (scsrCaseManagementEvaluationAutoSaveTimer) {
+      window.clearTimeout(scsrCaseManagementEvaluationAutoSaveTimer);
+      scsrCaseManagementEvaluationAutoSaveTimer = null;
+      void persistScsrCaseManagementEvaluationDetails({ isAutoSave: true, showToastOnError: false });
+      return;
+    }
+    if (shouldForcePersist) {
+      void persistScsrCaseManagementEvaluationDetails({ isAutoSave: true, showToastOnError: false });
+    }
+  }
+
   function scheduleCaseDevelopmentAutoSave() {
     if (
       caseDevelopmentApplyingEditorValue ||
@@ -5792,6 +10069,25 @@
     }, CASE_DEVELOPMENT_AUTOSAVE_DELAY_MS);
   }
 
+  function scheduleScsrPresentingProblemAutoSave() {
+    if (
+      caseDevelopmentApplyingEditorValue ||
+      !caseDevelopmentSummernoteReady ||
+      !isActiveScsrPresentingProblemRecord()
+    ) {
+      return;
+    }
+    if (scsrPresentingProblemAutoSaveTimer) {
+      window.clearTimeout(scsrPresentingProblemAutoSaveTimer);
+      scsrPresentingProblemAutoSaveTimer = null;
+    }
+    setCaseDevelopmentSaveStatus("Saving changes...", "pending");
+    scsrPresentingProblemAutoSaveTimer = window.setTimeout(() => {
+      scsrPresentingProblemAutoSaveTimer = null;
+      void persistScsrPresentingProblemDetails({ isAutoSave: true, showToastOnError: false });
+    }, CASE_DEVELOPMENT_AUTOSAVE_DELAY_MS);
+  }
+
   function flushCaseDevelopmentAutoSave(forcePersist) {
     const shouldForcePersist = Boolean(forcePersist);
     if (caseDevelopmentAutoSaveTimer) {
@@ -5803,6 +10099,42 @@
     if (shouldForcePersist) {
       void persistCaseDevelopmentDetails({ isAutoSave: true, showToastOnError: false });
     }
+  }
+
+  function flushScsrPresentingProblemAutoSave(forcePersist) {
+    const shouldForcePersist = Boolean(forcePersist);
+    if (!isActiveScsrPresentingProblemRecord()) {
+      if (scsrPresentingProblemAutoSaveTimer) {
+        window.clearTimeout(scsrPresentingProblemAutoSaveTimer);
+        scsrPresentingProblemAutoSaveTimer = null;
+      }
+      return;
+    }
+    if (scsrPresentingProblemAutoSaveTimer) {
+      window.clearTimeout(scsrPresentingProblemAutoSaveTimer);
+      scsrPresentingProblemAutoSaveTimer = null;
+      void persistScsrPresentingProblemDetails({ isAutoSave: true, showToastOnError: false });
+      return;
+    }
+    if (shouldForcePersist) {
+      void persistScsrPresentingProblemDetails({ isAutoSave: true, showToastOnError: false });
+    }
+  }
+
+  function scheduleActiveNarrativeAutoSave() {
+    if (activeWorkflowType === "SCSR") {
+      scheduleScsrPresentingProblemAutoSave();
+      return;
+    }
+    scheduleCaseDevelopmentAutoSave();
+  }
+
+  function flushActiveNarrativeAutoSave(forcePersist) {
+    if (activeWorkflowType === "SCSR") {
+      flushScsrPresentingProblemAutoSave(forcePersist);
+      return;
+    }
+    flushCaseDevelopmentAutoSave(forcePersist);
   }
 
   function scheduleBasicInfoAutoSave() {
@@ -5828,8 +10160,28 @@
     }
   }
 
-  function getBasicInfoRequiredFields() {
-    return Array.from(document.querySelectorAll("[data-basic-edit-required='1']"));
+  function getBasicInfoRequiredFieldIds(workflowType) {
+    return normalizeWorkflowType(workflowType || activeWorkflowType) === "SCSR"
+      ? SCSR_BASIC_INFO_REQUIRED_FIELD_IDS
+      : CSR_BASIC_INFO_REQUIRED_FIELD_IDS;
+  }
+
+  function getBasicInfoRequiredFields(workflowType) {
+    return getBasicInfoRequiredFieldIds(workflowType)
+      .map((fieldId) => document.getElementById(fieldId))
+      .filter((field) => Boolean(field));
+  }
+
+  function getAllBasicInfoValidationFields() {
+    const fieldIds = new Set([
+      "basic-sex",
+      "basic-civil-status",
+      ...CSR_BASIC_INFO_REQUIRED_FIELD_IDS,
+      ...SCSR_BASIC_INFO_REQUIRED_FIELD_IDS,
+    ]);
+    return Array.from(fieldIds)
+      .map((fieldId) => document.getElementById(fieldId))
+      .filter((field) => Boolean(field));
   }
 
   function formatSaveTimeLabel(date) {
@@ -5940,6 +10292,96 @@
     caseDevelopmentSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
   }
 
+  function setScsrBackgroundSaveStatus(message, tone) {
+    if (!scsrBackgroundSaveStatus) {
+      return;
+    }
+    scsrBackgroundSaveStatus.textContent = normalizeText(message);
+    scsrBackgroundSaveStatus.classList.remove(
+      "text-slate-500",
+      "dark:text-slate-400",
+      "text-amber-600",
+      "dark:text-amber-400",
+      "text-emerald-600",
+      "dark:text-emerald-400",
+      "text-red-600",
+      "dark:text-red-400"
+    );
+    if (tone === "success") {
+      scsrBackgroundSaveStatus.classList.add("text-emerald-600", "dark:text-emerald-400");
+      return;
+    }
+    if (tone === "error") {
+      scsrBackgroundSaveStatus.classList.add("text-red-600", "dark:text-red-400");
+      return;
+    }
+    if (tone === "pending") {
+      scsrBackgroundSaveStatus.classList.add("text-amber-600", "dark:text-amber-400");
+      return;
+    }
+    scsrBackgroundSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
+  }
+
+  function setScsrCaseAssessmentSaveStatus(message, tone) {
+    if (!scsrCaseAssessmentSaveStatus) {
+      return;
+    }
+    scsrCaseAssessmentSaveStatus.textContent = normalizeText(message);
+    scsrCaseAssessmentSaveStatus.classList.remove(
+      "text-slate-500",
+      "dark:text-slate-400",
+      "text-amber-600",
+      "dark:text-amber-400",
+      "text-emerald-600",
+      "dark:text-emerald-400",
+      "text-red-600",
+      "dark:text-red-400"
+    );
+    if (tone === "success") {
+      scsrCaseAssessmentSaveStatus.classList.add("text-emerald-600", "dark:text-emerald-400");
+      return;
+    }
+    if (tone === "error") {
+      scsrCaseAssessmentSaveStatus.classList.add("text-red-600", "dark:text-red-400");
+      return;
+    }
+    if (tone === "pending") {
+      scsrCaseAssessmentSaveStatus.classList.add("text-amber-600", "dark:text-amber-400");
+      return;
+    }
+    scsrCaseAssessmentSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
+  }
+
+  function setScsrCaseManagementEvaluationSaveStatus(message, tone) {
+    if (!scsrCaseManagementEvaluationSaveStatus) {
+      return;
+    }
+    scsrCaseManagementEvaluationSaveStatus.textContent = normalizeText(message);
+    scsrCaseManagementEvaluationSaveStatus.classList.remove(
+      "text-slate-500",
+      "dark:text-slate-400",
+      "text-amber-600",
+      "dark:text-amber-400",
+      "text-emerald-600",
+      "dark:text-emerald-400",
+      "text-red-600",
+      "dark:text-red-400"
+    );
+    if (tone === "success") {
+      scsrCaseManagementEvaluationSaveStatus.classList.add("text-emerald-600", "dark:text-emerald-400");
+      return;
+    }
+    if (tone === "error") {
+      scsrCaseManagementEvaluationSaveStatus.classList.add("text-red-600", "dark:text-red-400");
+      return;
+    }
+    if (tone === "pending") {
+      scsrCaseManagementEvaluationSaveStatus.classList.add("text-amber-600", "dark:text-amber-400");
+      return;
+    }
+    scsrCaseManagementEvaluationSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
+  }
+
   function setInterventionsProvidedSaveStatus(message, tone) {
     if (!interventionsProvidedSaveStatus) {
       return;
@@ -5968,6 +10410,36 @@
       return;
     }
     interventionsProvidedSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
+  }
+
+  function setScsrPlanImplementationSaveStatus(message, tone) {
+    if (!scsrPlanImplementationSaveStatus) {
+      return;
+    }
+    scsrPlanImplementationSaveStatus.textContent = normalizeText(message);
+    scsrPlanImplementationSaveStatus.classList.remove(
+      "text-slate-500",
+      "dark:text-slate-400",
+      "text-amber-600",
+      "dark:text-amber-400",
+      "text-emerald-600",
+      "dark:text-emerald-400",
+      "text-red-600",
+      "dark:text-red-400"
+    );
+    if (tone === "success") {
+      scsrPlanImplementationSaveStatus.classList.add("text-emerald-600", "dark:text-emerald-400");
+      return;
+    }
+    if (tone === "error") {
+      scsrPlanImplementationSaveStatus.classList.add("text-red-600", "dark:text-red-400");
+      return;
+    }
+    if (tone === "pending") {
+      scsrPlanImplementationSaveStatus.classList.add("text-amber-600", "dark:text-amber-400");
+      return;
+    }
+    scsrPlanImplementationSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
   }
 
   function setHouseholdInterventionPlanSaveStatus(message, tone) {
@@ -6028,6 +10500,36 @@
       return;
     }
     recommendationSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
+  }
+
+  function setScsrRecommendationSaveStatus(message, tone) {
+    if (!scsrRecommendationSaveStatus) {
+      return;
+    }
+    scsrRecommendationSaveStatus.textContent = normalizeText(message);
+    scsrRecommendationSaveStatus.classList.remove(
+      "text-slate-500",
+      "dark:text-slate-400",
+      "text-amber-600",
+      "dark:text-amber-400",
+      "text-emerald-600",
+      "dark:text-emerald-400",
+      "text-red-600",
+      "dark:text-red-400"
+    );
+    if (tone === "success") {
+      scsrRecommendationSaveStatus.classList.add("text-emerald-600", "dark:text-emerald-400");
+      return;
+    }
+    if (tone === "error") {
+      scsrRecommendationSaveStatus.classList.add("text-red-600", "dark:text-red-400");
+      return;
+    }
+    if (tone === "pending") {
+      scsrRecommendationSaveStatus.classList.add("text-amber-600", "dark:text-amber-400");
+      return;
+    }
+    scsrRecommendationSaveStatus.classList.add("text-slate-500", "dark:text-slate-400");
   }
 
   function setModalFieldError(field) {
@@ -6109,6 +10611,13 @@
   }
 
   function bindBasicInfoFieldConstraints() {
+    if (basicBirthdayInput) {
+      const todayIso = getPhilippinesTodayIsoDate();
+      if (todayIso) {
+        basicBirthdayInput.max = todayIso;
+      }
+    }
+
     const contactField = document.getElementById("edit-contact-info");
     if (contactField) {
       if (!normalizeText(contactField.value)) {
@@ -6194,6 +10703,24 @@
       });
     }
 
+    [monthlyIncomeField, perCapitaIncomeField].forEach((field) => {
+      if (!field) {
+        return;
+      }
+      field.addEventListener("input", () => {
+        field.value = normalizePesoAmountInput(field.value);
+        if (field === monthlyIncomeField) {
+          void refreshScsrPerCapitaIncomeFromFamilyComposition();
+        }
+      });
+      field.addEventListener("blur", () => {
+        field.value = normalizePesoAmountInput(field.value);
+        if (field === monthlyIncomeField) {
+          void refreshScsrPerCapitaIncomeFromFamilyComposition();
+        }
+      });
+    });
+
     refreshBasicInfoDatalistVisibility();
   }
 
@@ -6213,7 +10740,13 @@
 
   function refreshBasicInfoDatalistVisibility() {
     const sourceOfInfoField = document.getElementById(SOURCE_OF_INFO_FIELD_ID);
-    syncInputDatalistVisibility(sourceOfInfoField, SOURCE_OF_INFO_DATALIST_ID);
+    if (activeWorkflowType === "SCSR") {
+      if (sourceOfInfoField) {
+        sourceOfInfoField.removeAttribute("list");
+      }
+    } else {
+      syncInputDatalistVisibility(sourceOfInfoField, SOURCE_OF_INFO_DATALIST_ID);
+    }
 
     const prevWellBeingField = document.getElementById(PREV_WELLBEING_FIELD_ID);
     syncInputDatalistVisibility(prevWellBeingField, PREV_WELLBEING_DATALIST_ID);
@@ -6232,6 +10765,76 @@
     }
     const withoutLeadingZero = digits.replace(/^0+/, "");
     return (`09${withoutLeadingZero}`).slice(0, 11);
+  }
+
+  function normalizePesoAmountInput(value) {
+    const raw = normalizeText(value).replace(/₱/g, "").replace(/\s+/g, "");
+    const cleaned = raw.replace(/[^0-9.,]/g, "");
+    const parts = getPesoAmountParts(cleaned);
+    if (!parts) {
+      return "";
+    }
+    const { integerDigits, decimalDigits, endsWithSeparator } = parts;
+    if (!integerDigits && !decimalDigits) {
+      return "";
+    }
+    const integerNumber = Number.parseInt(integerDigits || "0", 10);
+    const formattedInteger = Number.isFinite(integerNumber)
+      ? integerNumber.toLocaleString("en-PH")
+      : "0";
+    if (endsWithSeparator) {
+      return `₱${formattedInteger}.`;
+    }
+    if (decimalDigits) {
+      return `₱${formattedInteger}.${decimalDigits}`;
+    }
+    return `₱${formattedInteger}`;
+  }
+
+  function getPesoAmountParts(cleanedValue) {
+    const cleaned = normalizeText(cleanedValue).replace(/[^0-9.,]/g, "");
+    if (!cleaned) {
+      return null;
+    }
+    const hasDot = cleaned.includes(".");
+    const hasComma = cleaned.includes(",");
+    const isThousandsGrouping = (separator) => {
+      const parts = cleaned.split(separator);
+      if (parts.length <= 1) {
+        return false;
+      }
+      const head = parts[0].replace(/\D/g, "");
+      if (!head || head.length > 3) {
+        return false;
+      }
+      return parts.slice(1).every((part) => /^\d{3}$/.test(part));
+    };
+
+    let separatorIndex = -1;
+    let treatAsDecimal = false;
+    if (hasDot && hasComma) {
+      separatorIndex = Math.max(cleaned.lastIndexOf("."), cleaned.lastIndexOf(","));
+      treatAsDecimal = true;
+    } else if (hasDot || hasComma) {
+      const separator = hasDot ? "." : ",";
+      separatorIndex = cleaned.lastIndexOf(separator);
+      const digitsAfter = cleaned.length - separatorIndex - 1;
+      treatAsDecimal = digitsAfter <= 2 && !isThousandsGrouping(separator);
+    }
+
+    if (!treatAsDecimal || separatorIndex < 0) {
+      return {
+        integerDigits: cleaned.replace(/[.,]/g, ""),
+        decimalDigits: "",
+        endsWithSeparator: false,
+      };
+    }
+
+    return {
+      integerDigits: cleaned.slice(0, separatorIndex).replace(/[.,]/g, ""),
+      decimalDigits: cleaned.slice(separatorIndex + 1).replace(/[.,]/g, "").slice(0, 2),
+      endsWithSeparator: separatorIndex === cleaned.length - 1,
+    };
   }
 
   function formatNationalId(value) {
@@ -6295,6 +10898,127 @@
       return "";
     }
     return `${numericValue} ${numericValue === 1 ? "year" : "years"}`;
+  }
+
+  function applyPerCapitaIncomeFieldMode(isScsr) {
+    if (!perCapitaIncomeField) {
+      return;
+    }
+    perCapitaIncomeField.readOnly = !!isScsr;
+    perCapitaIncomeField.setAttribute("aria-disabled", isScsr ? "true" : "false");
+    perCapitaIncomeField.tabIndex = isScsr ? -1 : 0;
+    perCapitaIncomeField.classList.toggle("bg-slate-100", !!isScsr);
+    perCapitaIncomeField.classList.toggle("dark:bg-slate-700", !!isScsr);
+    perCapitaIncomeField.classList.toggle("cursor-not-allowed", !!isScsr);
+    perCapitaIncomeField.classList.toggle("text-slate-500", !!isScsr);
+    perCapitaIncomeField.classList.toggle("dark:text-slate-300", !!isScsr);
+  }
+
+  function parsePesoAmountToNumber(value) {
+    const raw = normalizeText(value).replace(/₱/g, "").replace(/\s+/g, "");
+    const parts = getPesoAmountParts(raw);
+    if (!parts) {
+      return null;
+    }
+    const normalized = parts.decimalDigits
+      ? `${parts.integerDigits || "0"}.${parts.decimalDigits}`
+      : parts.integerDigits;
+    const parsed = Number.parseFloat(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function formatPesoAmountForDisplay(value) {
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) {
+      return "";
+    }
+    return `₱${amount.toLocaleString("en-PH", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+
+  function getVisibleFamilyCompositionMemberCount() {
+    const sourceRows = Array.isArray(latestFamilyCompositionRows)
+      ? latestFamilyCompositionRows
+      : [];
+    if (!sourceRows.length) {
+      return 0;
+    }
+    const deletedKeys = getFamilyCompositionDeletedKeysStore();
+    return sourceRows.filter((row) => !deletedKeys.has(getFamilyCompositionMemberKey(row))).length;
+  }
+
+  function computeScsrPerCapitaIncomeValue(monthlyIncomeValue) {
+    const monthlyIncome = parsePesoAmountToNumber(monthlyIncomeValue);
+    const memberCount = getVisibleFamilyCompositionMemberCount();
+    if (!Number.isFinite(monthlyIncome) || monthlyIncome <= 0 || memberCount <= 0) {
+      return "";
+    }
+    return formatPesoAmountForDisplay(monthlyIncome / memberCount);
+  }
+
+  function syncScsrPerCapitaIncomeField(options) {
+    if (getActiveRecordWorkflowType() !== "SCSR" || !perCapitaIncomeField) {
+      return false;
+    }
+    const config = {
+      preserveExistingOnUnresolved: true,
+      scheduleSave: false,
+      ...options,
+    };
+    const currentValue = normalizeText(perCapitaIncomeField.value);
+    let nextValue = computeScsrPerCapitaIncomeValue(
+      monthlyIncomeField && monthlyIncomeField.value
+    );
+    if (!nextValue && config.preserveExistingOnUnresolved && currentValue) {
+      nextValue = currentValue;
+    }
+    if (normalizeText(nextValue) === currentValue) {
+      return false;
+    }
+    perCapitaIncomeField.value = nextValue;
+    if (config.scheduleSave && currentCsrRecord && currentCsrRecord.csrId) {
+      scheduleBasicInfoAutoSave();
+    }
+    return true;
+  }
+
+  async function ensureFamilyCompositionRowsForActiveRecord() {
+    if (!currentCsrRecord || !currentCsrRecord.cardData) {
+      return false;
+    }
+    if (Array.isArray(latestFamilyCompositionRows) && latestFamilyCompositionRows.length) {
+      return true;
+    }
+    const targetCsrId = String(currentCsrRecord.csrId || "");
+    try {
+      await populateFamilyCompositionFromSelectedCard(currentCsrRecord.cardData);
+    } catch (_) {
+      return false;
+    }
+    return (
+      !!currentCsrRecord &&
+      String(currentCsrRecord.csrId || "") === targetCsrId &&
+      Array.isArray(latestFamilyCompositionRows) &&
+      latestFamilyCompositionRows.length > 0
+    );
+  }
+
+  async function refreshScsrPerCapitaIncomeFromFamilyComposition(options) {
+    if (getActiveRecordWorkflowType() !== "SCSR") {
+      return false;
+    }
+    const config = {
+      scheduleSave: true,
+      preserveExistingOnUnresolved: false,
+      ...options,
+    };
+    const hasRows = await ensureFamilyCompositionRowsForActiveRecord();
+    return syncScsrPerCapitaIncomeField({
+      scheduleSave: hasRows && config.scheduleSave,
+      preserveExistingOnUnresolved: config.preserveExistingOnUnresolved,
+    });
   }
 
   function normalizeNationalIdForStorage(value) {
@@ -6494,6 +11218,23 @@
     return "";
   }
 
+  function normalizeScsrWellBeingLabel(value) {
+    const normalized = normalizeText(value).toUpperCase();
+    if (!normalized) {
+      return "";
+    }
+    if (normalized.includes("LEVEL 1")) {
+      return "Level 1 - Survival";
+    }
+    if (normalized.includes("LEVEL 2")) {
+      return "Level 2 - Subsistence";
+    }
+    if (normalized.includes("LEVEL 3")) {
+      return "Level 3 - Self - Sufficient";
+    }
+    return normalizeText(value);
+  }
+
   function buildPrevWellBeingLabel(lowb, swdiScore) {
     const level = normalizeText(lowb);
     const score = normalizeText(swdiScore);
@@ -6511,10 +11252,21 @@
     return `${label} Index Score : ${score}`;
   }
 
-  function collectBasicInfoEditDetails() {
+  function collectCsrBasicInfoEditDetails() {
     const contactInfoRaw = getFieldValue("edit-contact-info");
     const nationalIdRaw = getFieldValue("edit-national-id");
+    const currentWellBeingLevel = getFieldValue("edit-prev-wellbeing");
+    const birthdayValue = normalizeText(basicBirthdayInput && basicBirthdayInput.value);
     return {
+      granteeName: normalizeText(basicGranteeNameInput && basicGranteeNameInput.value),
+      sex: resolveBasicSexValue(
+        normalizeText(basicSexInput && basicSexInput.value)
+      ),
+      birthday: toFamilyCompositionBirthdayIso(birthdayValue),
+      age: normalizeText(basicAgeInput && basicAgeInput.value) || computeAgeFromBirthday(birthdayValue),
+      civilStatus: resolveBasicCivilStatusValue(
+        normalizeText(basicCivilStatusInput && basicCivilStatusInput.value)
+      ),
       educationalAttainment: getFieldValue("edit-educational-attainment"),
       contactInfo: normalizeContactInfoForStorage(contactInfoRaw),
       nationalId: normalizeNationalIdForStorage(nationalIdRaw),
@@ -6525,8 +11277,43 @@
       placeOfBirth: getFieldValue("edit-place-of-birth"),
       sourceOfInfo: getFieldValue("edit-source-of-info"),
       clientStatusOnExit: getFieldValue("basic-client-status-on-exit"),
-      prevWellBeingLevel: getFieldValue("edit-prev-wellbeing"),
+      prevWellBeingLevel: currentWellBeingLevel,
+      monthlyIncome: getFieldValue("edit-monthly-income"),
+      perCapitaIncome: getFieldValue("edit-per-capita-income"),
     };
+  }
+
+  function collectScsrBasicInfoEditDetails() {
+    const contactInfoRaw = getFieldValue("edit-contact-info");
+    const currentWellBeingLevel = getFieldValue("edit-prev-wellbeing");
+    const birthdayValue = normalizeText(basicBirthdayInput && basicBirthdayInput.value);
+    syncScsrPerCapitaIncomeField();
+    return {
+      granteeName: normalizeText(basicGranteeNameInput && basicGranteeNameInput.value),
+      sex: resolveBasicSexValue(
+        normalizeText(basicSexInput && basicSexInput.value)
+      ),
+      birthday: toFamilyCompositionBirthdayIso(birthdayValue),
+      age: normalizeText(basicAgeInput && basicAgeInput.value) || computeAgeFromBirthday(birthdayValue),
+      civilStatus: resolveBasicCivilStatusValue(
+        normalizeText(basicCivilStatusInput && basicCivilStatusInput.value)
+      ),
+      educationalAttainment: getFieldValue("edit-educational-attainment"),
+      contactInfo: normalizeContactInfoForStorage(contactInfoRaw),
+      religion: getFieldValue("edit-religion"),
+      presentAddress: getFieldValue("edit-present-address"),
+      placeOfBirth: getFieldValue("edit-place-of-birth"),
+      sourceOfIncome: getFieldValue("edit-source-of-info"),
+      wellBeingLevel: currentWellBeingLevel,
+      monthlyIncome: getFieldValue("edit-monthly-income"),
+      perCapitaIncome: getFieldValue("edit-per-capita-income"),
+    };
+  }
+
+  function collectBasicInfoEditDetails() {
+    return getActiveRecordWorkflowType() === "SCSR"
+      ? collectScsrBasicInfoEditDetails()
+      : collectCsrBasicInfoEditDetails();
   }
 
   function getFieldValue(id) {
@@ -6545,17 +11332,8 @@
     }
   }
 
-  function applySavedBasicInfoEditDetails() {
-    resetBasicInfoEditDetailsForm();
-
-    if (!currentCsrRecord || !currentCsrRecord.basicInformation) {
-      return;
-    }
-    const editDetails = currentCsrRecord.basicInformation.editDetails;
-    if (!editDetails || typeof editDetails !== "object") {
-      return;
-    }
-
+  function applySavedCsrBasicInfoEditDetails(editDetails, prefilledDetails) {
+    applySavedBasicInfoSharedFieldEdits(editDetails, prefilledDetails);
     setEducationalAttainmentFieldValue(editDetails.educationalAttainment, false);
     setFieldValue("edit-contact-info", normalizePhilippineMobile(editDetails.contactInfo));
     setFieldValue("edit-national-id", formatNationalId(editDetails.nationalId));
@@ -6571,8 +11349,69 @@
     setFieldValue("edit-present-address", editDetails.presentAddress);
     setFieldValue("edit-place-of-birth", editDetails.placeOfBirth);
     setFieldValue("edit-source-of-info", editDetails.sourceOfInfo);
-    setFieldValue("basic-client-status-on-exit", editDetails.clientStatusOnExit);
-    setFieldValue("edit-prev-wellbeing", editDetails.prevWellBeingLevel);
+    setFieldValue(
+      "basic-client-status-on-exit",
+      normalizeText(prefilledDetails.clientStatusOnExit) || editDetails.clientStatusOnExit
+    );
+    setFieldValue(
+      "edit-prev-wellbeing",
+      normalizeText(editDetails.wellBeingLevel) || editDetails.prevWellBeingLevel
+    );
+    setFieldValue("edit-monthly-income", normalizePesoAmountInput(editDetails.monthlyIncome));
+    setFieldValue("edit-per-capita-income", normalizePesoAmountInput(editDetails.perCapitaIncome));
+  }
+
+  function applySavedScsrBasicInfoEditDetails(editDetails, prefilledDetails) {
+    applySavedBasicInfoSharedFieldEdits(editDetails, prefilledDetails);
+    setEducationalAttainmentFieldValue(editDetails.educationalAttainment, false);
+    setFieldValue("edit-contact-info", normalizePhilippineMobile(editDetails.contactInfo));
+    setFieldValue("edit-religion", editDetails.religion);
+    setFieldValue("edit-present-address", editDetails.presentAddress);
+    setFieldValue("edit-place-of-birth", editDetails.placeOfBirth);
+    setFieldValue(
+      "edit-source-of-info",
+      normalizeText(editDetails.sourceOfIncome) || normalizeText(editDetails.sourceOfInfo)
+    );
+    setFieldValue(
+      "basic-client-status-on-exit",
+      normalizeText(prefilledDetails.clientStatusOnExit)
+    );
+    setFieldValue(
+      "edit-prev-wellbeing",
+      normalizeText(editDetails.wellBeingLevel) || normalizeScsrWellBeingLabel(prefilledDetails.lowb)
+    );
+    setFieldValue("edit-monthly-income", normalizePesoAmountInput(editDetails.monthlyIncome));
+    setFieldValue("edit-per-capita-income", normalizePesoAmountInput(editDetails.perCapitaIncome));
+    syncScsrPerCapitaIncomeField();
+    void refreshScsrPerCapitaIncomeFromFamilyComposition({
+      scheduleSave: false,
+      preserveExistingOnUnresolved: true,
+    });
+  }
+
+  function applySavedBasicInfoEditDetails() {
+    resetBasicInfoEditDetailsForm();
+
+    if (!currentCsrRecord || !currentCsrRecord.basicInformation) {
+      return;
+    }
+    const editDetails = currentCsrRecord.basicInformation.editDetails;
+    if (!editDetails || typeof editDetails !== "object") {
+      return;
+    }
+    const prefilledDetails =
+      currentCsrRecord &&
+      currentCsrRecord.basicInformation &&
+      currentCsrRecord.basicInformation.prefilled &&
+      typeof currentCsrRecord.basicInformation.prefilled === "object"
+        ? currentCsrRecord.basicInformation.prefilled
+        : {};
+
+    if (getActiveRecordWorkflowType() === "SCSR") {
+      applySavedScsrBasicInfoEditDetails(editDetails, prefilledDetails);
+    } else {
+      applySavedCsrBasicInfoEditDetails(editDetails, prefilledDetails);
+    }
 
     const savedAt = normalizeText(
       currentCsrRecord &&
@@ -6593,6 +11432,14 @@
   }
 
   function applySavedCaseDevelopmentDetails() {
+    if (activeWorkflowType === "SCSR") {
+      applySavedScsrPresentingProblemDetails();
+      return;
+    }
+    applySavedCsrCaseDevelopmentDetails();
+  }
+
+  function applySavedCsrCaseDevelopmentDetails() {
     const savedDetails =
       currentCsrRecord &&
       currentCsrRecord.caseDevelopment &&
@@ -6620,6 +11467,111 @@
     setCaseDevelopmentSaveStatus("", "neutral");
   }
 
+  function applySavedScsrPresentingProblemDetails() {
+    const narrativeKey = getCurrentNarrativeRecordKey();
+    const savedDetails =
+      currentCsrRecord &&
+      currentCsrRecord[narrativeKey] &&
+      typeof currentCsrRecord[narrativeKey] === "object"
+        ? currentCsrRecord[narrativeKey]
+        : null;
+
+    if (savedDetails) {
+      setCaseDevelopmentEditorHtml(savedDetails.html || "");
+      const savedAt = normalizeText(savedDetails.savedAt);
+      if (savedAt) {
+        const mode = normalizeText(savedDetails.lastSaveMode);
+        const label = mode === "autosave" ? "Auto-saved" : "Saved";
+        setCaseDevelopmentSaveStatus(
+          `${label} ${formatSaveTimeLabel(savedAt)}`,
+          "success"
+        );
+      } else {
+        setCaseDevelopmentSaveStatus("", "neutral");
+      }
+      return;
+    }
+
+    setScsrPresentingProblemEditorHtml("");
+    setCaseDevelopmentSaveStatus("", "neutral");
+  }
+
+  function applySavedScsrBackgroundDetails() {
+    if (!scsrBackgroundSummernoteReady || !isActiveScsrBackgroundRecord()) {
+      return;
+    }
+    normalizeScsrBackgroundTabsStoreInMemory();
+    activeScsrBackgroundTabKey = getScsrBackgroundActiveTabFromStore();
+    renderScsrBackgroundTabs();
+    const activeEntry = getScsrBackgroundTabEntry(activeScsrBackgroundTabKey);
+    setScsrBackgroundEditorHtml(activeEntry.html || "");
+    const savedAt = normalizeText(activeEntry.savedAt);
+    if (savedAt) {
+      const mode = normalizeText(activeEntry.lastSaveMode);
+      const label = mode === "autosave" ? "Auto-saved" : "Saved";
+      setScsrBackgroundSaveStatus(`${label} ${formatSaveTimeLabel(savedAt)}`, "success");
+    } else {
+      setScsrBackgroundSaveStatus("", "neutral");
+    }
+    setScsrBackgroundFieldError(!normalizeText(getScsrBackgroundEditorHtml()));
+  }
+
+  function applySavedScsrCaseAssessmentDetails() {
+    if (!scsrCaseAssessmentSummernoteReady) {
+      return;
+    }
+    const savedDetails =
+      currentCsrRecord &&
+      currentCsrRecord.caseAssessment &&
+      typeof currentCsrRecord.caseAssessment === "object"
+        ? currentCsrRecord.caseAssessment
+        : null;
+
+    if (savedDetails) {
+      setScsrCaseAssessmentEditorHtml(savedDetails.html || "");
+      const savedAt = normalizeText(savedDetails.savedAt);
+      if (savedAt) {
+        const mode = normalizeText(savedDetails.lastSaveMode);
+        const label = mode === "autosave" ? "Auto-saved" : "Saved";
+        setScsrCaseAssessmentSaveStatus(`${label} ${formatSaveTimeLabel(savedAt)}`, "success");
+      } else {
+        setScsrCaseAssessmentSaveStatus("", "neutral");
+      }
+    } else {
+      setScsrCaseAssessmentEditorHtml("");
+      setScsrCaseAssessmentSaveStatus("", "neutral");
+    }
+    setScsrCaseAssessmentFieldError(!normalizeText(getScsrCaseAssessmentEditorHtml()));
+  }
+
+  function applySavedScsrCaseManagementEvaluationDetails() {
+    if (!scsrCaseManagementEvaluationSummernoteReady) {
+      return;
+    }
+    const savedDetails =
+      currentCsrRecord &&
+      currentCsrRecord.caseManagementEvaluation &&
+      typeof currentCsrRecord.caseManagementEvaluation === "object"
+        ? currentCsrRecord.caseManagementEvaluation
+        : null;
+
+    if (savedDetails) {
+      setScsrCaseManagementEvaluationEditorHtml(savedDetails.html || "");
+      const savedAt = normalizeText(savedDetails.savedAt);
+      if (savedAt) {
+        const mode = normalizeText(savedDetails.lastSaveMode);
+        const label = mode === "autosave" ? "Auto-saved" : "Saved";
+        setScsrCaseManagementEvaluationSaveStatus(`${label} ${formatSaveTimeLabel(savedAt)}`, "success");
+      } else {
+        setScsrCaseManagementEvaluationSaveStatus("", "neutral");
+      }
+    } else {
+      setScsrCaseManagementEvaluationEditorHtml("");
+      setScsrCaseManagementEvaluationSaveStatus("", "neutral");
+    }
+    setScsrCaseManagementEvaluationFieldError(!normalizeText(getScsrCaseManagementEvaluationEditorHtml()));
+  }
+
   function resetBasicInfoEditDetailsForm() {
     getBasicInfoRequiredFields().forEach((field) => {
       if (field.tagName === "SELECT") {
@@ -6631,20 +11583,52 @@
     });
     setFieldValue("basic-client-status-on-exit", "");
     setFieldValue("edit-contact-info", "09");
+    setFieldValue("edit-monthly-income", "");
+    setFieldValue("edit-per-capita-income", "");
+    applyPerCapitaIncomeFieldMode(getActiveRecordWorkflowType() === "SCSR");
     setBasicInfoSaveStatus("", "neutral");
   }
 
-  function restoreBasicInfoEditDefaultsFromPrefilled(prefilled) {
-    const religionFieldBeforeReset = document.getElementById("edit-religion");
-    const placeOfBirthBeforeReset = getFieldValue("edit-place-of-birth");
-    const sourceOfInfoBeforeReset = getFieldValue("edit-source-of-info");
-    const religionBeforeReset = normalizeText(
-      religionFieldBeforeReset ? religionFieldBeforeReset.value : ""
+  function restoreCsrBasicInfoEditDefaultsFromPrefilled(prefilled, restoreState) {
+    const religionBeforeReset = normalizeText(restoreState && restoreState.religionBeforeReset);
+    const placeOfBirthBeforeReset = normalizeText(
+      restoreState && restoreState.placeOfBirthBeforeReset
+    );
+    const sourceOfInfoBeforeReset = normalizeText(
+      restoreState && restoreState.sourceOfInfoBeforeReset
+    );
+    const educationalAttainmentFromPrefilled = normalizeText(
+      prefilled && prefilled.educationalAttainment
+    );
+    const presentAddressFromPrefilled = normalizeText(
+      prefilled && prefilled.presentAddress
+    );
+    const yearOfRegistrationFromPrefilled = normalizeText(
+      prefilled && prefilled.yearOfRegistration
+    );
+    const yearsInProgramFromPrefilled = normalizeText(
+      prefilled && prefilled.yearsInProgram
+    );
+    const contactInfoFromPrefilled = normalizeText(
+      prefilled && prefilled.contactInfo
+    );
+    const prevWellBeingFromPrefilled = normalizeText(
+      prefilled && prefilled.prevWellBeingLevel
+    );
+    const nationalIdFromPrefilled = normalizeText(
+      prefilled && prefilled.nationalId
     );
 
-    resetBasicInfoEditDetailsForm();
-
-    setEducationalAttainmentFieldValue(prefilled && prefilled.educationalAttainment, false);
+    setEducationalAttainmentFieldValue(educationalAttainmentFromPrefilled, false);
+    if (basicGranteeNameInput) {
+      basicGranteeNameInput.value = normalizeText(prefilled && prefilled.name);
+    }
+    setBasicSexValue(normalizeText(prefilled && prefilled.sex), "");
+    applyBasicInfoBirthdayAndAgeValues(
+      normalizeText(prefilled && prefilled.birthday),
+      normalizeText(prefilled && prefilled.age)
+    );
+    setBasicCivilStatusValue(normalizeText(prefilled && prefilled.civilStatus), "");
 
     const religionField = document.getElementById("edit-religion");
     if (religionField) {
@@ -6658,12 +11642,68 @@
 
     setFieldValue(
       "edit-year-registration",
-      normalizeText(prefilled && prefilled.yearOfRegistration).replace(/\D/g, "").slice(0, 4)
+      yearOfRegistrationFromPrefilled.replace(/\D/g, "").slice(0, 4)
     );
     setFieldValue(
       "edit-years-program",
-      normalizeText(prefilled && prefilled.yearsInProgram).replace(/\D/g, "").slice(0, 2)
+      yearsInProgramFromPrefilled.replace(/\D/g, "").slice(0, 2)
     );
+    setFieldValue(
+      "edit-contact-info",
+      normalizePhilippineMobile(normalizeContactInfoFromGrantee(contactInfoFromPrefilled))
+    );
+    setFieldValue(
+      "edit-present-address",
+      formatPresentAddressForDisplay(presentAddressFromPrefilled)
+    );
+    setFieldValue("edit-place-of-birth", placeOfBirthBeforeReset);
+    setFieldValue("edit-source-of-info", sourceOfInfoBeforeReset);
+    setFieldValue("basic-client-status-on-exit", normalizeText(prefilled && prefilled.clientStatusOnExit));
+    setFieldValue("edit-prev-wellbeing", prevWellBeingFromPrefilled);
+    setFieldValue("edit-national-id", formatNationalId(nationalIdFromPrefilled));
+  }
+
+  function restoreScsrBasicInfoEditDefaultsFromPrefilled(prefilled, restoreState) {
+    const religionBeforeReset = normalizeText(restoreState && restoreState.religionBeforeReset);
+    const placeOfBirthBeforeReset = normalizeText(
+      restoreState && restoreState.placeOfBirthBeforeReset
+    );
+    const sourceOfInfoBeforeReset = normalizeText(
+      restoreState && restoreState.sourceOfInfoBeforeReset
+    );
+    const monthlyIncomeBeforeReset = normalizeText(
+      restoreState && restoreState.monthlyIncomeBeforeReset
+    );
+    const perCapitaIncomeBeforeReset = normalizeText(
+      restoreState && restoreState.perCapitaIncomeBeforeReset
+    );
+
+    setEducationalAttainmentFieldValue(prefilled && prefilled.educationalAttainment, false);
+    if (basicGranteeNameInput) {
+      basicGranteeNameInput.value = normalizeText(prefilled && prefilled.name);
+    }
+    setBasicSexValue(normalizeText(prefilled && prefilled.sex), "");
+    applyBasicInfoBirthdayAndAgeValues(
+      normalizeText(prefilled && prefilled.birthday),
+      normalizeText(prefilled && prefilled.age)
+    );
+    setBasicCivilStatusValue(normalizeText(prefilled && prefilled.civilStatus), "");
+
+    const religionField = document.getElementById("edit-religion");
+    if (religionField) {
+      const religionFromPrefilled = resolveSelectOptionValue(
+        religionField,
+        normalizeText(prefilled && prefilled.religion)
+      );
+      const preservedReligion = religionFromPrefilled ||
+        resolveSelectOptionValue(religionField, religionBeforeReset);
+      if (preservedReligion) {
+        religionField.value = preservedReligion;
+      } else if ((religionField.options || []).length) {
+        religionField.selectedIndex = 0;
+      }
+    }
+
     setFieldValue(
       "edit-contact-info",
       normalizePhilippineMobile(normalizeContactInfoFromGrantee(prefilled && prefilled.contactInfo))
@@ -6675,8 +11715,47 @@
     setFieldValue("edit-place-of-birth", placeOfBirthBeforeReset);
     setFieldValue("edit-source-of-info", sourceOfInfoBeforeReset);
     setFieldValue("basic-client-status-on-exit", normalizeText(prefilled && prefilled.clientStatusOnExit));
-    setFieldValue("edit-prev-wellbeing", normalizeText(prefilled && prefilled.prevWellBeingLevel));
-    setFieldValue("edit-national-id", formatNationalId(normalizeText(prefilled && prefilled.nationalId)));
+    setFieldValue(
+      "edit-prev-wellbeing",
+      normalizeScsrWellBeingLabel(prefilled && prefilled.lowb)
+    );
+    setFieldValue("edit-monthly-income", normalizePesoAmountInput(monthlyIncomeBeforeReset));
+    syncScsrPerCapitaIncomeField();
+  }
+
+  function restoreBasicInfoEditDefaultsFromPrefilled(prefilled) {
+    const religionFieldBeforeReset = document.getElementById("edit-religion");
+    const placeOfBirthBeforeReset = getFieldValue("edit-place-of-birth");
+    const sourceOfInfoBeforeReset = getFieldValue("edit-source-of-info");
+    const yearOfRegistrationBeforeReset = getFieldValue("edit-year-registration");
+    const yearsInProgramBeforeReset = getFieldValue("edit-years-program");
+    const contactInfoBeforeReset = getFieldValue("edit-contact-info");
+    const prevWellBeingBeforeReset = getFieldValue("edit-prev-wellbeing");
+    const nationalIdBeforeReset = getFieldValue("edit-national-id");
+    const monthlyIncomeBeforeReset = getFieldValue("edit-monthly-income");
+    const perCapitaIncomeBeforeReset = getFieldValue("edit-per-capita-income");
+    const religionBeforeReset = normalizeText(
+      religionFieldBeforeReset ? religionFieldBeforeReset.value : ""
+    );
+
+    resetBasicInfoEditDetailsForm();
+    const restoreState = {
+      religionBeforeReset,
+      placeOfBirthBeforeReset,
+      sourceOfInfoBeforeReset,
+      yearOfRegistrationBeforeReset,
+      yearsInProgramBeforeReset,
+      contactInfoBeforeReset,
+      prevWellBeingBeforeReset,
+      nationalIdBeforeReset,
+      monthlyIncomeBeforeReset,
+      perCapitaIncomeBeforeReset,
+    };
+    if (getActiveRecordWorkflowType() === "SCSR") {
+      restoreScsrBasicInfoEditDefaultsFromPrefilled(prefilled, restoreState);
+      return;
+    }
+    restoreCsrBasicInfoEditDefaultsFromPrefilled(prefilled, restoreState);
   }
 
   async function handleBasicInfoRestoreClick() {
@@ -6685,7 +11764,7 @@
       return;
     }
 
-    const prefilled =
+    const cachedPrefilled =
       currentCsrRecord &&
       currentCsrRecord.basicInformation &&
       currentCsrRecord.basicInformation.prefilled &&
@@ -6693,13 +11772,35 @@
         ? currentCsrRecord.basicInformation.prefilled
         : null;
 
+    const currentWorkflowType = normalizeWorkflowType(
+      (currentCsrRecord && currentCsrRecord.workflowType) || activeWorkflowType
+    );
+    let prefilled = cachedPrefilled;
+    const latestPrefilled = await fetchLatestBasicInfoPrefilledForRecord(
+      currentCsrRecord,
+      currentWorkflowType
+    );
+    if (
+      currentWorkflowType === "CSR" &&
+      (!latestPrefilled || typeof latestPrefilled !== "object")
+    ) {
+      showToast("Unable to load latest municipality data for restore.");
+      return;
+    }
+    if (latestPrefilled && typeof latestPrefilled === "object") {
+      prefilled = {
+        ...(cachedPrefilled && typeof cachedPrefilled === "object" ? cachedPrefilled : {}),
+        ...latestPrefilled,
+      };
+    }
+
     if (!prefilled || !hasCachedBasicInfoPrefilled(prefilled)) {
       showToast("No prefilled Basic Information values found.");
       return;
     }
-
+    const subjectLabel = currentWorkflowType === "SCSR" ? "current client" : "current grantee";
     const confirmed = await confirmUserAction(
-      "Are you sure you want to restore the default values of current grantee?"
+      `Are you sure you want to restore the default values of ${subjectLabel}?`
     );
     if (!confirmed) {
       return;
@@ -6710,11 +11811,15 @@
       basicInfoAutoSaveTimer = null;
     }
 
+    currentCsrRecord.basicInformation = {
+      ...(currentCsrRecord.basicInformation || {}),
+      prefilled,
+    };
     restoreBasicInfoEditDefaultsFromPrefilled(prefilled);
     refreshExportValidationGlow();
     const saved = await persistBasicInfoEditDetails({ isAutoSave: false, showToastOnError: true });
     if (saved) {
-      showToast("Basic Information restored to prefilled defaults.", "success", 2800);
+      showToast("Restored to prefilled defaults.", "success", 2800);
     }
   }
 
@@ -6742,6 +11847,21 @@
       const savedAtLabel = formatSaveTimeLabel(currentCsrRecord.basicInformation.savedAt);
       const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
       setBasicInfoSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
+      const snapshot = buildRecordSyncSnapshot(currentCsrRecord, {
+        includeBasicInfo: true,
+      });
+      if (snapshot) {
+        void enqueueCrossWorkflowSync(() =>
+          syncRecordToCounterpartWorkflow(snapshot, {
+            syncBasicInfo: true,
+            sourceSavedAt: normalizeText(
+              snapshot &&
+              snapshot.basicInformation &&
+              snapshot.basicInformation.savedAt
+            ),
+          })
+        );
+      }
       return true;
     } catch (_) {
       const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
@@ -6775,6 +11895,7 @@
     if (hasCachedPrefilled && isActiveCsrPrefillRequest(targetCsrId, requestSeq)) {
       // Show cached values immediately, then refresh from latest municipality rows.
       fillBasicInfoLeftFieldsFromPrefilled(cachedPrefilled);
+      reapplySavedBasicInfoSharedFieldEdits();
     }
 
     setBasicInfoPrefillLoading(true);
@@ -6784,6 +11905,7 @@
     if (!municipality || (!hhid && !name)) {
       if (isActiveCsrPrefillRequest(targetCsrId, requestSeq)) {
         fillBasicInfoLeftFields(null);
+        reapplySavedBasicInfoSharedFieldEdits();
       }
       if (requestSeq === basicInfoPrefillRequestSeq) {
         setBasicInfoPrefillLoading(false);
@@ -6799,36 +11921,21 @@
       const granteeRow = findGranteeRowForBasicInfo(municipalityRows, hhid, name);
       fillBasicInfoLeftFields(granteeRow);
       if (currentCsrRecord) {
+        const nextPrefilled = buildBasicInfoPrefilledFromGranteeRow(
+          granteeRow,
+          (currentCsrRecord && currentCsrRecord.workflowType) || activeWorkflowType
+        );
         currentCsrRecord.basicInformation = {
           ...(currentCsrRecord.basicInformation || {}),
-          prefilled: {
-            name: normalizeText(granteeRow && (granteeRow.NAME || granteeRow.NAMES)),
-            hhid: normalizeText(granteeRow && granteeRow.HH_ID),
-            hhSet: normalizeText(granteeRow && granteeRow.HH_SET),
-            sex: normalizeText(granteeRow && granteeRow.SEX),
-            birthday: normalizeText(granteeRow && granteeRow.BIRTHDAY),
-            age: normalizeText(granteeRow && granteeRow.AGE),
-            civilStatus: normalizeText(granteeRow && granteeRow.CIVIL_STATUS),
-            ipAffiliation: normalizeText(granteeRow && granteeRow.IP_AFFILIATION) || "NONE",
-            contactInfo: normalizeText(granteeRow && granteeRow["CONTACT NUMBER"]),
-            nationalId: normalizeText(granteeRow && granteeRow.PCN),
-            presentAddress: normalizeText(granteeRow && granteeRow.PRESENT_ADDRESS),
-            religion: normalizeText(granteeRow && granteeRow.RELIGION),
-            yearOfRegistration: normalizeText(granteeRow && granteeRow["YEAR OF REGISTRATION"]),
-            yearsInProgram: normalizeText(granteeRow && granteeRow.YEARS_IN_PROGRAM),
-            educationalAttainment: normalizeText(granteeRow && granteeRow.GRADE_LEVEL),
-            clientStatusOnExit: normalizeText(granteeRow && granteeRow.CLIENT_STATUS),
-            prevWellBeingLevel: buildPrevWellBeingLabel(
-              granteeRow && granteeRow.LOWB,
-              granteeRow && granteeRow["SWDI SCORE"]
-            ),
-          },
+          prefilled: nextPrefilled,
         };
         await persistCsrRecord(currentCsrRecord);
       }
+      reapplySavedBasicInfoSharedFieldEdits();
     } catch (_) {
       if (isActiveCsrPrefillRequest(targetCsrId, requestSeq) && !hasCachedPrefilled) {
         fillBasicInfoLeftFields(null);
+        reapplySavedBasicInfoSharedFieldEdits();
       }
     } finally {
       if (requestSeq === basicInfoPrefillRequestSeq) {
@@ -6952,8 +12059,16 @@
       .filter((memberKey) => !isGranteeMemberKey(memberKey));
 
     const previousDeleted = Array.from(existingDeleted);
+    const existingMemberKeys = Object.keys(existingMembers).sort();
+    const cleanedMemberKeys = Object.keys(cleanedMembers).sort();
     const memberChanged =
-      Object.keys(cleanedMembers).length !== Object.keys(existingMembers).length;
+      existingMemberKeys.length !== cleanedMemberKeys.length ||
+      existingMemberKeys.some((key, index) => key !== cleanedMemberKeys[index]) ||
+      cleanedMemberKeys.some((key) => {
+        const before = existingMembers[key];
+        const after = cleanedMembers[key];
+        return JSON.stringify(before || {}) !== JSON.stringify(after || {});
+      });
     const deletedChanged =
       cleanedDeleted.length !== previousDeleted.length ||
       cleanedDeleted.some((key, idx) => key !== previousDeleted[idx]);
@@ -7033,7 +12148,86 @@
     if (!digits) {
       return "";
     }
-    return `\u20B1 ${digits}`;
+    const numericValue = Number.parseInt(digits, 10);
+    if (!Number.isFinite(numericValue)) {
+      return "";
+    }
+    return `\u20B1 ${numericValue.toLocaleString("en-PH")}`;
+  }
+
+  function formatFamilyCompositionBirthdayValue(value) {
+    const raw = normalizeText(value);
+    if (!raw) {
+      return "";
+    }
+
+    const numericMatch = raw.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+    if (numericMatch) {
+      const month = Number.parseInt(numericMatch[1], 10);
+      const day = Number.parseInt(numericMatch[2], 10);
+      const year = Number.parseInt(numericMatch[3], 10);
+      if (
+        Number.isFinite(month) &&
+        Number.isFinite(day) &&
+        Number.isFinite(year) &&
+        month >= 1 &&
+        month <= 12 &&
+        day >= 1 &&
+        day <= 31
+      ) {
+        return `${month}/${day}/${year}`;
+      }
+    }
+
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      const month = parsed.getMonth() + 1;
+      const day = parsed.getDate();
+      const year = parsed.getFullYear();
+      return `${month}/${day}/${year}`;
+    }
+    return raw;
+  }
+
+  function toFamilyCompositionBirthdayIso(value) {
+    const raw = normalizeText(value);
+    if (!raw) {
+      return "";
+    }
+
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoMatch) {
+      return raw;
+    }
+
+    const usMatch = raw.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+    if (usMatch) {
+      const month = Number.parseInt(usMatch[1], 10);
+      const day = Number.parseInt(usMatch[2], 10);
+      const year = Number.parseInt(usMatch[3], 10);
+      if (
+        Number.isFinite(month) &&
+        Number.isFinite(day) &&
+        Number.isFinite(year) &&
+        month >= 1 &&
+        month <= 12 &&
+        day >= 1 &&
+        day <= 31
+      ) {
+        const mm = String(month).padStart(2, "0");
+        const dd = String(day).padStart(2, "0");
+        return `${year}-${mm}-${dd}`;
+      }
+    }
+
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      const year = parsed.getFullYear();
+      const month = String(parsed.getMonth() + 1).padStart(2, "0");
+      const day = String(parsed.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+    return "";
   }
 
   function normalizeFamilyCompositionFieldForStorage(fieldName, value) {
@@ -7044,6 +12238,9 @@
     if (fieldName === "monthlyIncome") {
       const formatted = formatMonthlyIncomeValue(normalizedValue);
       return formatted || "NONE";
+    }
+    if (fieldName === "birthday") {
+      return toFamilyCompositionBirthdayIso(normalizedValue);
     }
     return normalizedValue;
   }
@@ -7059,32 +12256,76 @@
   const FAMILY_COMPOSITION_EDITABLE_FIELDS = Object.freeze([
     "monitoredChild",
     "educationalAttainment",
+    "birthday",
     "occupation",
     "monthlyIncome",
     "typeOfDisability",
   ]);
 
+  const FAMILY_COMPOSITION_RESET_PRESERVE_FIELDS_BY_WORKFLOW = Object.freeze({
+    CSR: Object.freeze(["occupation", "monthlyIncome"]),
+    SCSR: Object.freeze(["occupation", "monthlyIncome"]),
+  });
+
+  function shouldPreserveFamilyCompositionFieldOnReset(fieldName, workflowType) {
+    const normalizedWorkflow = normalizeWorkflowType(workflowType);
+    const preservedFields =
+      FAMILY_COMPOSITION_RESET_PRESERVE_FIELDS_BY_WORKFLOW[normalizedWorkflow];
+    if (!Array.isArray(preservedFields) || preservedFields.length === 0) {
+      return false;
+    }
+    return preservedFields.includes(fieldName);
+  }
+
+  function getFamilyCompositionDefaultFieldValue(fieldName, row, workflowType) {
+    const isScsrWorkflow = normalizeWorkflowType(workflowType) === "SCSR";
+    if (isScsrWorkflow && (fieldName === "occupation" || fieldName === "monthlyIncome")) {
+      return "";
+    }
+    switch (fieldName) {
+      case "monitoredChild":
+        return resolveMonitoredChildDefault(row);
+      case "educationalAttainment":
+        return row && row.GRADE_LEVEL;
+      case "birthday":
+        return row && row.BIRTHDAY;
+      case "occupation":
+        return row && row.OCCUPATION;
+      case "monthlyIncome":
+        return row && row.MONTHLY_INCOME;
+      case "typeOfDisability":
+        return normalizeText(row && row.DISABILITY_TYPES) || "None";
+      default:
+        return "";
+    }
+  }
+
   function buildFamilyCompositionDefaultEntry(row) {
+    const workflowType = getActiveRecordWorkflowType();
     return {
       monitoredChild: normalizeFamilyCompositionFieldForStorage(
         "monitoredChild",
-        resolveMonitoredChildDefault(row)
+        getFamilyCompositionDefaultFieldValue("monitoredChild", row, workflowType)
       ),
       educationalAttainment: normalizeFamilyCompositionFieldForStorage(
         "educationalAttainment",
-        row && row.GRADE_LEVEL
+        getFamilyCompositionDefaultFieldValue("educationalAttainment", row, workflowType)
+      ),
+      birthday: normalizeFamilyCompositionFieldForStorage(
+        "birthday",
+        getFamilyCompositionDefaultFieldValue("birthday", row, workflowType)
       ),
       occupation: normalizeFamilyCompositionFieldForStorage(
         "occupation",
-        row && row.OCCUPATION
+        getFamilyCompositionDefaultFieldValue("occupation", row, workflowType)
       ),
       monthlyIncome: normalizeFamilyCompositionFieldForStorage(
         "monthlyIncome",
-        row && row.MONTHLY_INCOME
+        getFamilyCompositionDefaultFieldValue("monthlyIncome", row, workflowType)
       ),
       typeOfDisability: normalizeFamilyCompositionFieldForStorage(
         "typeOfDisability",
-        normalizeText(row && row.DISABILITY_TYPES) || "None"
+        getFamilyCompositionDefaultFieldValue("typeOfDisability", row, workflowType)
       ),
     };
   }
@@ -7250,6 +12491,27 @@
     return `${age} ${age === 1 ? "year old" : "years old"}`;
   }
 
+  function getGranteeFamilyCompositionDisplayDetails(row) {
+    const live = collectBasicInfoForTemplate();
+    return {
+      name:
+        normalizeText(live && live.granteeName) ||
+        normalizeText(row && (row.NAMES || row.NAME)) ||
+        "N/A",
+      sex:
+        normalizeText(live && live.sex) ||
+        normalizeText(row && row.SEX) ||
+        "N/A",
+      ageLabel: formatAgeLabel(
+        normalizeText(live && live.age) || normalizeText(row && row.AGE)
+      ),
+      civilStatus:
+        normalizeText(live && live.civilStatus) ||
+        normalizeText(row && row.CIVIL_STATUS) ||
+        "N/A",
+    };
+  }
+
   function renderFamilyCompositionRows(rows) {
     if (!familyCompositionList || !familyCompositionEmpty) {
       return;
@@ -7275,6 +12537,7 @@
       familyCompositionList.innerHTML = "";
       familyCompositionEmpty.classList.remove("hidden");
       updateFamilyCompositionRestoreButtonVisibility();
+      syncScsrPerCapitaIncomeField({ scheduleSave: true });
       return;
     }
 
@@ -7283,32 +12546,42 @@
       .sort((a, b) => parseAgeForSort(b && b.AGE) - parseAgeForSort(a && a.AGE));
     const membersStore = getFamilyCompositionMembersStore();
     const deletedKeys = getFamilyCompositionDeletedKeysStore();
+    const expandedKeys = new Set(getFamilyCompositionAccordionExpandedKeys());
     const visibleRows = sortedRows.filter(
       (row) => !deletedKeys.has(getFamilyCompositionMemberKey(row))
     );
 
     familyCompositionList.innerHTML = visibleRows
-      .map((row, index) => renderFamilyCompositionMemberAccordion(row, index, membersStore))
+      .map((row) => renderFamilyCompositionMemberAccordion(row, membersStore, expandedKeys))
       .join("");
-    syncGranteeEducationalAttainmentFromBasicToFamilyComposition({
-      scheduleAutoSave: false,
-    });
     familyCompositionEmpty.classList.toggle("hidden", visibleRows.length > 0);
     updateFamilyCompositionRestoreButtonVisibility();
+    syncScsrPerCapitaIncomeField({ scheduleSave: true });
   }
 
-  function renderFamilyCompositionMemberAccordion(row, index, membersStore) {
+  function renderFamilyCompositionMemberAccordion(row, membersStore, expandedKeys) {
     const memberKey = getFamilyCompositionMemberKey(row);
     const encodedKey = escapeHtml(memberKey);
     const entryId = escapeHtml(normalizeText(row && row.ENTRY_ID) || "N/A");
-    const name = escapeHtml(normalizeText(row && (row.NAMES || row.NAME)) || "N/A");
-    const sex = escapeHtml(normalizeText(row && row.SEX) || "N/A");
-    const age = escapeHtml(formatAgeLabel(row && row.AGE));
-    const civilStatus = escapeHtml(normalizeText(row && row.CIVIL_STATUS) || "N/A");
     const relation = escapeHtml(
       normalizeText(row && row.RELATION_TO_HH_HEAD) || "N/A"
     );
     const isGrantee = normalizeText(row && row.GRANTEE).toUpperCase() === "YES";
+    const granteeDisplay = isGrantee ? getGranteeFamilyCompositionDisplayDetails(row) : null;
+    const name = escapeHtml(
+      granteeDisplay ? granteeDisplay.name : normalizeText(row && (row.NAMES || row.NAME)) || "N/A"
+    );
+    const sex = escapeHtml(
+      granteeDisplay ? granteeDisplay.sex : normalizeText(row && row.SEX) || "N/A"
+    );
+    const age = escapeHtml(
+      granteeDisplay ? granteeDisplay.ageLabel : formatAgeLabel(row && row.AGE)
+    );
+    const civilStatus = escapeHtml(
+      granteeDisplay
+        ? granteeDisplay.civilStatus
+        : normalizeText(row && row.CIVIL_STATUS) || "N/A"
+    );
     const granteeTag = isGrantee
       ? '<span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">GRANTEE</span>'
       : "";
@@ -7324,17 +12597,25 @@
       "educationalAttainment",
       row && row.GRADE_LEVEL
     );
+    const birthday = getMemberFieldValue(
+      membersStore,
+      memberKey,
+      "birthday",
+      formatFamilyCompositionBirthdayValue(
+        getFamilyCompositionDefaultFieldValue("birthday", row, activeWorkflowType)
+      )
+    );
     const occupation = getMemberFieldValue(
       membersStore,
       memberKey,
       "occupation",
-      row && row.OCCUPATION
+      getFamilyCompositionDefaultFieldValue("occupation", row, activeWorkflowType)
     );
     const monthlyIncome = getMemberFieldValue(
       membersStore,
       memberKey,
       "monthlyIncome",
-      row && row.MONTHLY_INCOME
+      getFamilyCompositionDefaultFieldValue("monthlyIncome", row, activeWorkflowType)
     );
     const disability = getMemberFieldValue(
       membersStore,
@@ -7346,10 +12627,12 @@
     const memberStatusLabel = memberStatusRaw || "Unknown";
     const memberStatusKey = escapeHtml(memberStatusRaw.toUpperCase());
     const canDelete = !isGranteeFamilyCompositionRow(row);
+    const isScsr = activeWorkflowType === "SCSR";
+    const isExpanded = expandedKeys instanceof Set && expandedKeys.has(memberKey);
     const badge = `<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">${escapeHtml(memberStatusLabel)}</span>`;
 
     return `
-      <details class="group bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 rounded-lg" ${index === 0 ? "open" : ""}>
+      <details data-fc-accordion data-fc-member-key="${encodedKey}" class="group bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 rounded-lg"${isExpanded ? " open" : ""}>
         <summary class="cursor-pointer list-none p-4 flex items-start justify-between gap-3">
           <div>
             <div class="flex items-center gap-2">
@@ -7380,6 +12663,12 @@
                 ${createFamilyCompositionEducationOptions(educationalAttainment)}
               </select>
             </div>
+            ${isScsr
+              ? `<div>
+              <label class="text-slate-500 dark:text-slate-400">Birthday</label>
+              <input data-fc-field="birthday" type="date" class="mt-1 w-full h-10 rounded-lg border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white shadow-sm" value="${escapeHtml(toFamilyCompositionBirthdayIso(birthday))}" />
+            </div>`
+              : ""}
             <div>
               <label class="text-slate-500 dark:text-slate-400">Occupation</label>
               <input data-fc-field="occupation" class="mt-1 w-full h-10 rounded-lg border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white shadow-sm" value="${escapeHtml(normalizeFamilyCompositionFieldForDisplay(occupation))}" />
@@ -7464,7 +12753,7 @@
       isAutoSave: true,
       ...options,
     };
-    if (!currentCsrRecord || !currentCsrRecord.csrId) {
+    if (!isActiveFamilyCompositionRecord()) {
       return false;
     }
     const members = collectFamilyCompositionEditsFromDom();
@@ -7481,6 +12770,21 @@
       const savedAtLabel = formatSaveTimeLabel(currentCsrRecord.familyComposition.savedAt);
       const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
       setFamilyCompositionSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
+      const snapshot = buildRecordSyncSnapshot(currentCsrRecord, {
+        includeFamilyComposition: true,
+      });
+      if (snapshot) {
+        void enqueueCrossWorkflowSync(() =>
+          syncRecordToCounterpartWorkflow(snapshot, {
+            syncFamilyComposition: true,
+            sourceSavedAt: normalizeText(
+              snapshot &&
+              snapshot.familyComposition &&
+              snapshot.familyComposition.savedAt
+            ),
+          })
+        );
+      }
       return true;
     } catch (_) {
       const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
@@ -7640,6 +12944,7 @@
     );
     const nextMembers = {};
     let resetCount = 0;
+    const workflowType = getActiveRecordWorkflowType();
 
     Object.keys(currentMembers).forEach((memberKey) => {
       const currentEntry =
@@ -7657,6 +12962,10 @@
       Object.keys(currentEntry).forEach((fieldName) => {
         const value = normalizeText(currentEntry[fieldName]);
         if (!FAMILY_COMPOSITION_EDITABLE_FIELDS.includes(fieldName)) {
+          nextEntry[fieldName] = value;
+          return;
+        }
+        if (shouldPreserveFamilyCompositionFieldOnReset(fieldName, workflowType)) {
           nextEntry[fieldName] = value;
           return;
         }
@@ -7683,6 +12992,21 @@
 
     try {
       await persistCsrRecord(currentCsrRecord);
+      const snapshot = buildRecordSyncSnapshot(currentCsrRecord, {
+        includeFamilyComposition: true,
+      });
+      if (snapshot) {
+        void enqueueCrossWorkflowSync(() =>
+          syncRecordToCounterpartWorkflow(snapshot, {
+            syncFamilyComposition: true,
+            sourceSavedAt: normalizeText(
+              snapshot &&
+              snapshot.familyComposition &&
+              snapshot.familyComposition.savedAt
+            ),
+          })
+        );
+      }
       renderFamilyCompositionRows(latestFamilyCompositionRows);
       updateFamilyCompositionRestoreButtonVisibility();
       closeFamilyCompositionRestoreModal();
@@ -7710,14 +13034,17 @@
     if (
       !caseDevelopmentSummernoteReady ||
       !currentCsrRecord ||
-      !currentCsrRecord.csrId
+      !currentCsrRecord.csrId ||
+      normalizeWorkflowType(currentCsrRecord.workflowType || activeWorkflowType) !== "CSR"
     ) {
       return false;
     }
 
     const html = getCaseDevelopmentEditorHtml();
-    currentCsrRecord.caseDevelopment = {
-      ...(currentCsrRecord.caseDevelopment || {}),
+    const narrativeKey = getCurrentNarrativeRecordKey();
+    const narrativeLabel = getCurrentNarrativeSectionLabel();
+    currentCsrRecord[narrativeKey] = {
+      ...(currentCsrRecord[narrativeKey] || {}),
       html,
       savedAt: new Date().toISOString(),
       lastSaveMode: config.isAutoSave ? "autosave" : "manual",
@@ -7725,7 +13052,9 @@
 
     try {
       await persistCsrRecord(currentCsrRecord);
-      const savedAtLabel = formatSaveTimeLabel(currentCsrRecord.caseDevelopment.savedAt);
+      const savedAtLabel = formatSaveTimeLabel(
+        currentCsrRecord[narrativeKey] && currentCsrRecord[narrativeKey].savedAt
+      );
       const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
       setCaseDevelopmentSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
       return true;
@@ -7733,19 +13062,271 @@
       const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
       setCaseDevelopmentSaveStatus(failedLabel, "error");
       if (config.showToastOnError) {
-        showToast("Unable to save Case Development right now.");
+        showToast(`Unable to save ${narrativeLabel} right now.`);
+      }
+      return false;
+    }
+  }
+
+  async function persistScsrPresentingProblemDetails(options) {
+    const config = {
+      isAutoSave: true,
+      showToastOnError: true,
+      ...options,
+    };
+    if (
+      !caseDevelopmentSummernoteReady ||
+      !isActiveScsrPresentingProblemRecord()
+    ) {
+      return false;
+    }
+
+    const html = getScsrPresentingProblemEditorHtml();
+    currentCsrRecord.presentingProblem = {
+      ...(currentCsrRecord.presentingProblem || {}),
+      html,
+      savedAt: new Date().toISOString(),
+      lastSaveMode: config.isAutoSave ? "autosave" : "manual",
+    };
+
+    try {
+      await persistCsrRecord(currentCsrRecord);
+      const savedAtLabel = formatSaveTimeLabel(
+        currentCsrRecord.presentingProblem && currentCsrRecord.presentingProblem.savedAt
+      );
+      const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
+      setCaseDevelopmentSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
+      return true;
+    } catch (_) {
+      const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
+      setCaseDevelopmentSaveStatus(failedLabel, "error");
+      if (config.showToastOnError) {
+        showToast("Unable to save Presenting Problem right now.");
+      }
+      return false;
+    }
+  }
+
+  async function persistScsrBackgroundDetails(options) {
+    const config = {
+      isAutoSave: true,
+      showToastOnError: true,
+      ...options,
+    };
+    if (
+      !scsrBackgroundSummernoteReady ||
+      !isActiveScsrBackgroundRecord()
+    ) {
+      return false;
+    }
+
+    const safeTabKey = isValidScsrBackgroundTabKey(activeScsrBackgroundTabKey)
+      ? activeScsrBackgroundTabKey
+      : SCSR_BACKGROUND_TABS[0].key;
+    const html = getScsrBackgroundEditorHtml();
+    const savedAt = new Date().toISOString();
+    const existingStore = getScsrBackgroundRecordStore();
+    const existingTabs = getScsrBackgroundTabsStore();
+    currentCsrRecord.backgroundInformation = {
+      ...existingStore,
+      tabs: {
+        ...existingTabs,
+        [safeTabKey]: {
+          ...(existingTabs[safeTabKey] || {}),
+          html,
+          savedAt,
+          lastSaveMode: config.isAutoSave ? "autosave" : "manual",
+        },
+      },
+      activeTab: safeTabKey,
+      savedAt,
+      lastSaveMode: config.isAutoSave ? "autosave" : "manual",
+    };
+
+    try {
+      await persistCsrRecord(currentCsrRecord);
+      const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
+      setScsrBackgroundSaveStatus(`${saveLabel} ${formatSaveTimeLabel(savedAt)}`, "success");
+      return true;
+    } catch (_) {
+      const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
+      setScsrBackgroundSaveStatus(failedLabel, "error");
+      if (config.showToastOnError) {
+        showToast("Unable to save Background Information right now.");
+      }
+      return false;
+    }
+  }
+
+  async function persistScsrCaseAssessmentDetails(options) {
+    const config = {
+      isAutoSave: true,
+      showToastOnError: true,
+      ...options,
+    };
+    if (
+      !scsrCaseAssessmentSummernoteReady ||
+      !isActiveScsrCaseAssessmentRecord()
+    ) {
+      return false;
+    }
+
+    const html = getScsrCaseAssessmentEditorHtml();
+    currentCsrRecord.caseAssessment = {
+      ...(currentCsrRecord.caseAssessment || {}),
+      html,
+      savedAt: new Date().toISOString(),
+      lastSaveMode: config.isAutoSave ? "autosave" : "manual",
+    };
+
+    try {
+      await persistCsrRecord(currentCsrRecord);
+      const savedAtLabel = formatSaveTimeLabel(
+        currentCsrRecord.caseAssessment && currentCsrRecord.caseAssessment.savedAt
+      );
+      const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
+      setScsrCaseAssessmentSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
+      return true;
+    } catch (_) {
+      const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
+      setScsrCaseAssessmentSaveStatus(failedLabel, "error");
+      if (config.showToastOnError) {
+        showToast("Unable to save Case Assessment right now.");
+      }
+      return false;
+    }
+  }
+
+  async function persistScsrCaseManagementEvaluationDetails(options) {
+    const config = {
+      isAutoSave: true,
+      showToastOnError: true,
+      ...options,
+    };
+    if (
+      !scsrCaseManagementEvaluationSummernoteReady ||
+      !isActiveScsrCaseManagementEvaluationRecord()
+    ) {
+      return false;
+    }
+
+    const html = getScsrCaseManagementEvaluationEditorHtml();
+    currentCsrRecord.caseManagementEvaluation = {
+      ...(currentCsrRecord.caseManagementEvaluation || {}),
+      html,
+      savedAt: new Date().toISOString(),
+      lastSaveMode: config.isAutoSave ? "autosave" : "manual",
+    };
+
+    try {
+      await persistCsrRecord(currentCsrRecord);
+      const savedAtLabel = formatSaveTimeLabel(
+        currentCsrRecord.caseManagementEvaluation &&
+        currentCsrRecord.caseManagementEvaluation.savedAt
+      );
+      const saveLabel = config.isAutoSave ? "Auto-saved" : "Saved";
+      setScsrCaseManagementEvaluationSaveStatus(`${saveLabel} ${savedAtLabel}`, "success");
+      return true;
+    } catch (_) {
+      const failedLabel = config.isAutoSave ? "Auto-save failed" : "Save failed";
+      setScsrCaseManagementEvaluationSaveStatus(failedLabel, "error");
+      if (config.showToastOnError) {
+        showToast("Unable to save Case Management Evaluation right now.");
       }
       return false;
     }
   }
 
   function handleCaseDevelopmentBackClick() {
+    if (activeWorkflowType === "SCSR") {
+      if (scsrPresentingProblemAutoSaveTimer) {
+        window.clearTimeout(scsrPresentingProblemAutoSaveTimer);
+        scsrPresentingProblemAutoSaveTimer = null;
+      }
+      void persistScsrPresentingProblemDetails({ isAutoSave: true, showToastOnError: false });
+      setActiveCsrStep(2);
+      return;
+    }
     if (caseDevelopmentAutoSaveTimer) {
       window.clearTimeout(caseDevelopmentAutoSaveTimer);
       caseDevelopmentAutoSaveTimer = null;
     }
     void persistCaseDevelopmentDetails({ isAutoSave: true, showToastOnError: false });
     setActiveCsrStep(2);
+  }
+
+  function handleScsrBackgroundBackClick() {
+    if (!isActiveScsrBackgroundRecord()) {
+      setActiveCsrStep(3);
+      return;
+    }
+    if (scsrBackgroundAutoSaveTimer) {
+      window.clearTimeout(scsrBackgroundAutoSaveTimer);
+      scsrBackgroundAutoSaveTimer = null;
+    }
+    void persistScsrBackgroundDetails({ isAutoSave: true, showToastOnError: false });
+    setActiveCsrStep(3);
+  }
+
+  function handleScsrCaseAssessmentBackClick() {
+    if (scsrCaseAssessmentAutoSaveTimer) {
+      window.clearTimeout(scsrCaseAssessmentAutoSaveTimer);
+      scsrCaseAssessmentAutoSaveTimer = null;
+    }
+    void persistScsrCaseAssessmentDetails({ isAutoSave: true, showToastOnError: false });
+    setActiveCsrStep(4);
+  }
+
+  function handleScsrCaseManagementEvaluationBackClick() {
+    if (scsrCaseManagementEvaluationAutoSaveTimer) {
+      window.clearTimeout(scsrCaseManagementEvaluationAutoSaveTimer);
+      scsrCaseManagementEvaluationAutoSaveTimer = null;
+    }
+    void persistScsrCaseManagementEvaluationDetails({ isAutoSave: true, showToastOnError: false });
+    setActiveCsrStep(6);
+  }
+
+  function handleScsrBackgroundTabClick(event) {
+    const button = event.target.closest("[data-scsr-background-tab]");
+    if (!button || !scsrBackgroundTabList || !scsrBackgroundTabList.contains(button)) {
+      return;
+    }
+    const tabKey = normalizeText(button.getAttribute("data-scsr-background-tab"));
+    if (!isValidScsrBackgroundTabKey(tabKey)) {
+      return;
+    }
+    void switchScsrBackgroundTab(tabKey);
+  }
+
+  async function switchScsrBackgroundTab(tabKey) {
+    if (!isValidScsrBackgroundTabKey(tabKey) || tabKey === activeScsrBackgroundTabKey) {
+      return;
+    }
+    if (isActiveScsrBackgroundRecord()) {
+      setScsrBackgroundEditorHtml(getScsrBackgroundEditorHtml());
+      const saved = await persistScsrBackgroundDetails({
+        isAutoSave: true,
+        showToastOnError: false,
+      });
+      if (!saved) {
+        showToast("Unable to switch tab because save failed.");
+        return;
+      }
+    }
+    normalizeScsrBackgroundTabsStoreInMemory();
+    activeScsrBackgroundTabKey = tabKey;
+    renderScsrBackgroundTabs();
+    const nextEntry = getScsrBackgroundTabEntry(tabKey);
+    setScsrBackgroundEditorHtml(nextEntry.html || "");
+    setScsrBackgroundFieldError(!normalizeText(getScsrBackgroundEditorHtml()));
+    const savedAt = normalizeText(nextEntry.savedAt);
+    if (savedAt) {
+      const mode = normalizeText(nextEntry.lastSaveMode);
+      const label = mode === "autosave" ? "Auto-saved" : "Saved";
+      setScsrBackgroundSaveStatus(`${label} ${formatSaveTimeLabel(savedAt)}`, "success");
+    } else {
+      setScsrBackgroundSaveStatus("", "neutral");
+    }
   }
 
   function isActiveCsrPrefillRequest(targetCsrId, requestSeq) {
@@ -7796,10 +13377,97 @@
       }
     }
 
+    // Fallback for municipality files where GRANTEE is missing/inconsistent.
+    if (normalizedHhId) {
+      const byHhIdAny = rows.find(
+        (row) => normalizeText(row && row.HH_ID) === normalizedHhId
+      );
+      if (byHhIdAny) {
+        return byHhIdAny;
+      }
+    }
+
+    if (nameUpper) {
+      const byNameAny = rows.find(
+        (row) =>
+          normalizeText(row && (row.NAME || row.NAMES)).toUpperCase() === nameUpper
+      );
+      if (byNameAny) {
+        return byNameAny;
+      }
+    }
+
     return null;
   }
 
+  function buildBasicInfoPrefilledFromGranteeRow(granteeRow, workflowType) {
+    const isScsrWorkflow = normalizeWorkflowType(workflowType) === "SCSR";
+    const nextPrefilled = {
+      name: normalizeText(granteeRow && (granteeRow.NAME || granteeRow.NAMES)),
+      hhid: normalizeText(granteeRow && granteeRow.HH_ID),
+      hhSet: normalizeText(granteeRow && granteeRow.HH_SET),
+      sex: resolveBasicSexValue(
+        normalizeText(granteeRow && granteeRow.SEX)
+      ),
+      birthday: normalizeText(granteeRow && granteeRow.BIRTHDAY),
+      age: normalizeText(granteeRow && granteeRow.AGE),
+      civilStatus: resolveBasicCivilStatusValue(
+        normalizeText(granteeRow && granteeRow.CIVIL_STATUS)
+      ),
+      ipAffiliation: normalizeText(granteeRow && granteeRow.IP_AFFILIATION) || "NONE",
+      contactInfo: normalizeText(granteeRow && granteeRow["CONTACT NUMBER"]),
+      nationalId: normalizeText(granteeRow && granteeRow.PCN),
+      presentAddress: normalizeText(granteeRow && granteeRow.PRESENT_ADDRESS),
+      religion: normalizeText(granteeRow && granteeRow.RELIGION),
+      yearOfRegistration: normalizeText(granteeRow && granteeRow["YEAR OF REGISTRATION"]),
+      yearsInProgram: normalizeText(granteeRow && granteeRow.YEARS_IN_PROGRAM),
+      educationalAttainment: normalizeText(granteeRow && granteeRow.GRADE_LEVEL),
+      clientStatusOnExit: normalizeText(granteeRow && granteeRow.CLIENT_STATUS),
+      lowb: normalizeText(granteeRow && granteeRow.LOWB),
+      prevWellBeingLevel: buildPrevWellBeingLabel(
+        granteeRow && granteeRow.LOWB,
+        granteeRow && granteeRow["SWDI SCORE"]
+      ),
+    };
+    if (!isScsrWorkflow) {
+      delete nextPrefilled.lowb;
+      delete nextPrefilled.religion;
+    } else {
+      delete nextPrefilled.contactInfo;
+      delete nextPrefilled.religion;
+      delete nextPrefilled.lowb;
+      delete nextPrefilled.presentAddress;
+    }
+    return nextPrefilled;
+  }
+
+  async function fetchLatestBasicInfoPrefilledForRecord(record, workflowType) {
+    const municipality = normalizeText(
+      record &&
+      record.cardData &&
+      record.cardData.municipality
+    ).toUpperCase();
+    const hhid = normalizeText(record && record.cardData && record.cardData.hhid);
+    const nameUpper = normalizeText(record && record.cardData && record.cardData.name).toUpperCase();
+    if (!municipality || (!hhid && !nameUpper)) {
+      return null;
+    }
+    try {
+      const municipalityRows = await loadMunicipalityRecordsForCards(municipality);
+      const granteeRow = findGranteeRowForBasicInfo(municipalityRows, hhid, nameUpper);
+      if (!granteeRow) {
+        return null;
+      }
+      const prefilledWorkflowType =
+        normalizeWorkflowType(workflowType) === "SCSR" ? "CSR" : workflowType;
+      return buildBasicInfoPrefilledFromGranteeRow(granteeRow, prefilledWorkflowType);
+    } catch (_) {
+      return null;
+    }
+  }
+
   function fillBasicInfoLeftFields(granteeRow) {
+    const isScsr = getActiveRecordWorkflowType() === "SCSR";
     const safeValue = (value) => normalizeText(value);
 
     if (basicGranteeNameInput) {
@@ -7811,18 +13479,15 @@
     if (basicHhSetInput) {
       basicHhSetInput.value = safeValue(granteeRow && granteeRow.HH_SET);
     }
-    if (basicSexInput) {
-      basicSexInput.value = safeValue(granteeRow && granteeRow.SEX);
-    }
-    if (basicBirthdayInput) {
-      basicBirthdayInput.value = safeValue(granteeRow && granteeRow.BIRTHDAY);
-    }
-    if (basicAgeInput) {
-      basicAgeInput.value = safeValue(granteeRow && granteeRow.AGE);
-    }
-    if (basicCivilStatusInput) {
-      basicCivilStatusInput.value = safeValue(granteeRow && granteeRow.CIVIL_STATUS);
-    }
+    setBasicSexValue(safeValue(granteeRow && granteeRow.SEX), "");
+    applyBasicInfoBirthdayAndAgeValues(
+      safeValue(granteeRow && granteeRow.BIRTHDAY),
+      safeValue(granteeRow && granteeRow.AGE)
+    );
+    setBasicCivilStatusValue(
+      safeValue(granteeRow && granteeRow.CIVIL_STATUS),
+      ""
+    );
     if (basicIpAffiliationInput) {
       const ipAffiliation = safeValue(granteeRow && granteeRow.IP_AFFILIATION);
       basicIpAffiliationInput.value = ipAffiliation || "NONE";
@@ -7832,13 +13497,15 @@
     }
     setEducationalAttainmentFieldValue(granteeRow && granteeRow.GRADE_LEVEL, true);
     const nationalIdField = document.getElementById("edit-national-id");
-    if (nationalIdField && !normalizeText(nationalIdField.value)) {
+    if (!isScsr && nationalIdField && !normalizeText(nationalIdField.value)) {
       nationalIdField.value = formatNationalId(safeValue(granteeRow && granteeRow.PCN));
     }
-    const prefilledPrevWellBeing = buildPrevWellBeingLabel(
-      granteeRow && granteeRow.LOWB,
-      granteeRow && granteeRow["SWDI SCORE"]
-    );
+    const prefilledPrevWellBeing = isScsr
+      ? normalizeScsrWellBeingLabel(safeValue(granteeRow && granteeRow.LOWB))
+      : buildPrevWellBeingLabel(
+          granteeRow && granteeRow.LOWB,
+          granteeRow && granteeRow["SWDI SCORE"]
+        );
     const editPrevWellBeingField = document.getElementById("edit-prev-wellbeing");
     if (editPrevWellBeingField && !normalizeText(editPrevWellBeingField.value)) {
       editPrevWellBeingField.value = prefilledPrevWellBeing;
@@ -7846,12 +13513,12 @@
 
     const rowYearOfRegistration = safeValue(granteeRow && granteeRow["YEAR OF REGISTRATION"]);
     const yearField = document.getElementById("edit-year-registration");
-    if (yearField && !normalizeText(yearField.value)) {
+    if (!isScsr && yearField && !normalizeText(yearField.value)) {
       yearField.value = rowYearOfRegistration;
     }
 
     const yearsInProgramField = document.getElementById("edit-years-program");
-    if (yearsInProgramField && !normalizeText(yearsInProgramField.value)) {
+    if (!isScsr && yearsInProgramField && !normalizeText(yearsInProgramField.value)) {
       yearsInProgramField.value = safeValue(granteeRow && granteeRow.YEARS_IN_PROGRAM)
         .replace(/\D/g, "")
         .slice(0, 2);
@@ -7917,18 +13584,16 @@
     if (!hasCachedBasicInfoPrefilled(prefilled)) {
       return false;
     }
-    const requiredMappedKeys = [
-      "religion",
-      "yearOfRegistration",
-      "clientStatusOnExit",
-      "prevWellBeingLevel",
-    ];
+    const requiredMappedKeys = getActiveRecordWorkflowType() === "SCSR"
+      ? ["clientStatusOnExit"]
+      : ["clientStatusOnExit"];
     return requiredMappedKeys.every((key) =>
       Object.prototype.hasOwnProperty.call(prefilled, key)
     );
   }
 
   function fillBasicInfoLeftFieldsFromPrefilled(prefilled) {
+    const isScsr = getActiveRecordWorkflowType() === "SCSR";
     if (!prefilled || typeof prefilled !== "object") {
       fillBasicInfoLeftFields(null);
       return;
@@ -7943,18 +13608,12 @@
     if (basicHhSetInput) {
       basicHhSetInput.value = normalizeText(prefilled.hhSet);
     }
-    if (basicSexInput) {
-      basicSexInput.value = normalizeText(prefilled.sex);
-    }
-    if (basicBirthdayInput) {
-      basicBirthdayInput.value = normalizeText(prefilled.birthday);
-    }
-    if (basicAgeInput) {
-      basicAgeInput.value = normalizeText(prefilled.age);
-    }
-    if (basicCivilStatusInput) {
-      basicCivilStatusInput.value = normalizeText(prefilled.civilStatus);
-    }
+    setBasicSexValue(normalizeText(prefilled.sex), "");
+    applyBasicInfoBirthdayAndAgeValues(
+      normalizeText(prefilled.birthday),
+      normalizeText(prefilled.age)
+    );
+    setBasicCivilStatusValue(normalizeText(prefilled.civilStatus), "");
     if (basicIpAffiliationInput) {
       const ip = normalizeText(prefilled.ipAffiliation);
       basicIpAffiliationInput.value = ip || "NONE";
@@ -7964,21 +13623,23 @@
     }
     setEducationalAttainmentFieldValue(prefilled.educationalAttainment, true);
     const nationalIdField = document.getElementById("edit-national-id");
-    if (nationalIdField && !normalizeText(nationalIdField.value)) {
+    if (!isScsr && nationalIdField && !normalizeText(nationalIdField.value)) {
       nationalIdField.value = formatNationalId(normalizeText(prefilled.nationalId));
     }
     const editPrevWellBeingField = document.getElementById("edit-prev-wellbeing");
     if (editPrevWellBeingField && !normalizeText(editPrevWellBeingField.value)) {
-      editPrevWellBeingField.value = normalizeText(prefilled.prevWellBeingLevel);
+      editPrevWellBeingField.value = isScsr
+        ? normalizeScsrWellBeingLabel(prefilled.lowb)
+        : normalizeText(prefilled.prevWellBeingLevel);
     }
 
     const yearField = document.getElementById("edit-year-registration");
-    if (yearField && !normalizeText(yearField.value)) {
+    if (!isScsr && yearField && !normalizeText(yearField.value)) {
       yearField.value = normalizeText(prefilled.yearOfRegistration);
     }
 
     const yearsInProgramField = document.getElementById("edit-years-program");
-    if (yearsInProgramField && !normalizeText(yearsInProgramField.value)) {
+    if (!isScsr && yearsInProgramField && !normalizeText(yearsInProgramField.value)) {
       yearsInProgramField.value = normalizeText(prefilled.yearsInProgram)
         .replace(/\D/g, "")
         .slice(0, 2);
@@ -8071,22 +13732,23 @@
     }
   }
 
-  async function getCsrRecordById(csrId, municipalityHint) {
+  async function getCsrRecordById(csrId, municipalityHint, workflowType) {
     if (!csrId) {
       return null;
     }
+    const datasetKind = getDatasetKindFromWorkflowType(workflowType || activeWorkflowType);
     if (isHttpContext()) {
       const municipality = normalizeText(
         municipalityHint || getActiveMunicipalityForCards()
       ).toUpperCase();
-      const byHint = await fetchServerCsrRecordById(csrId, municipality);
+      const byHint = await fetchServerCsrRecordById(csrId, municipality, datasetKind);
       if (byHint) {
         return byHint;
       }
       // Safe fallback: retry without municipality filter in case session/cache
       // state is stale across browser profiles.
       if (municipality) {
-        const byIdOnly = await fetchServerCsrRecordById(csrId, "");
+        const byIdOnly = await fetchServerCsrRecordById(csrId, "", datasetKind);
         if (byIdOnly) {
           return byIdOnly;
         }
@@ -8098,17 +13760,26 @@
       const tx = db.transaction(CSR_STORE_NAME, "readonly");
       const store = tx.objectStore(CSR_STORE_NAME);
       const request = store.get(String(csrId));
-      request.onsuccess = () => resolve(request.result || null);
+      request.onsuccess = () => {
+        const result = request.result || null;
+        if (!result) {
+          resolve(null);
+          return;
+        }
+        const recordKind = getDatasetKindFromWorkflowType(result.workflowType || "CSR");
+        resolve(recordKind === datasetKind ? result : null);
+      };
       request.onerror = () =>
         reject(request.error || new Error("Failed to load CSR record."));
     });
   }
 
-  async function fetchServerCsrRecordById(csrId, municipality) {
+  async function fetchServerCsrRecordById(csrId, municipality, kind) {
     if (!isHttpContext()) {
       return null;
     }
     const query = new URLSearchParams({ id: String(csrId) });
+    query.set("kind", String(kind || "csr"));
     const safeMunicipality = normalizeText(municipality).toUpperCase();
     if (safeMunicipality) {
       query.set("municipality", safeMunicipality);
@@ -8130,13 +13801,16 @@
     }
   }
 
-  async function getServerCsrRecordsByMunicipality(municipality) {
+  async function getServerCsrRecordsByMunicipality(municipality, kind) {
     const safeMunicipality = normalizeText(municipality).toUpperCase();
     if (!safeMunicipality || !isHttpContext()) {
       return null;
     }
     try {
-      const query = new URLSearchParams({ municipality: safeMunicipality });
+      const query = new URLSearchParams({
+        municipality: safeMunicipality,
+        kind: String(kind || "csr"),
+      });
       const response = await fetch(`/api/csr?${query.toString()}`, {
         cache: "no-store",
       });
@@ -8153,7 +13827,7 @@
     }
   }
 
-  async function saveServerCsrRecord(municipality, record) {
+  async function saveServerCsrRecord(municipality, record, kind) {
     const safeMunicipality = normalizeText(municipality).toUpperCase();
     if (!safeMunicipality || !isHttpContext()) {
       return false;
@@ -8164,6 +13838,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           municipality: safeMunicipality,
+          kind: String(kind || "csr"),
           record: record,
         }),
       });
@@ -8181,6 +13856,240 @@
     ).toUpperCase();
   }
 
+  function sanitizeRecordWorkflowIsolation(record) {
+    if (!record || typeof record !== "object") {
+      return { record, changed: false };
+    }
+    const workflowType = normalizeWorkflowType(record.workflowType || "CSR");
+    const nextRecord = { ...record, workflowType };
+    let changed = false;
+    if (workflowType === "SCSR") {
+      if (Object.prototype.hasOwnProperty.call(nextRecord, "recommendation")) {
+        delete nextRecord.recommendation;
+        changed = true;
+      }
+      const backgroundInformation =
+        nextRecord.backgroundInformation && typeof nextRecord.backgroundInformation === "object"
+          ? nextRecord.backgroundInformation
+          : null;
+      if (
+        backgroundInformation &&
+        backgroundInformation.tabs &&
+        typeof backgroundInformation.tabs === "object"
+      ) {
+        const nextTabs = { ...backgroundInformation.tabs };
+        let tabsMutated = false;
+        if (Object.prototype.hasOwnProperty.call(nextTabs, "family")) {
+          delete nextTabs.family;
+          tabsMutated = true;
+        }
+        Object.keys(nextTabs).forEach((tabKey) => {
+          const entry = nextTabs[tabKey];
+          if (!entry || typeof entry !== "object") {
+            return;
+          }
+          const normalizedHtml = normalizeCaseDevelopmentHtmlForStorage(entry.html);
+          if (normalizedHtml !== normalizeText(entry.html)) {
+            nextTabs[tabKey] = {
+              ...entry,
+              html: normalizedHtml,
+            };
+            tabsMutated = true;
+          }
+        });
+        if (tabsMutated) {
+          nextRecord.backgroundInformation = {
+            ...backgroundInformation,
+            tabs: nextTabs,
+          };
+          changed = true;
+        }
+      }
+      const basicInformation =
+        nextRecord.basicInformation && typeof nextRecord.basicInformation === "object"
+          ? nextRecord.basicInformation
+          : null;
+      if (basicInformation) {
+        const sanitizeBasicEntry = (entry) => {
+          if (!entry || typeof entry !== "object") {
+            return { entry, mutated: false };
+          }
+          const nextEntry = { ...entry };
+          let mutated = false;
+          if (normalizeText(nextEntry.prevWellBeingLevel) && !normalizeText(nextEntry.wellBeingLevel)) {
+            nextEntry.wellBeingLevel = normalizeText(nextEntry.prevWellBeingLevel);
+            mutated = true;
+          }
+          [
+            "nationalId",
+            "yearOfRegistration",
+            "yearsInProgram",
+            "prevWellBeingLevel",
+          ].forEach((key) => {
+            if (Object.prototype.hasOwnProperty.call(nextEntry, key)) {
+              delete nextEntry[key];
+              mutated = true;
+            }
+          });
+          return { entry: nextEntry, mutated };
+        };
+
+        const prefilled = sanitizeBasicEntry(basicInformation.prefilled);
+        const editDetails = sanitizeBasicEntry(basicInformation.editDetails);
+        if (
+          editDetails.entry &&
+          typeof editDetails.entry === "object" &&
+          normalizeText(editDetails.entry.sourceOfInfo) &&
+          !normalizeText(editDetails.entry.sourceOfIncome)
+        ) {
+          editDetails.entry.sourceOfIncome = normalizeText(editDetails.entry.sourceOfInfo);
+          delete editDetails.entry.sourceOfInfo;
+          editDetails.mutated = true;
+        } else if (
+          editDetails.entry &&
+          typeof editDetails.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(editDetails.entry, "sourceOfInfo")
+        ) {
+          delete editDetails.entry.sourceOfInfo;
+          editDetails.mutated = true;
+        }
+        if (
+          prefilled.entry &&
+          typeof prefilled.entry === "object" &&
+          !normalizeText(prefilled.entry.educationalAttainment) &&
+          editDetails.entry &&
+          typeof editDetails.entry === "object" &&
+          normalizeText(editDetails.entry.educationalAttainment)
+        ) {
+          prefilled.entry.educationalAttainment = normalizeText(
+            editDetails.entry.educationalAttainment
+          );
+          prefilled.mutated = true;
+        }
+        if (
+          prefilled.entry &&
+          typeof prefilled.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(prefilled.entry, "monthlyIncome")
+        ) {
+          delete prefilled.entry.monthlyIncome;
+          prefilled.mutated = true;
+        }
+        if (
+          prefilled.entry &&
+          typeof prefilled.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(prefilled.entry, "perCapitaIncome")
+        ) {
+          delete prefilled.entry.perCapitaIncome;
+          prefilled.mutated = true;
+        }
+        if (
+          prefilled.entry &&
+          typeof prefilled.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(prefilled.entry, "contactInfo")
+        ) {
+          delete prefilled.entry.contactInfo;
+          prefilled.mutated = true;
+        }
+        if (
+          prefilled.entry &&
+          typeof prefilled.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(prefilled.entry, "religion")
+        ) {
+          delete prefilled.entry.religion;
+          prefilled.mutated = true;
+        }
+        if (
+          prefilled.entry &&
+          typeof prefilled.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(prefilled.entry, "lowb")
+        ) {
+          delete prefilled.entry.lowb;
+          prefilled.mutated = true;
+        }
+        if (
+          prefilled.entry &&
+          typeof prefilled.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(prefilled.entry, "presentAddress")
+        ) {
+          delete prefilled.entry.presentAddress;
+          prefilled.mutated = true;
+        }
+        if (
+          editDetails.entry &&
+          typeof editDetails.entry === "object" &&
+          Object.prototype.hasOwnProperty.call(editDetails.entry, "clientStatusOnExit")
+        ) {
+          delete editDetails.entry.clientStatusOnExit;
+          editDetails.mutated = true;
+        }
+        if (prefilled.mutated || editDetails.mutated) {
+          nextRecord.basicInformation = {
+            ...basicInformation,
+            prefilled: prefilled.entry,
+            editDetails: editDetails.entry,
+          };
+          changed = true;
+        }
+      }
+    } else if (workflowType === "CSR") {
+      const basicInformation =
+        nextRecord.basicInformation && typeof nextRecord.basicInformation === "object"
+          ? nextRecord.basicInformation
+          : null;
+      if (basicInformation) {
+        let prefilledMutated = false;
+        let editDetailsMutated = false;
+        let nextPrefilled =
+          basicInformation.prefilled && typeof basicInformation.prefilled === "object"
+            ? { ...basicInformation.prefilled }
+            : null;
+        let nextEditDetails =
+          basicInformation.editDetails && typeof basicInformation.editDetails === "object"
+            ? { ...basicInformation.editDetails }
+            : null;
+
+        [
+          "lowb",
+          "monthlyIncome",
+          "perCapitaIncome",
+          "contactInfo",
+          "nationalId",
+          "presentAddress",
+          "religion",
+          "yearOfRegistration",
+          "yearsInProgram",
+          "educationalAttainment",
+          "prevWellBeingLevel",
+        ].forEach((key) => {
+          if (nextPrefilled && Object.prototype.hasOwnProperty.call(nextPrefilled, key)) {
+            delete nextPrefilled[key];
+            prefilledMutated = true;
+          }
+        });
+
+        ["monthlyIncome", "perCapitaIncome"].forEach((key) => {
+          if (nextEditDetails && Object.prototype.hasOwnProperty.call(nextEditDetails, key)) {
+            delete nextEditDetails[key];
+            editDetailsMutated = true;
+          }
+        });
+
+        if (prefilledMutated || editDetailsMutated) {
+          nextRecord.basicInformation = {
+            ...basicInformation,
+            ...(prefilledMutated ? { prefilled: nextPrefilled } : {}),
+            ...(editDetailsMutated ? { editDetails: nextEditDetails } : {}),
+          };
+          changed = true;
+        }
+      }
+    } else if (Object.prototype.hasOwnProperty.call(nextRecord, "scsrRecommendation")) {
+      delete nextRecord.scsrRecommendation;
+      changed = true;
+    }
+    return { record: nextRecord, changed };
+  }
+
   async function putCsrRecordLocalCache(record) {
     try {
       const db = await openCsrDb();
@@ -8190,36 +14099,85 @@
     }
   }
 
-  async function getPrimaryCsrRecordsForMunicipality(municipality) {
+  async function getPrimaryCsrRecordsForMunicipality(municipality, workflowType) {
     const safeMunicipality = normalizeText(municipality).toUpperCase();
+    const datasetKind = getDatasetKindFromWorkflowType(workflowType || activeWorkflowType);
     if (!safeMunicipality) {
       return [];
     }
 
     if (isHttpContext()) {
-      const serverRecords = await getServerCsrRecordsByMunicipality(safeMunicipality);
+      const serverRecords = await getServerCsrRecordsByMunicipality(
+        safeMunicipality,
+        datasetKind
+      );
       if (Array.isArray(serverRecords)) {
         return serverRecords;
       }
     }
 
     const db = await openCsrDb();
-    return getAllCsrRecords(db);
+    const localRecords = await getAllCsrRecords(db);
+    return localRecords.filter(
+      (record) =>
+        getDatasetKindFromWorkflowType(record && record.workflowType) === datasetKind &&
+        normalizeText(record && record.cardData && record.cardData.municipality).toUpperCase() ===
+          safeMunicipality
+    );
+  }
+
+  async function cleanupWorkflowIsolationForMunicipality(municipality, workflowType) {
+    const normalizedWorkflow = normalizeWorkflowType(workflowType);
+    const safeMunicipality = normalizeText(municipality).toUpperCase();
+    if (!safeMunicipality) {
+      return;
+    }
+    const cleanupKey = `${normalizedWorkflow}:${safeMunicipality}`;
+    if (workflowIsolationCleanupDone.has(cleanupKey)) {
+      return;
+    }
+    try {
+      const records = await getPrimaryCsrRecordsForMunicipality(
+        safeMunicipality,
+        normalizedWorkflow
+      );
+      if (!Array.isArray(records) || !records.length) {
+        workflowIsolationCleanupDone.add(cleanupKey);
+        return;
+      }
+      const activeId = String(currentCsrRecord && currentCsrRecord.csrId ? currentCsrRecord.csrId : "");
+      for (const record of records) {
+        const sanitized = sanitizeRecordWorkflowIsolation(record);
+        if (!sanitized.changed) {
+          continue;
+        }
+        await saveCsrRecordToPrimaryStorage(sanitized.record);
+        if (activeId && String(sanitized.record.csrId || "") === activeId) {
+          currentCsrRecord = sanitized.record;
+        }
+      }
+      workflowIsolationCleanupDone.add(cleanupKey);
+    } catch (_) {
+      // Ignore cleanup failures; main workflow remains available.
+    }
   }
 
   async function saveCsrRecordToPrimaryStorage(record) {
-    const municipality = getRecordMunicipality(record);
+    const sanitized = sanitizeRecordWorkflowIsolation(record);
+    const safeRecord = sanitized.record;
+    const municipality = getRecordMunicipality(safeRecord);
+    const datasetKind = getDatasetKindFromWorkflowType(safeRecord && safeRecord.workflowType);
     let savedToPrimary = false;
 
     if (isHttpContext() && municipality) {
-      savedToPrimary = await saveServerCsrRecord(municipality, record);
+      savedToPrimary = await saveServerCsrRecord(municipality, safeRecord, datasetKind);
     } else if (!isHttpContext()) {
       const db = await openCsrDb();
-      await putCsrRecord(db, record);
+      await putCsrRecord(db, safeRecord);
       savedToPrimary = true;
     }
 
-    await putCsrRecordLocalCache(record);
+    await putCsrRecordLocalCache(safeRecord);
     return savedToPrimary || !isHttpContext();
   }
 
@@ -8228,6 +14186,7 @@
     if (!viewState || viewState.mode !== "workspace") {
       return false;
     }
+    const workflowType = normalizeWorkflowType(viewState.workflowType);
 
     const csrId = String(viewState.csrId || "").trim();
     if (!csrId) {
@@ -8236,13 +14195,13 @@
     }
 
     try {
-      const savedRecord = await getCsrRecordById(csrId);
+      const savedRecord = await getCsrRecordById(csrId, "", workflowType);
       if (!savedRecord) {
         clearCsrViewState();
         return false;
       }
       const requestedStep = Number(viewState.activeStep || savedRecord.activeStep || 1);
-      return openCsrWorkspaceFromRecord(savedRecord, requestedStep);
+      return openCsrWorkspaceFromRecord(savedRecord, requestedStep, workflowType);
     } catch (_) {
       clearCsrViewState();
       return false;
@@ -8272,7 +14231,8 @@
     try {
       const savedRecord = await getCsrRecordById(
         deepLink.csrId,
-        targetMunicipality || activeMunicipality
+        targetMunicipality || activeMunicipality,
+        "CSR"
       );
       if (!savedRecord) {
         showToast(
@@ -8283,7 +14243,7 @@
         return false;
       }
       const requestedStep = Number(savedRecord.activeStep || 1);
-      const opened = await openCsrWorkspaceFromRecord(savedRecord, requestedStep);
+      const opened = await openCsrWorkspaceFromRecord(savedRecord, requestedStep, "CSR");
       if (opened) {
         showToast(`CSR ${deepLink.csrId} opened from link.`, "success", 2200);
       }
@@ -8294,13 +14254,30 @@
     }
   }
 
-  async function openCsrWorkspaceFromRecord(savedRecord, requestedStep) {
+  async function openCsrWorkspaceFromRecord(savedRecord, requestedStep, workflowType) {
     if (!savedRecord || !savedRecord.csrId) {
       return false;
     }
-    currentCsrRecord = savedRecord;
+    if (currentCsrRecord && currentCsrRecord.csrId) {
+      flushAllAutoSaveQueues();
+    }
+    const normalizedWorkflowType = normalizeWorkflowType(
+      workflowType || savedRecord.workflowType || "CSR"
+    );
+    const municipality = normalizeText(
+      savedRecord && savedRecord.cardData && savedRecord.cardData.municipality
+    ).toUpperCase();
+    await cleanupWorkflowIsolationForMunicipality(municipality, normalizedWorkflowType);
+    setWorkflowType(normalizedWorkflowType);
+    const hydratedRecord = await hydrateRecordFromCounterpartWorkflow(savedRecord);
+    currentCsrRecord = sanitizeRecordWorkflowIsolation(hydratedRecord).record;
     applySavedBasicInfoEditDetails();
     applySavedCaseDevelopmentDetails();
+    applySavedScsrBackgroundDetails();
+    applySavedScsrCaseAssessmentDetails();
+    applySavedScsrPlanImplementationDetails();
+    applySavedScsrCaseManagementEvaluationDetails();
+    applySavedScsrRecommendationDetails();
     applySavedInterventionsProvidedDetails();
     applySavedHouseholdInterventionPlanDetails();
     applySavedRecommendationDetails();
@@ -8308,22 +14285,25 @@
     const resolvedStep =
       Number.isInteger(requestedStep) &&
       requestedStep >= 1 &&
-      requestedStep <= CSR_STEP_COUNT
+      requestedStep <= getCurrentWorkflowStepCount()
         ? requestedStep
         : 1;
     setActiveCsrStep(resolvedStep);
     setCsrViewState({
       mode: "workspace",
       csrId: String(savedRecord.csrId || ""),
+      workflowType: normalizedWorkflowType,
       activeStep: resolvedStep,
     });
     void populateBasicInfoFromSelectedCard(
       savedRecord && savedRecord.cardData,
       savedRecord && savedRecord.csrId
     );
-    void populateFamilyCompositionFromSelectedCard(
-      savedRecord && savedRecord.cardData
-    );
+    if (normalizedWorkflowType === "CSR") {
+      void populateFamilyCompositionFromSelectedCard(
+        savedRecord && savedRecord.cardData
+      );
+    }
     return true;
   }
 
@@ -8353,6 +14333,553 @@
     const name = normalizeCsrKeyPart(cardData && cardData.name);
     const barangay = normalizeCsrKeyPart(cardData && cardData.barangay);
     return `${municipality}|${name}|${barangay}`;
+  }
+
+  function getCounterpartWorkflowType(workflowType) {
+    return normalizeWorkflowType(workflowType) === "SCSR" ? "CSR" : "SCSR";
+  }
+
+  function setBasicInfoSyncAuditMetadata(basicInformation, changedFieldKeys, options) {
+    const safeBasicInformation =
+      basicInformation && typeof basicInformation === "object" ? basicInformation : {};
+    const keys = Array.isArray(changedFieldKeys)
+      ? changedFieldKeys.map((value) => normalizeText(value)).filter(Boolean)
+      : [];
+    if (!keys.length) {
+      return safeBasicInformation;
+    }
+    const config = {
+      sourceWorkflow: "",
+      sourceCsrId: "",
+      updatedAt: new Date().toISOString(),
+      syncMode: "auto-sync",
+      ...options,
+    };
+    const existingAudit =
+      safeBasicInformation.syncAudit && typeof safeBasicInformation.syncAudit === "object"
+        ? safeBasicInformation.syncAudit
+        : {};
+    const existingFields =
+      existingAudit.sharedFields && typeof existingAudit.sharedFields === "object"
+        ? existingAudit.sharedFields
+        : {};
+    const nextSharedFields = {
+      ...existingFields,
+    };
+    const sourceWorkflowRaw = normalizeText(config.sourceWorkflow).toUpperCase();
+    const sourceWorkflow =
+      sourceWorkflowRaw === "SCSR" || sourceWorkflowRaw === "CSR"
+        ? sourceWorkflowRaw
+        : "";
+    const updatedAt = normalizeText(config.updatedAt) || new Date().toISOString();
+    keys.forEach((fieldKey) => {
+      nextSharedFields[fieldKey] = {
+        lastUpdatedByWorkflow: sourceWorkflow,
+        updatedAt,
+        sourceCsrId: normalizeText(config.sourceCsrId),
+        syncMode: normalizeText(config.syncMode) || "auto-sync",
+      };
+    });
+    return {
+      ...safeBasicInformation,
+      syncAudit: {
+        ...existingAudit,
+        sharedFields: nextSharedFields,
+        lastUpdatedByWorkflow: sourceWorkflow,
+        lastUpdatedAt: updatedAt,
+        lastSourceCsrId: normalizeText(config.sourceCsrId),
+        lastSyncMode: normalizeText(config.syncMode) || "auto-sync",
+      },
+    };
+  }
+
+  function setFamilyCompositionSyncAuditMetadata(familyComposition, options) {
+    const safeFamilyComposition =
+      familyComposition && typeof familyComposition === "object"
+        ? familyComposition
+        : {};
+    const config = {
+      sourceWorkflow: "",
+      sourceCsrId: "",
+      updatedAt: new Date().toISOString(),
+      syncMode: "auto-sync",
+      ...options,
+    };
+    const existingAudit =
+      safeFamilyComposition.syncAudit && typeof safeFamilyComposition.syncAudit === "object"
+        ? safeFamilyComposition.syncAudit
+        : {};
+    const sourceWorkflowRaw = normalizeText(config.sourceWorkflow).toUpperCase();
+    const sourceWorkflow =
+      sourceWorkflowRaw === "SCSR" || sourceWorkflowRaw === "CSR"
+        ? sourceWorkflowRaw
+        : "";
+    const updatedAt = normalizeText(config.updatedAt) || new Date().toISOString();
+    return {
+      ...safeFamilyComposition,
+      syncAudit: {
+        ...existingAudit,
+        lastUpdatedByWorkflow: sourceWorkflow,
+        lastUpdatedAt: updatedAt,
+        lastSourceCsrId: normalizeText(config.sourceCsrId),
+        lastSyncMode: normalizeText(config.syncMode) || "auto-sync",
+      },
+    };
+  }
+
+  function normalizeSharedBasicFieldValue(fieldName, value) {
+    const normalized = normalizeText(value);
+    if (!normalized) {
+      return "";
+    }
+    if (fieldName === "sex") {
+      return resolveBasicSexValue(normalized);
+    }
+    if (fieldName === "birthday") {
+      return toFamilyCompositionBirthdayIso(normalized);
+    }
+    if (fieldName === "civilStatus") {
+      return resolveBasicCivilStatusValue(normalized);
+    }
+    if (fieldName === "educationalAttainment" || fieldName === "religion") {
+      if (normalized.toUpperCase().startsWith("SELECT")) {
+        return "";
+      }
+      return normalized;
+    }
+    if (fieldName === "contactInfo") {
+      const normalizedContact = normalizeContactInfoForStorage(normalized);
+      return normalizedContact === "NONE" ? "" : normalizedContact;
+    }
+    return normalized;
+  }
+
+  function extractSharedBasicInfoPayload(editDetails) {
+    const safeEntry = editDetails && typeof editDetails === "object" ? editDetails : {};
+    const payload = {};
+    CROSS_WORKFLOW_SHARED_BASIC_FIELDS.forEach((fieldName) => {
+      payload[fieldName] = normalizeSharedBasicFieldValue(fieldName, safeEntry[fieldName]);
+    });
+    return payload;
+  }
+
+  function cloneJsonValue(value) {
+    if (typeof value === "undefined") {
+      return undefined;
+    }
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (_) {
+      return undefined;
+    }
+  }
+
+  function buildRecordSyncSnapshot(record, options) {
+    const config = {
+      includeBasicInfo: false,
+      includeFamilyComposition: false,
+      ...options,
+    };
+    if (!record || !record.csrId) {
+      return null;
+    }
+    const snapshot = {
+      csrId: String(record.csrId || ""),
+      workflowType: normalizeWorkflowType(record.workflowType || activeWorkflowType),
+      cardData: {
+        ...(record.cardData || {}),
+      },
+    };
+    if (config.includeBasicInfo) {
+      const basicInformation =
+        record.basicInformation && typeof record.basicInformation === "object"
+          ? record.basicInformation
+          : null;
+      snapshot.basicInformation = {
+        ...(basicInformation || {}),
+        editDetails: cloneJsonValue(basicInformation && basicInformation.editDetails) || {},
+      };
+    }
+    if (config.includeFamilyComposition) {
+      const clonedFamily = cloneJsonValue(record.familyComposition);
+      snapshot.familyComposition =
+        clonedFamily && typeof clonedFamily === "object" ? clonedFamily : {};
+    }
+    return snapshot;
+  }
+
+  function enqueueCrossWorkflowSync(task) {
+    if (typeof task !== "function") {
+      return Promise.resolve(false);
+    }
+    crossWorkflowSyncQueue = crossWorkflowSyncQueue
+      .catch(() => null)
+      .then(() => task())
+      .catch(() => false);
+    return crossWorkflowSyncQueue;
+  }
+
+  function applySharedBasicInfoToRecord(record, sharedBasicInfo, options) {
+    const config = {
+      onlyIfEmpty: false,
+      savedAt: "",
+      lastSaveMode: "autosave",
+      sourceWorkflow: "",
+      sourceCsrId: "",
+      syncMode: "auto-sync",
+      ...options,
+    };
+    if (!record || typeof record !== "object") {
+      return { record, changed: false };
+    }
+    const sourcePayload = extractSharedBasicInfoPayload(sharedBasicInfo);
+    const hasSourceValue = CROSS_WORKFLOW_SHARED_BASIC_FIELDS.some(
+      (fieldName) => normalizeText(sourcePayload[fieldName]).length > 0
+    );
+    if (!hasSourceValue) {
+      return { record, changed: false };
+    }
+    const basicInformation =
+      record.basicInformation && typeof record.basicInformation === "object"
+        ? record.basicInformation
+        : {};
+    const existingEditDetails =
+      basicInformation.editDetails && typeof basicInformation.editDetails === "object"
+        ? basicInformation.editDetails
+        : {};
+    const nextEditDetails = {
+      ...existingEditDetails,
+    };
+    const currentPayload = extractSharedBasicInfoPayload(existingEditDetails);
+    let changed = false;
+    const changedFieldKeys = [];
+
+    CROSS_WORKFLOW_SHARED_BASIC_FIELDS.forEach((fieldName) => {
+      const nextValue = normalizeText(sourcePayload[fieldName]);
+      const currentValue = normalizeText(currentPayload[fieldName]);
+      if (!nextValue) {
+        return;
+      }
+      if (config.onlyIfEmpty && currentValue) {
+        return;
+      }
+      if (currentValue === nextValue) {
+        return;
+      }
+      nextEditDetails[fieldName] = nextValue;
+      changed = true;
+      changedFieldKeys.push(fieldName);
+    });
+
+    if (!changed) {
+      return { record, changed: false };
+    }
+
+    const savedAt = normalizeText(config.savedAt) || new Date().toISOString();
+    const nextBasicInformation = setBasicInfoSyncAuditMetadata(
+      {
+        ...basicInformation,
+        editDetails: nextEditDetails,
+        savedAt,
+        lastSaveMode: normalizeText(config.lastSaveMode) || "autosave",
+      },
+      changedFieldKeys,
+      {
+        sourceWorkflow: config.sourceWorkflow,
+        sourceCsrId: config.sourceCsrId,
+        updatedAt: savedAt,
+        syncMode: config.syncMode,
+      }
+    );
+    const nextRecord = {
+      ...record,
+      basicInformation: nextBasicInformation,
+    };
+    return { record: nextRecord, changed: true };
+  }
+
+  function normalizeSharedFamilyCompositionFieldValue(fieldName, value) {
+    const safeField = normalizeText(fieldName);
+    if (!safeField) {
+      return "";
+    }
+    const normalized = normalizeFamilyCompositionFieldForStorage(safeField, value);
+    if (safeField === "educationalAttainment") {
+      const key = normalizeText(normalized).toUpperCase();
+      if (!key || key.startsWith("SELECT")) {
+        return "";
+      }
+    }
+    return normalizeText(normalized);
+  }
+
+  function applySharedFamilyCompositionToRecord(record, familyComposition, options) {
+    const config = {
+      onlyIfEmpty: false,
+      savedAt: "",
+      lastSaveMode: "autosave",
+      sourceWorkflow: "",
+      sourceCsrId: "",
+      syncMode: "auto-sync",
+      ...options,
+    };
+    if (!record || typeof record !== "object") {
+      return { record, changed: false };
+    }
+    const sourceStore =
+      familyComposition && typeof familyComposition === "object"
+        ? familyComposition
+        : null;
+    if (!sourceStore) {
+      return { record, changed: false };
+    }
+    const sourceMembers =
+      sourceStore.members && typeof sourceStore.members === "object"
+        ? cloneJsonValue(sourceStore.members) || {}
+        : {};
+    const sourceMemberKeys = Object.keys(sourceMembers);
+    if (!sourceMemberKeys.length) {
+      return { record, changed: false };
+    }
+
+    const existingStore =
+      record.familyComposition && typeof record.familyComposition === "object"
+        ? record.familyComposition
+        : {};
+    const existingMembers =
+      existingStore.members && typeof existingStore.members === "object"
+        ? existingStore.members
+        : {};
+    const nextMembers = cloneJsonValue(existingMembers) || {};
+    let changed = false;
+
+    sourceMemberKeys.forEach((memberKey) => {
+      const sourceEntry =
+        sourceMembers[memberKey] && typeof sourceMembers[memberKey] === "object"
+          ? sourceMembers[memberKey]
+          : {};
+      const existingEntry =
+        nextMembers[memberKey] && typeof nextMembers[memberKey] === "object"
+          ? nextMembers[memberKey]
+          : {};
+      const nextEntry = {
+        ...existingEntry,
+      };
+      let entryChanged = false;
+
+      CROSS_WORKFLOW_SHARED_FAMILY_COMPOSITION_FIELDS.forEach((fieldName) => {
+        const sourceHasField = Object.prototype.hasOwnProperty.call(sourceEntry, fieldName);
+        if (!sourceHasField) {
+          return;
+        }
+        const sourceValue = normalizeSharedFamilyCompositionFieldValue(
+          fieldName,
+          sourceEntry[fieldName]
+        );
+        if (!sourceValue) {
+          return;
+        }
+        const currentValue = normalizeSharedFamilyCompositionFieldValue(
+          fieldName,
+          existingEntry[fieldName]
+        );
+        if (config.onlyIfEmpty && currentValue) {
+          return;
+        }
+        if (currentValue === sourceValue) {
+          return;
+        }
+        nextEntry[fieldName] = sourceValue;
+        entryChanged = true;
+      });
+
+      if (entryChanged) {
+        nextMembers[memberKey] = nextEntry;
+        changed = true;
+      }
+    });
+
+    if (!changed) {
+      return { record, changed: false };
+    }
+
+    const existingDeletedKeys = Array.isArray(existingStore.deletedMemberKeys)
+      ? existingStore.deletedMemberKeys.map((item) => normalizeText(item)).filter(Boolean)
+      : [];
+    const savedAt = normalizeText(config.savedAt) || new Date().toISOString();
+    const nextFamilyComposition = setFamilyCompositionSyncAuditMetadata(
+      {
+        ...existingStore,
+        members: nextMembers,
+        deletedMemberKeys: existingDeletedKeys,
+        savedAt,
+        lastSaveMode: normalizeText(config.lastSaveMode) || "autosave",
+      },
+      {
+        sourceWorkflow: config.sourceWorkflow,
+        sourceCsrId: config.sourceCsrId,
+        updatedAt: savedAt,
+        syncMode: config.syncMode,
+      }
+    );
+    const nextRecord = {
+      ...record,
+      familyComposition: nextFamilyComposition,
+    };
+    return { record: nextRecord, changed: true };
+  }
+
+  async function syncRecordToCounterpartWorkflow(sourceRecord, options) {
+    const config = {
+      syncBasicInfo: false,
+      syncFamilyComposition: false,
+      sourceSavedAt: "",
+      onlyIfEmpty: false,
+      ...options,
+    };
+    if (!sourceRecord || !sourceRecord.csrId) {
+      return false;
+    }
+    const sourceWorkflow = normalizeWorkflowType(sourceRecord.workflowType || activeWorkflowType);
+    const cardData = sourceRecord.cardData && typeof sourceRecord.cardData === "object"
+      ? sourceRecord.cardData
+      : null;
+    if (!cardData) {
+      return false;
+    }
+    const counterpartWorkflow = getCounterpartWorkflowType(sourceWorkflow);
+    const counterpartRecord = await getExistingCsrRecordForCardSafe(cardData, counterpartWorkflow);
+    if (!counterpartRecord || !counterpartRecord.csrId) {
+      return false;
+    }
+
+    let nextRecord = {
+      ...counterpartRecord,
+      workflowType: counterpartWorkflow,
+    };
+    let changed = false;
+    const savedAt = normalizeText(config.sourceSavedAt) || new Date().toISOString();
+    const sourceWorkflowType = normalizeWorkflowType(
+      sourceRecord && sourceRecord.workflowType
+    );
+    const sourceCsrId = normalizeText(sourceRecord && sourceRecord.csrId);
+
+    if (config.syncBasicInfo) {
+      const basicInformation =
+        sourceRecord.basicInformation && typeof sourceRecord.basicInformation === "object"
+          ? sourceRecord.basicInformation
+          : null;
+      const sharedPayload = extractSharedBasicInfoPayload(
+        basicInformation && basicInformation.editDetails
+      );
+      const basicResult = applySharedBasicInfoToRecord(nextRecord, sharedPayload, {
+        onlyIfEmpty: !!config.onlyIfEmpty,
+        savedAt,
+        lastSaveMode: "autosave",
+        sourceWorkflow: sourceWorkflowType,
+        sourceCsrId,
+        syncMode: "auto-sync",
+      });
+      nextRecord = basicResult.record;
+      changed = changed || basicResult.changed;
+    }
+
+    if (config.syncFamilyComposition) {
+      const familyResult = applySharedFamilyCompositionToRecord(
+        nextRecord,
+        sourceRecord.familyComposition,
+        {
+          onlyIfEmpty: !!config.onlyIfEmpty,
+          savedAt,
+          lastSaveMode: "autosave",
+          sourceWorkflow: sourceWorkflowType,
+          sourceCsrId,
+          syncMode: "auto-sync",
+        }
+      );
+      nextRecord = familyResult.record;
+      changed = changed || familyResult.changed;
+    }
+
+    if (!changed) {
+      return false;
+    }
+    try {
+      await persistCsrRecord(nextRecord);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function hydrateRecordFromCounterpartWorkflow(record) {
+    if (!record || !record.csrId) {
+      return record;
+    }
+    const targetRecord = buildRecordSyncSnapshot(record, {
+      includeBasicInfo: true,
+      includeFamilyComposition: true,
+    });
+    if (!targetRecord) {
+      return record;
+    }
+    const counterpartWorkflow = getCounterpartWorkflowType(targetRecord.workflowType);
+    const counterpartRecord = await getExistingCsrRecordForCardSafe(
+      targetRecord.cardData,
+      counterpartWorkflow
+    );
+    if (!counterpartRecord || !counterpartRecord.csrId) {
+      return record;
+    }
+    const savedAt = new Date().toISOString();
+    let nextRecord = {
+      ...targetRecord,
+      workflowType: normalizeWorkflowType(targetRecord.workflowType),
+    };
+    let changed = false;
+
+    const counterpartBasicInformation =
+      counterpartRecord.basicInformation && typeof counterpartRecord.basicInformation === "object"
+        ? counterpartRecord.basicInformation
+        : null;
+    const sharedPayload = extractSharedBasicInfoPayload(
+      counterpartBasicInformation && counterpartBasicInformation.editDetails
+    );
+    const basicResult = applySharedBasicInfoToRecord(nextRecord, sharedPayload, {
+      onlyIfEmpty: false,
+      savedAt,
+      lastSaveMode: "autosave",
+      sourceWorkflow: counterpartWorkflow,
+      sourceCsrId: normalizeText(counterpartRecord && counterpartRecord.csrId),
+      syncMode: "hydrate-sync",
+    });
+    nextRecord = basicResult.record;
+    changed = changed || basicResult.changed;
+
+    const familyResult = applySharedFamilyCompositionToRecord(
+      nextRecord,
+      counterpartRecord.familyComposition,
+      {
+        onlyIfEmpty: false,
+        savedAt,
+        lastSaveMode: "autosave",
+        sourceWorkflow: counterpartWorkflow,
+        sourceCsrId: normalizeText(counterpartRecord && counterpartRecord.csrId),
+        syncMode: "hydrate-sync",
+      }
+    );
+    nextRecord = familyResult.record;
+    changed = changed || familyResult.changed;
+
+    if (!changed) {
+      return record;
+    }
+    try {
+      await persistCsrRecord(nextRecord);
+      return nextRecord;
+    } catch (_) {
+      return record;
+    }
   }
 
   function findExistingCsrRecord(records, cardData) {
@@ -8408,14 +14935,40 @@
     });
   }
 
-  async function createOrGetCsrRecord(cardData) {
+  async function getReservedCsrIdsForCreation(existingRecords) {
+    const ids = new Set(
+      (Array.isArray(existingRecords) ? existingRecords : [])
+        .map((record) => String(record && record.csrId ? record.csrId : ""))
+        .filter(Boolean)
+    );
+    try {
+      const db = await openCsrDb();
+      const allLocalRecords = await getAllCsrRecords(db);
+      allLocalRecords.forEach((record) => {
+        const id = String(record && record.csrId ? record.csrId : "");
+        if (id) {
+          ids.add(id);
+        }
+      });
+    } catch (_) {
+      // Ignore local ID cache read failures; caller still has scoped existing IDs.
+    }
+    return Array.from(ids);
+  }
+
+  async function createOrGetCsrRecord(cardData, workflowType) {
+    const normalizedWorkflowType = normalizeWorkflowType(workflowType || activeWorkflowType);
     const municipality = normalizeText(cardData && cardData.municipality).toUpperCase();
-    const existingRecords = await getPrimaryCsrRecordsForMunicipality(municipality);
+    const existingRecords = await getPrimaryCsrRecordsForMunicipality(
+      municipality,
+      normalizedWorkflowType
+    );
     const existingRecord = findExistingCsrRecord(existingRecords, cardData);
 
     if (existingRecord) {
       const mergedRecord = {
         ...existingRecord,
+        workflowType: normalizedWorkflowType,
         householdKey: buildHouseholdKey(cardData),
         cardData: {
           ...(existingRecord.cardData || {}),
@@ -8429,12 +14982,13 @@
       return { record: mergedRecord, isNew: false };
     }
 
-    const existingIds = existingRecords.map((record) => String(record.csrId || ""));
+    const existingIds = await getReservedCsrIdsForCreation(existingRecords);
     const csrId = generateUniqueCsrId(existingIds);
     const record = {
       csrId,
       createdAt: new Date().toISOString(),
       activeStep: 1,
+      workflowType: normalizedWorkflowType,
       completion: {
         status: "in_progress",
         completedAt: "",
@@ -8454,18 +15008,22 @@
     return { record: record, isNew: true };
   }
 
-  async function getExistingCsrRecordForCard(cardData) {
+  async function getExistingCsrRecordForCard(cardData, workflowType) {
+    const normalizedWorkflowType = normalizeWorkflowType(workflowType || activeWorkflowType);
     const municipality = normalizeText(cardData && cardData.municipality).toUpperCase();
     if (!municipality) {
       return null;
     }
-    const existingRecords = await getPrimaryCsrRecordsForMunicipality(municipality);
+    const existingRecords = await getPrimaryCsrRecordsForMunicipality(
+      municipality,
+      normalizedWorkflowType
+    );
     return findExistingCsrRecord(existingRecords, cardData);
   }
 
-  async function getExistingCsrRecordForCardSafe(cardData) {
+  async function getExistingCsrRecordForCardSafe(cardData, workflowType) {
     try {
-      return await getExistingCsrRecordForCard(cardData);
+      return await getExistingCsrRecordForCard(cardData, workflowType);
     } catch (_) {
       return null;
     }
@@ -8536,6 +15094,7 @@
     if (!record || !record.csrId) {
       return;
     }
+    record.workflowType = normalizeWorkflowType(record.workflowType || activeWorkflowType);
     const saved = await saveCsrRecordToPrimaryStorage(record);
     if (!saved) {
       throw new Error("Failed to save CSR record to primary storage.");

@@ -53,7 +53,9 @@ Use this app to:
 - Run `build-release.bat` to use the safer build profile by default.
 - Safe defaults in `build-release.bat`:
   - `SAFE_BUILD=1` (uses `electron-builder.safe.json`)
-  - `OBFUSCATE_JS=1` (safe JS obfuscation enabled)
+  - `OBFUSCATE_JS=0` (safe JS obfuscation disabled by default; enable when needed)
+  - `RUN_PREFLIGHT=1` (syntax + contract token checks before build)
+  - `ENABLE_EXE_ICON=1` (uses `electron-builder.safe.icon.json` when available)
   - `FORCE_UNSIGNED=0` (allows signing if cert env vars are set)
 - Outputs include:
   - NSIS installer
@@ -65,10 +67,50 @@ Use this app to:
   - `set FORCE_UNSIGNED=1 && build-release.bat`
 - Disable obfuscation:
   - `set OBFUSCATE_JS=0 && build-release.bat`
-- Enable EXE icon embedding:
-  - `set ENABLE_EXE_ICON=1 && build-release.bat`
+- Enable safe obfuscation:
+  - `set OBFUSCATE_JS=1 && build-release.bat`
+- Disable EXE icon embedding:
+  - `set ENABLE_EXE_ICON=0 && build-release.bat`
 - Use old packaging config:
   - `set SAFE_BUILD=0 && build-release.bat`
+- Skip preflight checks:
+  - `set RUN_PREFLIGHT=0 && build-release.bat`
+
+### Build Commands By Shell
+
+Command Prompt (`cmd`):
+
+```bat
+cd /d "C:\Users\Batosai\Desktop\CSR GENERATOR"
+build-release.bat
+```
+
+Command Prompt with safe obfuscation:
+
+```bat
+cd /d "C:\Users\Batosai\Desktop\CSR GENERATOR"
+set OBFUSCATE_JS=1 && build-release.bat
+```
+
+PowerShell:
+
+```powershell
+cd "C:\Users\Batosai\Desktop\CSR GENERATOR"
+$env:OBFUSCATE_JS = "1" .\build-release.bat
+```
+
+Git Bash:
+
+```bash
+cd "/c/Users/Batosai/Desktop/CSR GENERATOR"
+OBFUSCATE_JS=1 ./build-release.bat
+```
+
+Git Bash fallback (if `.bat` does not execute directly):
+
+```bash
+cmd.exe /c "cd /d C:\Users\Batosai\Desktop\CSR GENERATOR && set OBFUSCATE_JS=1 && build-release.bat"
+```
 
 ### Obfuscation Safety
 
@@ -79,8 +121,11 @@ Use this app to:
 
 ### Desktop Icon Note
 
-- Default safe build keeps `signAndEditExecutable` off for maximum packaging stability.
-- To embed `assets/logo.ico` into the app `.exe`, run with `ENABLE_EXE_ICON=1`.
+- Default safe build enables EXE icon embedding when `electron-builder.safe.icon.json` is present.
+- It embeds `assets/logo/favicon.ico` into the app `.exe`.
+- If needed for maximum packaging stability, disable with `ENABLE_EXE_ICON=0`.
+- If build logs show `Cannot create symbolic link` under `winCodeSign`, the script now retries automatically with icon embedding disabled.
+- To keep EXE icon embedding on those PCs, run the build terminal as Administrator or enable Windows Developer Mode.
 - If icon looks unchanged after install, refresh Windows icon cache or recreate the desktop shortcut.
 
 ### Municipality Update Polling

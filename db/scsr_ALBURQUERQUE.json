@@ -1,0 +1,1376 @@
+[
+  {
+    "csrId": "29239",
+    "createdAt": "2026-03-16T02:38:58.296Z",
+    "activeStep": 8,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201005-1-10362987",
+    "cardData": {
+      "name": "CECILIA OMEGA SALUAGUE",
+      "hhid": "071201005-1-10362987",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "EAST POBLACION"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "CECILIA OMEGA SALUAGUE",
+        "hhid": "071201005-1-10362987",
+        "hhSet": "11A",
+        "sex": "FEMALE",
+        "birthday": "June 9, 1967",
+        "age": "58",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "NO GRADE COMPLETED",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-16",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO"
+      },
+      "savedAt": "2026-03-16T03:04:26.672Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:07.321Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-16T02:39:07.322Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-16T02:39:07.322Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:07.323Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:07.324Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:07.325Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:07.327Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:07.328Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "38308",
+    "createdAt": "2026-03-16T02:39:10.223Z",
+    "activeStep": 2,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201011-2205-00011",
+    "cardData": {
+      "name": "CECILLE UNGAB LUAYON",
+      "hhid": "071201011-2205-00011",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "WEST POBLACION"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "CECILLE UNGAB LUAYON",
+        "hhid": "071201011-2205-00011",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "October 18, 1983",
+        "age": "42",
+        "civilStatus": "Unknown",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "HIGH SCHOOL GRADUATE",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-16",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO"
+      },
+      "savedAt": "2026-03-16T03:04:26.672Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:12.003Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-16T02:39:12.004Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-16T02:39:12.004Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:12.005Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:12.006Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:12.007Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:12.008Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:12.009Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "58532",
+    "createdAt": "2026-03-16T02:39:17.734Z",
+    "activeStep": 2,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201009-6543-00003",
+    "cardData": {
+      "name": "CANCIA AMBA MILO",
+      "hhid": "071201009-6543-00003",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "TAGBUANE"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "CANCIA AMBA MILO",
+        "hhid": "071201009-6543-00003",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "December 23, 1976",
+        "age": "49",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "HIGH SCHOOL GRADUATE",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-16",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO"
+      },
+      "savedAt": "2026-03-16T03:04:26.672Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:20.050Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-16T02:39:20.051Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-16T02:39:20.051Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:20.051Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-16T02:39:20.052Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:20.056Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:20.058Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-16T02:39:20.059Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "92663",
+    "createdAt": "2026-03-16T02:39:29.091Z",
+    "activeStep": 2,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201008-7940-00001",
+    "cardData": {
+      "name": "ALMA BANGHAL SOTEL",
+      "hhid": "071201008-7940-00001",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "SANTA FILOMENA"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "ALMA BANGHAL SOTEL",
+        "hhid": "071201008-7940-00001",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "July 17, 1966",
+        "age": "59",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "GRADE 6",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-16",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO"
+      },
+      "savedAt": "2026-03-16T03:04:26.672Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-16T02:40:36.611Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-16T02:40:36.612Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-16T02:40:36.612Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-16T02:40:36.613Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-16T02:40:36.614Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-16T02:40:36.615Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-16T02:40:36.616Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-16T02:40:36.617Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "47171",
+    "createdAt": "2026-03-16T02:41:05.693Z",
+    "activeStep": 8,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201001-5614-00002",
+    "cardData": {
+      "name": "CARMELITA ARCENA BATILONG",
+      "hhid": "071201001-5614-00002",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "BAHI"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "CARMELITA ARCENA BATILONG",
+        "hhid": "071201001-5614-00002",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "April 7, 1972",
+        "age": "53",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "HIGH SCHOOL GRADUATE",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-16",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO"
+      },
+      "savedAt": "2026-03-16T03:04:26.672Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-16T02:41:26.792Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-16T02:41:26.792Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-16T02:41:26.792Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-16T02:41:26.793Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-16T02:41:26.794Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-16T02:41:26.795Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-16T02:41:26.796Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-16T02:41:26.797Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "75284",
+    "createdAt": "2026-03-16T02:41:29.868Z",
+    "activeStep": 8,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201001-7254-00007",
+    "cardData": {
+      "name": "CASTRO BANLUTA UNGAB SR.",
+      "hhid": "071201001-7254-00007",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "BAHI"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "CASTRO BANLUTA UNGAB SR.",
+        "hhid": "071201001-7254-00007",
+        "hhSet": "6A",
+        "sex": "MALE",
+        "birthday": "April 27, 1958",
+        "age": "67",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "GRADE 6",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-16",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO"
+      },
+      "savedAt": "2026-03-16T03:04:26.672Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-16T02:42:02.702Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-16T02:42:02.703Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-16T02:42:02.703Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-16T02:42:02.704Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-16T02:42:02.705Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-16T02:42:02.706Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-16T02:42:02.708Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-16T02:42:02.708Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "96791",
+    "createdAt": "2026-03-16T02:42:05.935Z",
+    "activeStep": 8,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201003-2-09528352",
+    "cardData": {
+      "name": "NERIA TESORIO TORREON",
+      "hhid": "071201003-2-09528352",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "CANTIGUIB"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "NERIA TESORIO TORREON",
+        "hhid": "071201003-2-09528352",
+        "hhSet": "11A",
+        "sex": "FEMALE",
+        "birthday": "May 26, 1986",
+        "age": "39",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "NO GRADE COMPLETED",
+        "clientStatusOnExit": "1 - Active",
+        "wellBeingLevel": "Level 2 - Subsistence Index Score : 2.39173"
+      },
+      "editDetails": {
+        "educationalAttainment": "Grade 5",
+        "contactInfo": "09122094332",
+        "religion": "Aglipay",
+        "presentAddress": "Cantiguib, Alburquerque, Bohol",
+        "placeOfBirth": "Cantiguib, Alburquerque, Bohol",
+        "sourceOfIncome": "Dried Fish Seller",
+        "wellBeingLevel": "Level 2 - Subsistence",
+        "monthlyIncome": "₱7,000",
+        "perCapitaIncome": "₱700.00"
+      },
+      "savedAt": "2026-03-16T09:00:21.690Z",
+      "lastSaveMode": "autosave"
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-16",
+        "recommendationText": "To help the family, an inclusive approach focusing on both environmental improvements and social support is recommended. Strengthening on their community involvement, programs that provide livelihood opportunities that can help stabilize their income and improve their living conditions. Enhancing their awareness of health and safety, and encouraging greater participation in social protection programs, will empower them further. Regular monitoring and follow-up are essential to ensure the success and to adjust strategies as their needs change over time.",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO"
+      },
+      "savedAt": "2026-03-16T09:16:49.942Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "<p style=\"text-align: justify; border: none\">The family is experiencing financial stress resulting to difficulty in\nproviding the educational needs of their in-school child Art Haiden.</p>",
+      "savedAt": "2026-03-16T09:16:49.926Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "<p style=\"text-align: justify; margin-right: 0cm; border: none\">Margie and Rodgen, 38- and 42-year-olds live in\nBarangay Basiao, Pres. Carlos P. Garcia, Bohol. Rodgen is a fisherman while\nMargie is a fish vendor. She sells Rodgen’s catch. Art Haiden is Margie’s son\nfrom her previous partner and he is bringing Margie’s maiden name. Margie and\nRodgen have been married for 5 years. The couple are both high school\ngraduates; they can read and write. Art Haide is currently in Grade 12.<br>Margie appears to be participative in Family\nDevelopment Sessions; she demonstrated pro-activeness during the sessions and\noften shares to the group. She is a member of SLPA and volunteers in KALAHI\nprojects.<br>The family was identified as poor in Listahahan\nlast 2019 and was registered in set 12A last March 2023. They have been active\npartner-beneficiaries in the program for 3 years.</p>",
+          "savedAt": "2026-03-16T09:12:43.928Z",
+          "lastSaveMode": "autosave"
+        },
+        "socioEconomic": {
+          "html": "<p style=\"text-align: justify\">They are living in their\nancestral house located in the remote part of the barangay. It is made of light\nmaterials, has one room and a comfort room located outside their house. The\nhouse appears to be clean, simple and modest.<br>Margie expressed that even\nthough they live simply, they work together to keep their home running\nsmoothly. Everyone in the family assumes household chores. Margie oversees the\nhousehold chores. Whenever she is out selling fish, Art Haiden takes care of the\nchores – particularly cooking. Sometimes he helps Margie in selling small goods\nto earn extra money.<br>They don’t often go to church\nbut Margie said her family remains hopeful for a better future especially for\nArt Haiden. She said, they dream of better living conditions and more\nopportunities to improve their income.</p>",
+          "savedAt": "2026-03-16T09:13:04.477Z",
+          "lastSaveMode": "autosave"
+        },
+        "healthCondition": {
+          "html": "<p style=\"text-align: justify\">The family appears to be\nhealthy. They have not experienced any serious medical illness. Margie said\nthey are able to avail barangay health services within the past six months. The\nfamily has a segregated garbage bin. They also own a water-sealed comfort room.\nThere is no sign of mental health issues nor gender-based issues in the family.\nMargie said that when there are coming typhoons, Rodgen does not go out fishing\nand the family seeks safety through staying in the nearby school&nbsp; which is the designated evacuation center.</p>",
+          "savedAt": "2026-03-16T09:13:14.057Z",
+          "lastSaveMode": "autosave"
+        },
+        "environmentalLivingConditions": {
+          "html": "<p style=\"text-align: justify\">The family lives a 15-minute\nmotorcycle ride from the barangay center. Their only water source is a shared\ndeep well. Some families can afford to have their own deep well, but since\nMargie’s relatives own the well near them, they can access the water for free.\nFor drinking water, they buy from refilling stations in their barangay at Php25\nper gallon. The community promotes waste segregation, with plastic waste\ncollected by the local government unit (LGU), and they prohibit burning trash\nin each home. They have electricity, which provides power to light up the\nentire barangay.<br>The family has not\nexperienced conflicts in their neighborhood.</p>",
+          "savedAt": "2026-03-16T09:13:25.387Z",
+          "lastSaveMode": "autosave"
+        },
+        "environmentCommunity": {
+          "html": "<p style=\"text-align: justify; margin-right: 0cm\">The community is\n7.2 kilometers from the town center. It takes about 20 minutes to travel there\nby motor vehicle. People can reach the community by riding a public jeep or\nmotorbike along San Vicente-Villa Milagrosa Road. Most houses are near the\nshore, while some are near the mountain. The main jobs of the residents are\nfishing and farming. The barangay has basic facilities, including an emergency\nrescue vehicle, a health station, a small gymnasium, a chapel, an elementary\nofschool, a high school, and a Day Center. These are all located near the\nBarangay Hall. The health center has a Barangay Health Worker on duty every\nday. There is also a visiting midwife or nurse who provides health check-ups,\nvaccinations, and other health services. Water comes mainly from deep wells.\nThere are several communal wells, and some households have their own for\nlaundry and cooking. The barangay has a water refilling station along the road,\nwhich residents can access for drinking water, with door-to-door delivery\navailable. Most households have electricity. The residents practice waste\nsegregation and proper waste disposal. Some burn biodegradable wastes. Every\ntwo to three months, the local government staff collect and buy plastic waste,\nworking with the barangay council. Residents gather their plastic garbage and\nbring it to the collection point. Most homes have a water-sealed toilet. The\ncommunity is quiet and safe. During a disaster, residents living near the shore\nare advised to evacuate to the elementary or high school, which serve as\nevacuation sites for the barangay.</p>",
+          "savedAt": "2026-03-16T09:16:49.929Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "environmentCommunity",
+      "savedAt": "2026-03-16T09:16:49.929Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "<p style=\"text-align: justify\">The Acuesta family was\nchecked using the Family Risk and Vulnerability Assessment (FRVA). The results\nshowed they have low risk in finances and the environment, and no risks in\nhealth, safety, or protecting children.</p>\n\n<p style=\"text-align: justify\">Their latest Social Welfare\nand Development Indicator (SWDI) assessment was done on August 3, 2025. It\nshowed their family’s income is at Level 2, meaning they just meet basic needs\n(subsistence level). Their average monthly income per person is Php2,938.88.\nThe poverty line in Bohol is Php2,170.74 per person each month, and the average\nfood cost in the province is Php1,515.83.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">The family has\nthis year to be in the program since they will be ineligible for the program\ndue to Art Haiden’s graduation in Senior High School.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">The family head's\nseasonal income is insufficient to cover all the growing educational expenses\nof their son, Art. Their meager earnings are just enough to meet basic needs,\nwith an average monthly income per person of Php2,938.88, which is slightly\nabove the poverty line but still insufficient to comfortably afford health and\neducational expenses. The rising health and education costs have put a real\nstrain on their finances. In addition, living on a remote island and relying\nonly on fishing, which can easily be affected by weather and environmental\nconditions, poses a burden in terms of the family's finances. The Acuesta\nfamily have been struggling for a while but this burden was unloaded through\nthe aid of the program, but things are getting more pressing now that Art\nHaiden is almost done with school and they will soon not be able to get some\nfinancial help from the government making him difficult to pursue on his\ntertiary education.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">The family’s\nsituation is not entirely permanent. The family may have big problems which\nmainly come from social and economic issues that can be solved with the right\nhelp, support, and community programs. Acuesta’s family shows resiliency amidst\ntheir financial difficulties. They're involved in their community, which shows\nthey want to change and improve for their family. Margie, in particular, has\ndemonstrated her hardworking nature and willingness to seek solutions, which\nsuggests that with appropriate support given, positive change is achievable.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">Their environment\nalso offers some available resources that can promote improvement. Local\ngovernment programs that facilitate waste management, health services, and\npossible livelihood initiatives. The community also has basic facilities such\nas a health station, barangay hall, and water refilling stations, which can\nsupport health and sanitation needs. However, restraining forces such as\nlimited income, geographic location, and dependence on vulnerable livelihood\nsources poses significant barriers to the family’s progress. These factors can\nmake it hard to find stable jobs and get the services they need. Though the\nfamily’s problem is not immediately life-threatening, the on-going financial\ndifficulties affect their ability to access necessary health and educational\nservices, which are critical for their long-term well-being. Addressing these\nissues immediately is important to prevent further threat to their level of\nwell-being.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">In the theory of\nMaslow's Hierarchy of needs emphasizes that people worry about food, housing,\nand feeling safe before they can think about things like school or personal\ngrowth. The Acuesta family is struggling because they don't have much money, so\nit's hard for them to regularly meet these basic needs. This affects how happy\nand healthy they are, and how they develop as people. But despite being\nfinancially incapable the Acuesta family was able to send Art Haiden to school\nthrough the help of the program nearing its completion in Senior High School\neducation.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">The Family\nSystems Theory looks at the Acuesta family as a group where everyone affects\neveryone else. Because they're having financial difficulties, it changes how\nthey interact, their relationships, and how they handle tough times together.\nIf we understand how they're all connected, we can create support programs that\nhelp the whole family. The Acuesta family’s strategies in overcoming struggles\nare done through collaborative and proactive approach. They involve everyone in\nseeking solutions to their problems which make them a functional family and\ncould be a good asset to the family in attaining improved level of well-being.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">The Ecological\nSystems Theory, developed by Bronfenbrenner, says that things like community\nprograms, government help, and where the family lives are important. The\nAcuesta family lives far away from many things, being in a remote area, and\nit's hard for them to get services easily when needed. This has a big impact on\ntheir financial situation. Despite these struggles, the Acuesta family is\nstrong and connected to their community. These are good things that can help\nthem make their lives better. The family is good at expressing for themselves,\nand their involvement in community groups are strengths that help them. They\nknow where to access resources according to their needs.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">Lastly, Amartya\nSen's Capability Approach is all about giving people and families the tools\nthey need to live fulfilling lives. By boosting Acuesta’s income through giving\nlivelihood capital assistance or any possible livelihood opportunities, making\nsure their child, Art Haiden can get to school, and providing health services,\nit can open up new doors for them and become better in individual functions and\ntheir overall well-being. Looking at this, through the lens of what shapes\npeople’s condition and how to fight poverty, it's clear that acting presently\nis crucial. The program aims to break the intergenerational cycle of poverty\nand make sure that families have a brighter future ahead of them through\ninvesting in education, healthcare, and economic opportunities so that poo\nfamilies will have an equal opportunity to have a better life. Poverty is a\nmultifaceted issue, and early action is key to making a real difference in\npeople's lives. For instance, if children have access to good schools and\nhealthcare from a young age, they're more likely to stay healthy, get a good\neducation, and find better jobs in the future. This not only improves their\nlives but also benefits their families and communities. When families have\nenough money, good health, and access to education, they're better positioned\nto take advantage of opportunities and make choices that align with their\nvalues and dreams. And when communities invest in programs and policies that\nsupport families, they're creating a ripple effect that can lead to sustainable\nand positive change.</p>",
+      "savedAt": "2026-03-16T09:16:49.936Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "<p style=\"text-align: justify\">Margie and her family show\nresilience and are actively involved in their community, which are important\nstrengths to build on. Their main livelihood activities like fishing and\nselling small goods are affected by seasonal weather and environmental factors,\nmaking their income unstable. They have good knowledge of health, safety, and\ndisaster preparedness, but they need help in finding ways to diversify their\nincome sources. Their strong social connections and participation in local\ngroups provide a good foundation for receiving more support and making progress</p>",
+      "savedAt": "2026-03-16T09:16:49.938Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [
+        {
+          "specificObjective": "Enhance health and safety awareness",
+          "activities": "Conduct health and safety seminars, including disaster preparedness to the household",
+          "timeframe": "January 2026",
+          "personResponsible": "Barangay Health Workers / Barangay Officials",
+          "materialsNeeded": "Educational materials",
+          "expectedOutput": "Increased knowledge of health, safety, and disaster response"
+        },
+        {
+          "specificObjective": "Strengthen social support",
+          "activities": "Encourage participation in more community groups and savings programs",
+          "timeframe": "Ongoing",
+          "personResponsible": "Barangay Officials",
+          "materialsNeeded": "Group meeting supplies",
+          "expectedOutput": "Increased social networks and financial resilience"
+        },
+        {
+          "specificObjective": "To monitor and evaluate progress",
+          "activities": "Regular household monitoring and follow-up",
+          "timeframe": "Every 6 months",
+          "personResponsible": "Social Worker/ Case Manager",
+          "materialsNeeded": "Track progress and adjust interventions as needed",
+          "expectedOutput": "Monitor and evaluate progress"
+        }
+      ],
+      "savedAt": "2026-03-16T09:16:49.941Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-16T09:16:49.945Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-16T09:16:49.955Z",
+      "lastSaveMode": "autosave"
+    },
+    "familyComposition": {
+      "members": {
+        "418100326|071201003-2-09528352": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "birthday": "1954-01-01",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100323|071201003-2-09528352": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "birthday": "1956-11-18",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100321|071201003-2-09528352": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 5",
+          "birthday": "1986-05-26",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100329|071201003-2-09528352": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "birthday": "1986-03-07",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100328|071201003-2-09528352": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "birthday": "1992-01-24",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100327|071201003-2-09528352": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "birthday": "1995-07-24",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100322|071201003-2-09528352": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 11",
+          "birthday": "2007-08-12",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100325|071201003-2-09528352": {
+          "monitoredChild": "Yes",
+          "educationalAttainment": "Grade 12",
+          "birthday": "2008-10-10",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100324|071201003-2-09528352": {
+          "monitoredChild": "Yes",
+          "educationalAttainment": "Grade 9",
+          "birthday": "2010-11-01",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "418100330|071201003-2-09528352": {
+          "monitoredChild": "Yes",
+          "educationalAttainment": "Grade 6",
+          "birthday": "2014-02-06",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        }
+      },
+      "deletedMemberKeys": [],
+      "savedAt": "2026-03-16T09:00:20.962Z",
+      "lastSaveMode": "manual"
+    }
+  },
+  {
+    "csrId": "48390",
+    "workflowType": "SCSR",
+    "cardData": {
+      "name": "AGAPITO MORANO LAGUNSAD",
+      "hhid": "071201008-7945-00011",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "SANTA FILOMENA"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "AGAPITO MORANO LAGUNSAD",
+        "hhid": "071201008-7945-00011",
+        "hhSet": "6A",
+        "sex": "MALE",
+        "birthday": "March 28, 1948",
+        "age": "77",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "GRADE 6",
+        "clientStatusOnExit": "14 - No Eligible (0-18 y/o) for CVS Monitoring (Certified by RPMO)"
+      },
+      "editDetails": {
+        "granteeName": "AGAPITO MORANO LAGUNSAD",
+        "sex": "MALE",
+        "birthday": "1948-03-28",
+        "age": "78",
+        "civilStatus": "Married with spouse present",
+        "educationalAttainment": "Grade 6",
+        "contactInfo": "09212039326",
+        "religion": "Select Religion",
+        "presentAddress": "Santa Filomena, Alburquerque, Bohol",
+        "placeOfBirth": "",
+        "sourceOfIncome": "",
+        "wellBeingLevel": "",
+        "monthlyIncome": "",
+        "perCapitaIncome": ""
+      },
+      "savedAt": "2026-03-28T06:59:46.764Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "sharedFields": {
+          "granteeName": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T03:59:31.088Z",
+            "sourceCsrId": "26531",
+            "syncMode": "auto-sync"
+          },
+          "birthday": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T04:22:30.499Z",
+            "sourceCsrId": "26531",
+            "syncMode": "auto-sync"
+          },
+          "age": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T04:22:30.499Z",
+            "sourceCsrId": "26531",
+            "syncMode": "auto-sync"
+          },
+          "civilStatus": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T06:57:04.270Z",
+            "sourceCsrId": "26531",
+            "syncMode": "auto-sync"
+          },
+          "educationalAttainment": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T06:59:46.764Z",
+            "sourceCsrId": "26531",
+            "syncMode": "auto-sync"
+          },
+          "contactInfo": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T03:51:14.347Z",
+            "sourceCsrId": "26531",
+            "syncMode": "auto-sync"
+          },
+          "sex": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T06:56:18.594Z",
+            "sourceCsrId": "26531",
+            "syncMode": "auto-sync"
+          }
+        },
+        "lastUpdatedByWorkflow": "CSR",
+        "lastUpdatedAt": "2026-03-28T06:59:46.764Z",
+        "lastSourceCsrId": "26531",
+        "lastSyncMode": "auto-sync"
+      }
+    },
+    "familyComposition": {
+      "members": {
+        "50244632|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "birthday": "1945-02-10",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244609|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None",
+          "educationalAttainment": "Elementary Graduate"
+        },
+        "50244655|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "birthday": "1979-05-20",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None",
+          "educationalAttainment": "High School Graduate"
+        },
+        "50244683|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "2ND YEAR COLLEGE / VOCATIONAL",
+          "birthday": "1986-01-29",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244705|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "birthday": "1999-09-23",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None",
+          "educationalAttainment": "High School Graduate"
+        },
+        "50244904|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "birthday": "2001-03-19",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None",
+          "educationalAttainment": "Grade 10"
+        },
+        "50244931|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "birthday": "2008-10-20",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None",
+          "educationalAttainment": "No Grade Completed"
+        },
+        "50244981|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "birthday": "2010-11-13",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None",
+          "educationalAttainment": "Day care"
+        }
+      },
+      "deletedMemberKeys": [
+        "50244632|071201008-7945-00011"
+      ],
+      "savedAt": "2026-03-28T06:59:20.924Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "lastUpdatedByWorkflow": "CSR",
+        "lastUpdatedAt": "2026-03-28T06:59:20.924Z",
+        "lastSourceCsrId": "26531",
+        "lastSyncMode": "auto-sync"
+      },
+      "ui": {
+        "expandedMemberKeys": []
+      }
+    },
+    "activeStep": 2,
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-28",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO,RSW"
+      },
+      "savedAt": "2026-03-28T07:02:55.447Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-28T07:02:55.445Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-28T07:02:55.446Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-28T07:02:55.446Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-28T07:02:55.446Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-28T07:02:55.446Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-28T07:02:55.447Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-28T07:02:55.448Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-28T07:02:55.448Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "76090",
+    "createdAt": "2026-03-28T03:03:59.654Z",
+    "activeStep": 2,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201003-2-09528280",
+    "cardData": {
+      "name": "AGRIPINA MALATE BANGAHON",
+      "hhid": "071201003-2-09528280",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "CANTIGUIB"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "AGRIPINA MALATE BANGAHON",
+        "hhid": "071201003-2-09528280",
+        "hhSet": "11A",
+        "sex": "FEMALE",
+        "birthday": "November 9, 1980",
+        "age": "45",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "NO GRADE COMPLETED",
+        "clientStatusOnExit": "1 - Active",
+        "wellBeingLevel": "Level 2 - Subsistence Index Score : 2.67905"
+      },
+      "editDetails": {
+        "educationalAttainment": "No Grade Completed",
+        "contactInfo": "09467254591",
+        "religion": "Select Religion",
+        "presentAddress": "Cantiguib, Alburquerque, Bohol",
+        "placeOfBirth": "",
+        "sourceOfIncome": "",
+        "wellBeingLevel": "Level 2 - Subsistence",
+        "monthlyIncome": "₱12,312",
+        "perCapitaIncome": "₱2,052.00",
+        "granteeName": "AGRIPINA MALATE BANGAHON",
+        "birthday": "1980-11-09",
+        "age": "45",
+        "civilStatus": "Married with spouse present"
+      },
+      "savedAt": "2026-03-28T03:52:06.057Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "sharedFields": {
+          "granteeName": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T03:52:06.057Z",
+            "sourceCsrId": "63429",
+            "syncMode": "auto-sync"
+          },
+          "birthday": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T03:52:06.057Z",
+            "sourceCsrId": "63429",
+            "syncMode": "auto-sync"
+          },
+          "age": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T03:52:06.057Z",
+            "sourceCsrId": "63429",
+            "syncMode": "auto-sync"
+          },
+          "civilStatus": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T03:52:06.057Z",
+            "sourceCsrId": "63429",
+            "syncMode": "auto-sync"
+          }
+        },
+        "lastUpdatedByWorkflow": "CSR",
+        "lastUpdatedAt": "2026-03-28T03:52:06.057Z",
+        "lastSourceCsrId": "63429",
+        "lastSyncMode": "auto-sync"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-28",
+        "recommendationText": "To help the family, an inclusive approach focusing on both environmental improvements and social support is recommended. Strengthening on their community involvement, programs that provide livelihood opportunities that can help stabilize their income and improve their living conditions. Enhancing their awareness of health and safety, and encouraging greater participation in social protection programs, will empower them further. Regular monitoring and follow-up are essential to ensure the success and to adjust strategies as their needs change over time.",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO,RSW"
+      },
+      "savedAt": "2026-03-28T07:03:09.538Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "<p style=\"text-align: justify\">The household has\ninsufficient income and they are experiencing financial difficulty especially\nin bearing the cost of health and educational needs of their children, Nico,\nTito Jr. and Blessy.</p><p style=\"text-align: justify\">Edna and her family\nshow resilience and are actively involved in their community, which are\nimportant strengths to build on. Their main livelihood activities like farming\nand selling own grown harvested root crops and vegetables are affected by\nseasonal weather and environmental factors, making their income unstable. They\nhave good knowledge of health, safety, and disaster preparedness, but they need\nhelp in finding ways to diversify their income sources. Their strong social connections\nand participation in local groups provide a good foundation for receiving more\nsupport and making progress.</p>",
+      "savedAt": "2026-03-28T07:03:09.533Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "<p style=\"text-align: justify; margin-right: 0cm; border: none\">Edna and Tito, 43- and 54-year-olds married live in Barangay Bonifacio\nBilar, Bohol. Tito is a farmer while Edna is not working because she’s the one\ntaking care of the children. Edna and Tito’s children are the following: Nico;\n13 years old eldest child, studying as grade 8 at the Campagao High School.\nTito Jr.; 12 years old second child, studying as grade 6 at Bonifacio\nElementary School. Blessy; 10 years old youngest and the only girl among their\nsiblings, she’s studying as grade 4 at the same school.<br>Edna is the parent leader of the partner beneficiaries; she appears to\nbe participative and attentive in Family Development Sessions. Given that she’s\nthe parent leader, she demonstrated pro-activeness during the sessions and\noften shares to the group her own ideas and also encourages her co-partner\nbeneficiaries to also share their ideas too in the Family Development Sessions.\nShe is a member of and one of the leaders of their Self-Help Group Paglambo Sa\nMatag Osa Sa Brgy. Bonifacio.<br>The family was identified as poor in Listahahan last 2019 and was\nregistered in set 12A last March 2023. They have been active\npartner-beneficiaries in the program for 3 years.</p>",
+          "savedAt": "2026-03-28T03:11:19.327Z",
+          "lastSaveMode": "autosave"
+        },
+        "socioEconomic": {
+          "html": "<p style=\"text-align: justify\">Farming on their own farm land is the family’s main source of income.\nTito, cultivate their farm regularly and earning a seasonal income\napproximately ₱8,000.00 pesos per month to support his family. While Edna looks after and\ntake good care of their home and their children, Nico who is now in second year\nhigh school, Tito Jr. who is now in grade 6 elementary school and Blessy who is\nnow in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also\nsells their root crops and vegetables to neighbors and schools to augment their\ndaily expenses which sometimes reaches ₱1,500 pesos per month.<br>Family is living in their own house located at the remote part of the\nbarangay. It is made of light materials, has two rooms and a comfort room\nlocated inside their house. The house appears to be clean, simple and\nmodest.<br>Edna expressed that even though they live simply, they work together to\nkeep their home running smoothly of maintaining good relationship with each\nother. Everyone in the family assumes household chores. Edna oversees the\nhousehold chores particularly in cooking meals for the family, their children\nassist sometimes household chores such as wash dishes, wiping tables, sweeping\nthe floor, watering the plants, washing laundries and feeding live stocks.<br>They often go to church since it is just accessible for about through\nwalking from their house, her family remains hopeful for better future\nespecially for their three children.</p>",
+          "savedAt": "2026-03-28T03:11:39.375Z",
+          "lastSaveMode": "autosave"
+        },
+        "healthCondition": {
+          "html": "<p style=\"text-align: justify\">The family appears to be healthy. They have not experienced any serious\nmedical illness. Edna share that they are able to avail barangay health\nservices within the past six months. The family has a segregated compost pit\nfor their garbage. They also own a water-sealed comfort room. There is no sign\nof mental health issues nor gender-based issues in the family. Edna said that\nwhen there are coming typhoons, the family seeks safety through staying in the\nnearby church which is the designated evacuation center of their Barangay.</p>",
+          "savedAt": "2026-03-28T03:11:48.758Z",
+          "lastSaveMode": "autosave"
+        },
+        "environmentalLivingConditions": {
+          "html": "<p style=\"text-align: justify\">The family lives a 10-minute walk from the barangay center. Their only\nwater source is a shared deep well. Some families can afford to have their own\ndeep well, but since Margie’s relatives own the well near them, they can access\nthe water for free. For drinking water, they buy from refilling stations in\ntheir barangay at Php25 per gallon. The community promotes waste segregation\nand has their own compost pit, while plastic waste collected by the local\ngovernment unit (LGU) garbage truck, and they prohibit burning trash in each\nhome. They have electricity, which provides power to light up the entire\nbarangay.<br>The family has not experienced conflicts in their neighborhood.</p>",
+          "savedAt": "2026-03-28T03:11:56.950Z",
+          "lastSaveMode": "autosave"
+        },
+        "environmentCommunity": {
+          "html": "<p style=\"text-align: justify; margin-right: 0cm\">Barangay\nBonifacio is about 7 kilometers from the town center. It takes about 20 minutes\nto travel there by motor vehicle. People can reach the community by riding a\nprivate jeep or public and privtae motorbike. Most houses are close with each\nother since this is the smallest Barangay of the Municipality, while some are\nnear the woody mountains. The main jobs of the residents are farming and lake\nor fishpond fishing. The barangay has basic facilities, including an emergency\nrescue vehicle, a health station, a small gymnasium, a chapel, an elementary\nschool and a Day Center which are all located near the Barangay Hall. The\nhealth center has a Barangay Health Worker on duty every day. There is also a\nvisiting midwife or nurse who provides health check-ups, vaccinations, and\nother health services. Water comes mainly from deep wells. There are several\ncommunal wells, and some households have their own for laundry and cooking. The\nbarangay has a water refilling station along the road, which residents can\naccess for drinking water, with door-to-door delivery available. Most\nhouseholds have electricity. The residents practice waste segregation and\nproper waste disposal. Some burn biodegradable wastes. Every two to three\nmonths, the local government staff collect and buy plastic waste, working with\nthe barangay council. Residents gather their plastic garbage and bring it to\nthe collection point. Most homes have a water-sealed toilet. The community is\nquiet and safe. During a disaster, residents living near the woody mountains\nare advised to evacuate to the church, which serve as evacuation sites for the\nbarangay.</p>",
+          "savedAt": "2026-03-28T07:03:09.534Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "environmentCommunity",
+      "savedAt": "2026-03-28T07:03:09.534Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "<p style=\"text-align: justify\">The Ancog family was checked using the Family Risk and Vulnerability\nAssessment (FRVA). The results showed they have low risk in finances and the\nenvironment, and no risks in health, safety, or protecting children.</p>\n\n<p style=\"text-align: justify\">Their latest Social Welfare and Development Indicator (SWDI) assessment\nwas done on October 10, 2025. It showed their family’s income is at Level 2,\nmeaning they just meet basic needs (subsistence level). Their average monthly\nincome per person is Php1,713.33. The poverty line in Bohol is Php2,170.74 per\nperson each month, and the average food cost in the province is Php1,515.83.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">The family has four more years to be in the program basing on the 7-year\nlimit R.A 11310 and since they are still legible for the program due to their\nthree children Nico, Tito Jr. and Blessy.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">Edna is a 43-year-old grantee who has been a partner-beneficiary of the\nPantawid Pamilyang Pilipino Program (4Ps) for two years. Their main concern is\nthe family’s insufficient income coming from unstable type of work and only her\nhusband making for a living, which makes it difficult for them to cover\nessential needs such as healthcare and education for their children Nico, Tito\nJr. and Blessy. This situation has continued over time, mainly due to their\nlimited sources of income where Edna only assists her husband depending on the\nseason of selling harvested root crops and vegetables. While her husband, Tito,\nworks as a farmer. Based on the latest Social Welfare and Development Indicator\n(SWDI), their family is at level 2 (Subsistence Level). Their combined earnings\nare just enough to meet basic needs, with an average monthly income per person\nof Php1,713.33, which is below the poverty line which resulted insufficient to\ncomfortably afford health and educational expenses. With the rising health and\neducation costs have put a real strain on their finances. Plus, living on a\nremote Barangay and relying only on farming, which is easily get affected by\nweather and environmental condition, it poses burden in terms of family’s\nfinances. The Ancog family have been struggling for a while but this burden was\nunloaded through the aid of the program; but things are getting more pressing\nnow that their children Nico, Tito Jr. and Blessy must continue in their\nstudies which needs increasing financial demands of supporting such as their school\nexpenses such as food, school supplies, allowances, and other educational\nneeds.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">The family’s situation is not entirely permanent. The family may have\nbig problems which mainly comes from social and economic issues that can be\nsolve with the right help, support, and community programs. Ancog family is\nresilient, and they're involved in their community, which shows they want to\nchange and improve for their family. Edna, in particular, has demonstrated her\nhardworking nature and willingness to seek solutions, which suggests that with\nappropriate support given, positive change is achievable.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">Their environment also offers some available resources that can promote\nimprovement. Local government programs which facilitate waste management,\nhealth services, and possible livelihood initiatives. The community has also\nbasic facilities such as a health station, barangay hall, and water refilling\nstations, which can support health and sanitation needs. However, restraining\nforces such as limited income, geographic location, and dependence on\nvulnerable livelihood sources poses significant barriers to the family’s\nprogress. These factors can make it hard to find stable jobs and get the\nservices they need. Though the family’s problem is not immediately\nlife-threatening but the on-going financial difficulties affects their ability\nto access necessary health and educational services, which are critical for\ntheir long-term well-being. Addressing these issues immediately is important to\nprevent further threatening of their level of well-being.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">Maslow’s Hierarchy of Needs explains that people are motivated by\ndifferent needs arranged in levels. A person usually focuses first on\nsatisfying the most basic needs before moving toward higher goals like\nachievement and self-fulfillment. The Ancog family is struggling because they\ndon't have much money, so it's hard for them to regularly meet these basic\nneeds. This affects how happy and healthy they are, and how they develop as\npeople. But despite being financially incapable, the Ancog family was able to\nsend their three children to school through the help of the program.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">In Physiological Needs (survival needs), the household experiencing\nfinancial struggles and meeting their daily needs becomes their priority. For\nsecurity and safety needs, parents want their children to have a comfortable\nlife if they finish their studies and will have a better-paying job in the\nfuture. looks at the Ancog family as a group where everyone affects everyone\nelse. Because they're having financial difficulties, it changes how they\ninteract, their relationships, and how they handle tough times together. If we\nunderstand how they're all connected, we can create support programs that help\nthe whole family.</p>\n\n<p style=\"text-align: justify; margin-right: 0cm\">For the esteem needs, the Ancog family’s strategies in overcoming struggles are done through\ncollaborative and proactive approach. They involved everyone in seeking\nsolutions of their problem which make them a functional family and could be a\ngood asset to the family in attaining improved level of well-being. The LGU may\nprovide assistance through referral services such as financial aid for school\nassistance every year as a support resource to address the children of the\nhousehold to continue their studies, referral to healthcare for the family to\nstay healthy, and referral to economic opportunities so that families will have\nan equal opportunity to have a better life. which help strengthens their\nreadiness for change.</p>",
+      "savedAt": "2026-03-28T07:03:09.535Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "<p style=\"text-align: justify\">Edna and her family\nshow resilience and are actively involved in their community, which are\nimportant strengths to build on. Their main livelihood activities like farming\nand selling own grown harvested root crops and vegetables are affected by\nseasonal weather and environmental factors, making their income unstable. They\nhave good knowledge of health, safety, and disaster preparedness, but they need\nhelp in finding ways to diversify their income sources. Their strong social connections\nand participation in local groups provide a good foundation for receiving more\nsupport and making progress.</p>",
+      "savedAt": "2026-03-28T07:03:09.536Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-28T07:03:09.537Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-28T07:03:09.539Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-28T07:03:09.541Z",
+      "lastSaveMode": "autosave"
+    },
+    "familyComposition": {
+      "ui": {
+        "expandedMemberKeys": []
+      }
+    }
+  },
+  {
+    "csrId": "57165",
+    "createdAt": "2026-03-28T04:51:25.953Z",
+    "activeStep": 1,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201002-7254-00044",
+    "cardData": {
+      "name": "ALICE COLALJO BANO",
+      "hhid": "071201002-7254-00044",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "BASACDACU"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "ALICE COLALJO BANO",
+        "hhid": "071201002-7254-00044",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "December 7, 1964",
+        "age": "61",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "HIGH SCHOOL GRADUATE",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      },
+      "editDetails": {
+        "granteeName": "ALICE COLALJO BANO",
+        "birthday": "1964-12-07",
+        "age": "61",
+        "civilStatus": "Married with spouse present",
+        "educationalAttainment": "High School Graduate",
+        "contactInfo": "NONE",
+        "religion": "Select Religion",
+        "presentAddress": "Basacdacu, Alburquerque, Bohol",
+        "placeOfBirth": "",
+        "sourceOfIncome": "",
+        "wellBeingLevel": "",
+        "monthlyIncome": "",
+        "perCapitaIncome": ""
+      },
+      "savedAt": "2026-03-28T05:03:44.634Z",
+      "lastSaveMode": "autosave"
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-28",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO,RSW"
+      },
+      "savedAt": "2026-03-28T05:03:59.802Z",
+      "lastSaveMode": "autosave"
+    },
+    "familyComposition": {
+      "ui": {
+        "expandedMemberKeys": [
+          "42265036|071201002-7254-00044",
+          "42265035|071201002-7254-00044",
+          "42265039|071201002-7254-00044",
+          "42265048|071201002-7254-00044",
+          "42265057|071201002-7254-00044",
+          "42265052|071201002-7254-00044",
+          "42265061|071201002-7254-00044",
+          "42265066|071201002-7254-00044",
+          "42265073|071201002-7254-00044",
+          "42265077|071201002-7254-00044"
+        ]
+      }
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-28T05:03:59.800Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-28T05:03:59.800Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-28T05:03:59.800Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-28T05:03:59.801Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-28T05:03:59.801Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-28T05:03:59.801Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-28T05:03:59.802Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-28T05:03:59.803Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "86000",
+    "createdAt": "2026-03-28T07:03:11.897Z",
+    "activeStep": 2,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201005-1-10362851",
+    "cardData": {
+      "name": "ALMA NIEVES SINCONIEGUE",
+      "hhid": "071201005-1-10362851",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "EAST POBLACION"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "ALMA NIEVES SINCONIEGUE",
+        "hhid": "071201005-1-10362851",
+        "hhSet": "11A",
+        "sex": "FEMALE",
+        "birthday": "November 12, 1987",
+        "age": "38",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "NO GRADE COMPLETED",
+        "clientStatusOnExit": "1 - Active",
+        "wellBeingLevel": "Level 2 - Subsistence Index Score : 2.70116"
+      },
+      "editDetails": {
+        "granteeName": "ALMA NIEVES SINCONIEGUE",
+        "sex": "FEMALE",
+        "birthday": "1987-11-12",
+        "age": "38",
+        "civilStatus": "Married with spouse present",
+        "educationalAttainment": "No Grade Completed",
+        "contactInfo": "09083109889",
+        "religion": "Select Religion",
+        "presentAddress": "East Poblacion, Alburquerque, Bohol",
+        "placeOfBirth": "",
+        "sourceOfIncome": "",
+        "wellBeingLevel": "",
+        "monthlyIncome": "",
+        "perCapitaIncome": ""
+      },
+      "savedAt": "2026-03-28T07:04:38.808Z",
+      "lastSaveMode": "manual"
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-28",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO,RSW"
+      },
+      "savedAt": "2026-03-28T07:04:43.389Z",
+      "lastSaveMode": "autosave"
+    },
+    "familyComposition": {
+      "ui": {
+        "expandedMemberKeys": []
+      }
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-28T07:04:43.388Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-28T07:04:43.388Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-28T07:04:43.388Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-28T07:04:43.388Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-28T07:04:43.389Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-28T07:04:43.389Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-28T07:04:43.390Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-28T07:04:43.390Z",
+      "lastSaveMode": "autosave"
+    }
+  }
+]

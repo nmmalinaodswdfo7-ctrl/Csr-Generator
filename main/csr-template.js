@@ -6,6 +6,7 @@
             window.__CSR_EXPORT_READY__ = false;
             window.__CSR_EXPORT_RENDER_SEQ__ = 0;
             window.__CSR_PRINT_MODE__ = IS_PRINT_MODE;
+            const NARRATIVE_CONTINUATION_SPLIT_BUFFER_PX = 2;
             if (document && document.documentElement) {
                 document.documentElement.setAttribute(EXPORT_READY_ATTR, "0");
                 if (IS_PRINT_MODE) {
@@ -234,6 +235,35 @@
                 return nodeBottom > (footerTop - pad);
             }
 
+            function getTextLineRects(node) {
+                if (!node || typeof window.Range !== "function") {
+                    return [];
+                }
+                const range = document.createRange();
+                range.selectNodeContents(node);
+                const rects = Array.from(range.getClientRects());
+                range.detach && range.detach();
+                return rects
+                    .filter((rect) => rect && rect.height > 0 && rect.width > 0)
+                    .sort((a, b) => a.top - b.top);
+            }
+
+            function isParagraphTextOverFooter(page, node, paddingPx) {
+                if (!page || !node) {
+                    return false;
+                }
+                const footer = page.querySelector(".footer-section");
+                const footerTop = footer
+                    ? footer.getBoundingClientRect().top
+                    : page.getBoundingClientRect().bottom;
+                const pad = typeof paddingPx === "number" ? paddingPx : 2;
+                const rects = getTextLineRects(node);
+                if (!rects.length) {
+                    return isNodeOverFooter(page, node, pad);
+                }
+                return rects.some((rect) => rect.bottom > (footerTop - pad));
+            }
+
             function removeGeneratedDynamicPages() {
                 if (!pageRoot) {
                     return;
@@ -311,6 +341,44 @@
                     return [cloned];
                 }
 
+                function splitParagraphByBreakNodes(node) {
+                    if (!node || node.nodeType !== 1 || String(node.tagName || "").toUpperCase() !== "P") {
+                        return [];
+                    }
+                    const chunks = [];
+                    let currentParagraph = document.createElement("p");
+                    currentParagraph.classList.add("case-dev-paragraph");
+                    currentParagraph.style.margin = "0 0 0.35rem 0";
+
+                    const flushCurrentParagraph = () => {
+                        const plainText = text(currentParagraph.textContent).replace(/\s+/g, " ").trim();
+                        if (!plainText) {
+                            currentParagraph = document.createElement("p");
+                            currentParagraph.classList.add("case-dev-paragraph");
+                            currentParagraph.style.margin = "0 0 0.35rem 0";
+                            return;
+                        }
+                        chunks.push(currentParagraph);
+                        currentParagraph = document.createElement("p");
+                        currentParagraph.classList.add("case-dev-paragraph");
+                        currentParagraph.style.margin = "0 0 0.35rem 0";
+                    };
+
+                    Array.from(node.childNodes || []).forEach((child) => {
+                        const isBreak =
+                            child &&
+                            child.nodeType === 1 &&
+                            String(child.tagName || "").toUpperCase() === "BR";
+                        if (isBreak) {
+                            flushCurrentParagraph();
+                            return;
+                        }
+                        currentParagraph.appendChild(child.cloneNode(true));
+                    });
+                    flushCurrentParagraph();
+                    return chunks;
+                }
+
                 function collectAtomicBlocks(node, out) {
                     if (!node) {
                         return;
@@ -339,6 +407,11 @@
                         return;
                     }
                     if (tag === "P") {
+                        const splitChunks = splitParagraphByBreakNodes(node);
+                        if (splitChunks.length) {
+                            splitChunks.forEach((chunkNode) => out.push(chunkNode));
+                            return;
+                        }
                         const cloned = node.cloneNode(true);
                         cloned.classList.add("case-dev-paragraph");
                         cloned.style.margin = "0 0 0.35rem 0";
@@ -382,21 +455,20 @@
                 if (!fullText) {
                     return null;
                 }
-                const words = fullText.split(/\s+/).filter(Boolean);
-                if (words.length < 2) {
+                if (fullText.length < 2) {
                     return null;
                 }
 
                 const probe = paragraphNode.cloneNode(true);
                 caseBody.appendChild(probe);
                 let low = 1;
-                let high = words.length - 1;
+                let high = fullText.length - 1;
                 let best = 0;
 
                 while (low <= high) {
                     const mid = Math.floor((low + high) / 2);
-                    probe.textContent = words.slice(0, mid).join(" ");
-                    if (isNodeOverFooter(page, probe)) {
+                    probe.textContent = fullText.slice(0, mid).trimEnd();
+                    if (!probe.textContent || isParagraphTextOverFooter(page, probe, NARRATIVE_CONTINUATION_SPLIT_BUFFER_PX)) {
                         high = mid - 1;
                     } else {
                         best = mid;
@@ -405,19 +477,61 @@
                 }
                 probe.remove();
 
-                if (best <= 0 || best >= words.length) {
+                if (best <= 0 || best >= fullText.length) {
                     return null;
                 }
 
-                const firstText = words.slice(0, best).join(" ");
-                const remainingText = words.slice(best).join(" ");
+                let splitIndex = best;
+                while (splitIndex > 0 && /\S/.test(fullText.charAt(splitIndex))) {
+                    splitIndex -= 1;
+                }
+                if (splitIndex <= 0) {
+                    splitIndex = best;
+                }
+
+                const canFitPrefix = (candidateIndex) => {
+                    const prefixText = fullText.slice(0, candidateIndex).trimEnd();
+                    if (!prefixText) {
+                        return false;
+                    }
+                    const fitProbe = paragraphNode.cloneNode(true);
+                    fitProbe.textContent = prefixText;
+                    caseBody.appendChild(fitProbe);
+                    const fits = !isParagraphTextOverFooter(page, fitProbe, NARRATIVE_CONTINUATION_SPLIT_BUFFER_PX);
+                    fitProbe.remove();
+                    return fits;
+                };
+
+                let extendedIndex = splitIndex;
+                while (extendedIndex < fullText.length) {
+                    const nextWhitespaceMatch = fullText.slice(extendedIndex).match(/\s+\S/);
+                    if (!nextWhitespaceMatch) {
+                        if (canFitPrefix(fullText.length)) {
+                            extendedIndex = fullText.length;
+                        }
+                        break;
+                    }
+                    const nextWordStart = extendedIndex + nextWhitespaceMatch.index + nextWhitespaceMatch[0].search(/\S/);
+                    let nextWordEnd = nextWordStart;
+                    while (nextWordEnd < fullText.length && /\S/.test(fullText.charAt(nextWordEnd))) {
+                        nextWordEnd += 1;
+                    }
+                    if (!canFitPrefix(nextWordEnd)) {
+                        break;
+                    }
+                    extendedIndex = nextWordEnd;
+                }
+                splitIndex = extendedIndex;
+
+                const firstText = fullText.slice(0, splitIndex).trimEnd();
+                const remainingText = fullText.slice(splitIndex).trimStart();
                 if (!firstText || !remainingText) {
                     return null;
                 }
 
                 paragraphNode.textContent = firstText;
                 caseBody.appendChild(paragraphNode);
-                if (isNodeOverFooter(page, paragraphNode)) {
+                if (isParagraphTextOverFooter(page, paragraphNode, NARRATIVE_CONTINUATION_SPLIT_BUFFER_PX)) {
                     paragraphNode.remove();
                     return null;
                 }
@@ -425,6 +539,75 @@
                 const remainder = paragraphNode.cloneNode(true);
                 remainder.textContent = remainingText;
                 return remainder;
+            }
+
+            function createNarrativeSectionSkeleton(kind, title, isContinuation) {
+                const section = document.createElement("section");
+                section.className = "mb-2";
+                section.setAttribute("data-flow-kind", kind);
+                section.innerHTML =
+                    ((isContinuation ? "" : "<div class=\"flex gap-4 mb-2 calibri-font\"><h3 class=\"font-bold text-[12pt]\">" + title + "</h3></div>")) +
+                    "<div class=\"calibri-font text-[12pt] leading-[1.2] text-justify case-development-body\" data-flow-body=\"1\"></div>";
+                return section;
+            }
+
+            function appendNarrativeNodeAcrossPages(initialNode, currentPage, currentHost, kind, title, includeHeadingOnFirstPage) {
+                let node = initialNode;
+                let page = currentPage;
+                let host = currentHost;
+                let section = createNarrativeSectionSkeleton(kind, title, !includeHeadingOnFirstPage);
+                host.appendChild(section);
+                let body = section.querySelector("div:last-child");
+
+                while (node) {
+                    body.appendChild(node);
+                    if (!isNodeOverFooter(page, node)) {
+                        return {
+                            success: true,
+                            currentPage: page,
+                            currentHost: host,
+                            section,
+                            body,
+                        };
+                    }
+
+                    node.remove();
+                    const remainder = splitCaseParagraphToFitPage(page, body, node);
+                    if (!remainder) {
+                        return {
+                            success: false,
+                            currentPage: page,
+                            currentHost: host,
+                            section,
+                            body,
+                        };
+                    }
+
+                    page = createFlowPage();
+                    host = getFlowHost(page);
+                    if (!host) {
+                        return {
+                            success: false,
+                            currentPage,
+                            currentHost,
+                            section,
+                            body,
+                        };
+                    }
+
+                    section = createNarrativeSectionSkeleton(kind, title, true);
+                    host.appendChild(section);
+                    body = section.querySelector("div:last-child");
+                    node = remainder;
+                }
+
+                return {
+                    success: true,
+                    currentPage: page,
+                    currentHost: host,
+                    section,
+                    body,
+                };
             }
 
             function updateDynamicFooterPageNumbers() {
@@ -772,12 +955,7 @@
                         currentPage = createFlowPage();
                         currentHost = getFlowHost(currentPage);
                     }
-                    const caseSection = document.createElement("section");
-                    caseSection.className = "mb-2";
-                    caseSection.setAttribute("data-flow-kind", "case");
-                    caseSection.innerHTML =
-                        "<div class=\"flex gap-4 mb-2 calibri-font\"><h3 class=\"font-bold text-[12pt]\">III. CASE DEVELOPMENT</h3></div>" +
-                        "<div class=\"calibri-font text-[12pt] leading-[1.2] text-justify case-development-body\" data-flow-body=\"1\"></div>";
+                    const caseSection = createNarrativeSectionSkeleton("case", "III. CASE DEVELOPMENT", false);
                     currentHost.appendChild(caseSection);
                     if (isNodeOverFooter(currentPage, caseSection)) {
                         caseSection.remove();
@@ -787,115 +965,37 @@
                             currentHost.appendChild(caseSection);
                         }
                     }
-                    const caseBody = caseSection.querySelector("div:last-child");
+                    let caseBody = caseSection.querySelector("div:last-child");
                     let caseIndex = 0;
                     while (caseIndex < caseBlocks.length) {
                         const node = caseBlocks[caseIndex].cloneNode(true);
                         caseBody.appendChild(node);
                         if (isNodeOverFooter(currentPage, node)) {
                             node.remove();
-                            if (!caseBody.childNodes.length) {
-                                const firstRemainder = splitCaseParagraphToFitPage(currentPage, caseBody, node);
-                                if (firstRemainder) {
-                                    currentPage = createFlowPage();
-                                    currentHost = getFlowHost(currentPage);
-                                    if (!currentHost) {
-                                        break;
-                                    }
-                                    const firstContSection = document.createElement("section");
-                                    firstContSection.className = "mb-2";
-                                    firstContSection.setAttribute("data-flow-kind", "case");
-                                    firstContSection.innerHTML = "<div class=\"calibri-font text-[12pt] leading-[1.2] text-justify case-development-body\" data-flow-body=\"1\"></div>";
-                                    currentHost.appendChild(firstContSection);
-                                    const firstContBody = firstContSection.querySelector("div");
-                                    firstContBody.appendChild(firstRemainder);
-                                    if (isNodeOverFooter(currentPage, firstRemainder)) {
-                                        firstRemainder.remove();
-                                        break;
-                                    }
-                                    caseIndex += 1;
-                                    while (caseIndex < caseBlocks.length) {
-                                        const moreNode = caseBlocks[caseIndex].cloneNode(true);
-                                        firstContBody.appendChild(moreNode);
-                                        if (isNodeOverFooter(currentPage, moreNode)) {
-                                            moreNode.remove();
-                                            break;
-                                        }
-                                        caseIndex += 1;
-                                    }
-                                    continue;
-                                }
-                                caseSection.remove();
-                                currentPage = createFlowPage();
-                                currentHost = getFlowHost(currentPage);
-                                if (!currentHost) {
-                                    break;
-                                }
-                                currentHost.appendChild(caseSection);
-                                caseBody.appendChild(node);
-                                if (isNodeOverFooter(currentPage, node)) {
-                                    node.remove();
-                                    break;
-                                }
-                                caseIndex += 1;
-                                continue;
-                            }
                             const remainder = splitCaseParagraphToFitPage(currentPage, caseBody, node);
-                            if (remainder) {
-                                currentPage = createFlowPage();
-                                currentHost = getFlowHost(currentPage);
-                                if (!currentHost) {
-                                    break;
-                                }
-                                const contSection = document.createElement("section");
-                                contSection.className = "mb-2";
-                                contSection.setAttribute("data-flow-kind", "case");
-                                contSection.innerHTML = "<div class=\"calibri-font text-[12pt] leading-[1.2] text-justify case-development-body\" data-flow-body=\"1\"></div>";
-                                currentHost.appendChild(contSection);
-                                const contBody = contSection.querySelector("div");
-                                contBody.appendChild(remainder);
-                                if (isNodeOverFooter(currentPage, remainder)) {
-                                    remainder.remove();
-                                    break;
-                                }
-                                caseIndex += 1;
-                                while (caseIndex < caseBlocks.length) {
-                                    const moreNode = caseBlocks[caseIndex].cloneNode(true);
-                                    contBody.appendChild(moreNode);
-                                    if (isNodeOverFooter(currentPage, moreNode)) {
-                                        moreNode.remove();
-                                        break;
-                                    }
-                                    caseIndex += 1;
-                                }
-                                continue;
+                            if (!caseBody.childNodes.length && caseSection.parentElement) {
+                                caseSection.remove();
                             }
                             currentPage = createFlowPage();
                             currentHost = getFlowHost(currentPage);
                             if (!currentHost) {
                                 break;
                             }
-                            const contSection = document.createElement("section");
-                            contSection.className = "mb-2";
-                            contSection.setAttribute("data-flow-kind", "case");
-                            contSection.innerHTML = "<div class=\"calibri-font text-[12pt] leading-[1.2] text-justify case-development-body\" data-flow-body=\"1\"></div>";
-                            currentHost.appendChild(contSection);
-                            const contBody = contSection.querySelector("div");
-                            contBody.appendChild(node);
-                            if (isNodeOverFooter(currentPage, node)) {
-                                node.remove();
+                            const narrativeAppendResult = appendNarrativeNodeAcrossPages(
+                                remainder || node,
+                                currentPage,
+                                currentHost,
+                                "case",
+                                "III. CASE DEVELOPMENT",
+                                false
+                            );
+                            if (!narrativeAppendResult.success) {
                                 break;
                             }
+                            currentPage = narrativeAppendResult.currentPage;
+                            currentHost = narrativeAppendResult.currentHost;
+                            caseBody = narrativeAppendResult.body;
                             caseIndex += 1;
-                            while (caseIndex < caseBlocks.length) {
-                                const moreNode = caseBlocks[caseIndex].cloneNode(true);
-                                contBody.appendChild(moreNode);
-                                if (isNodeOverFooter(currentPage, moreNode)) {
-                                    moreNode.remove();
-                                    break;
-                                }
-                                caseIndex += 1;
-                            }
                             continue;
                         }
                         caseIndex += 1;

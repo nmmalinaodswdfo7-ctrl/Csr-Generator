@@ -1,21 +1,49 @@
 ﻿const { app, BrowserWindow, dialog, shell } = require("electron");
 const { fork } = require("child_process");
 const http = require("http");
+const net = require("net");
 const path = require("path");
 const fs = require("fs");
 
-const PORT = process.env.CSR_PORT || "8080";
+const DEFAULT_PORT = Number(process.env.CSR_PORT || 8080);
 const ROOT_DIR = path.resolve(__dirname, "..");
 const LAUNCHER_DIR = path.resolve(ROOT_DIR, "launcher");
-const APP_URL = `http://127.0.0.1:${PORT}/main/index.html`;
 const SERVER_READY_TIMEOUT_MS = 20000;
-const SERVER_EXISTING_CHECK_TIMEOUT_MS = 1500;
 const SERVER_START_ATTEMPTS = 3;
+const PORT_SCAN_ATTEMPTS = 25;
 
 let mainWindow = null;
 let serverProcess = null;
 let isShuttingDown = false;
 let startupInProgress = false;
+let activePort = DEFAULT_PORT;
+
+const SINGLE_INSTANCE_ERROR_TITLE = "App Already Running";
+const SINGLE_INSTANCE_ERROR_MESSAGE =
+  "The app is already running. Close the app and open it again.";
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+
+function findFirstExistingPath(candidates) {
+  for (const candidate of candidates) {
+    try {
+      if (candidate && fs.existsSync(candidate)) {
+        return candidate;
+      }
+    } catch (_) {
+      // Ignore probe errors and continue fallback search.
+    }
+  }
+  return null;
+}
+
+function resolveAppIconPath() {
+  const iconCandidates = [
+    path.resolve(ROOT_DIR, "assets", "logo", "favicon.ico"),
+    path.resolve(ROOT_DIR, "assets", "logo", "android-chrome-512x512.png"),
+    path.resolve(ROOT_DIR, "assets", "logo", "apple-touch-icon.png"),
+  ];
+  return findFirstExistingPath(iconCandidates);
+}
 
 function resolveServerEntrypoint() {
   const sourceEntry = path.join(LAUNCHER_DIR, "server.js");
@@ -35,7 +63,6 @@ function ensureDataDirs(dataRootDir) {
   const requiredDirs = [
     path.resolve(dataRootDir, "downloads"),
     path.resolve(dataRootDir, "db"),
-    path.resolve(dataRootDir, "backup"),
   ];
   for (const dir of requiredDirs) {
     try {
@@ -48,6 +75,37 @@ function ensureDataDirs(dataRootDir) {
 
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function buildAppUrl(port) {
+  return `http://127.0.0.1:${port}/main/index.html`;
+}
+
+function canBindPort(port) {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.unref();
+    probe.once("error", () => resolve(false));
+    probe.listen({ host: "127.0.0.1", port }, () => {
+      probe.close(() => resolve(true));
+    });
+  });
+}
+
+async function resolveAvailablePort(preferredPort) {
+  const startPort = Number.isFinite(Number(preferredPort))
+    ? Number(preferredPort)
+    : 8080;
+  for (let offset = 0; offset < PORT_SCAN_ATTEMPTS; offset += 1) {
+    const candidate = startPort + offset;
+    // eslint-disable-next-line no-await-in-loop
+    if (await canBindPort(candidate)) {
+      return candidate;
+    }
+  }
+  throw new Error(
+    `No available localhost port found from ${startPort} to ${startPort + PORT_SCAN_ATTEMPTS - 1}.`
+  );
 }
 
 async function waitForServerReady(url, timeoutMs) {
@@ -80,20 +138,13 @@ async function startServer() {
   }
   const dataRootDir = resolveDataRootDir();
   ensureDataDirs(dataRootDir);
-
-  // Reuse an already-running local server on the same port when available.
-  const existingReady = await waitForServerReady(
-    APP_URL,
-    SERVER_EXISTING_CHECK_TIMEOUT_MS
-  );
-  if (existingReady) {
-    return;
-  }
+  activePort = await resolveAvailablePort(DEFAULT_PORT);
+  const appUrl = buildAppUrl(activePort);
 
   startupInProgress = true;
   let lastError = null;
   for (let attempt = 1; attempt <= SERVER_START_ATTEMPTS; attempt += 1) {
-    serverProcess = fork(entry, [String(PORT)], {
+    serverProcess = fork(entry, [String(activePort)], {
       cwd: ROOT_DIR,
       stdio: "ignore",
       env: {
@@ -112,7 +163,7 @@ async function startServer() {
       }
     });
 
-    const ready = await waitForServerReady(APP_URL, SERVER_READY_TIMEOUT_MS);
+    const ready = await waitForServerReady(appUrl, SERVER_READY_TIMEOUT_MS);
     if (ready) {
       startupInProgress = false;
       return;
@@ -123,16 +174,6 @@ async function startServer() {
     );
     stopServer();
 
-    // If another process took the port and is healthy now, continue with it.
-    const fallbackReady = await waitForServerReady(
-      APP_URL,
-      SERVER_EXISTING_CHECK_TIMEOUT_MS
-    );
-    if (fallbackReady) {
-      startupInProgress = false;
-      return;
-    }
-
     await wait(300 * attempt);
   }
 
@@ -142,6 +183,7 @@ async function startServer() {
 
 async function createMainWindow() {
   await startServer();
+  const appIconPath = resolveAppIconPath();
   mainWindow = new BrowserWindow({
     width: 1366,
     height: 860,
@@ -149,6 +191,7 @@ async function createMainWindow() {
     minHeight: 700,
     show: false,
     autoHideMenuBar: true,
+    icon: appIconPath || undefined,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -171,7 +214,8 @@ async function createMainWindow() {
     }
     return { action: "deny" };
   });
-  await mainWindow.loadURL(APP_URL);
+  enforceFixedZoom(mainWindow);
+  await mainWindow.loadURL(buildAppUrl(activePort));
 }
 
 function stopServer() {
@@ -186,26 +230,102 @@ function stopServer() {
   serverProcess = null;
 }
 
-app.on("window-all-closed", () => {
-  isShuttingDown = true;
-  stopServer();
-  if (process.platform !== "darwin") {
-    app.quit();
+function enforceFixedZoom(win) {
+  const webContents = win && win.webContents;
+  if (!webContents) {
+    return;
   }
-});
 
-app.on("before-quit", () => {
-  isShuttingDown = true;
-  stopServer();
-});
+  const resetZoom = () => {
+    try {
+      webContents.setZoomFactor(1);
+    } catch (_) {
+      // Ignore zoom reset failures.
+    }
+    try {
+      webContents.setZoomLevel(0);
+    } catch (_) {
+      // Ignore zoom reset failures.
+    }
+  };
 
-app.whenReady().then(() => {
-  createMainWindow().catch((error) => {
-    dialog.showErrorBox(
-      "Startup Failed",
-      `CSR desktop startup failed.\n\n${String(error && error.message ? error.message : error)}`
-    );
-    app.quit();
+  if (typeof webContents.setVisualZoomLevelLimits === "function") {
+    webContents.setVisualZoomLevelLimits(1, 1).catch(() => null);
+  }
+  if (typeof webContents.setLayoutZoomLevelLimits === "function") {
+    webContents.setLayoutZoomLevelLimits(0, 0).catch(() => null);
+  }
+
+  webContents.on("before-input-event", (event, input) => {
+    const key = String((input && input.key) || "").toLowerCase();
+    const code = String((input && input.code) || "").toLowerCase();
+    const type = String((input && input.type) || "").toLowerCase();
+    const isCtrl = !!(input && input.control);
+    const isZoomHotkey =
+      isCtrl &&
+      (key === "+" ||
+        key === "=" ||
+        key === "-" ||
+        key === "_" ||
+        key === "0" ||
+        code === "numpadadd" ||
+        code === "numpadsubtract" ||
+        code === "digit0" ||
+        code === "numpad0");
+    const isCtrlWheel = isCtrl && type === "mousewheel";
+    if (isZoomHotkey || isCtrlWheel) {
+      event.preventDefault();
+      resetZoom();
+    }
   });
-});
+
+  webContents.on("zoom-changed", (event) => {
+    event.preventDefault();
+    resetZoom();
+  });
+  webContents.on("did-finish-load", resetZoom);
+  webContents.on("did-navigate-in-page", resetZoom);
+
+  resetZoom();
+}
+
+if (!hasSingleInstanceLock) {
+  dialog.showErrorBox(SINGLE_INSTANCE_ERROR_TITLE, SINGLE_INSTANCE_ERROR_MESSAGE);
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (!mainWindow) {
+      return;
+    }
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    mainWindow.show();
+    mainWindow.focus();
+  });
+
+  app.on("window-all-closed", () => {
+    isShuttingDown = true;
+    stopServer();
+    if (process.platform !== "darwin") {
+      app.quit();
+    }
+  });
+
+  app.on("before-quit", () => {
+    isShuttingDown = true;
+    stopServer();
+  });
+
+  app.whenReady().then(() => {
+    createMainWindow().catch((error) => {
+      dialog.showErrorBox(
+        "Startup Failed",
+        `CSR desktop startup failed.\n\n${String(error && error.message ? error.message : error)}`
+      );
+      app.quit();
+    });
+  });
+}
+
 

@@ -1,6 +1,6 @@
 {
   "appId": "com.csr.generator.desktop",
-  "productName": "CSR Generator",
+  "productName": "Social Case Report Manager",
   "directories": {
     "output": "dist"
   },
@@ -21,7 +21,7 @@
   "asar": false,
   "win": {
     "signAndEditExecutable": false,
-    "icon": "assets/logo.ico",
+    "icon": "assets/logo/favicon.ico",
     "target": [
       {
         "target": "nsis",
@@ -34,7 +34,7 @@
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "installerIcon": "assets/logo.ico",
-    "uninstallerIcon": "assets/logo.ico"
+    "installerIcon": "assets/logo/favicon.ico",
+    "uninstallerIcon": "assets/logo/favicon.ico"
   }
 }

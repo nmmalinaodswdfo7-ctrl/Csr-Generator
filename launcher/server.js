@@ -11,7 +11,6 @@ const rootDir = path.resolve(__dirname, "..");
 const dataRootDir = path.resolve(process.env.CSR_DATA_DIR || rootDir);
 const sessionFilePath = path.resolve(dataRootDir, "session-state.json");
 const csrDbDirPath = path.resolve(dataRootDir, "db");
-const backupDirPath = path.resolve(dataRootDir, "backup");
 const downloadsDirPath = path.resolve(dataRootDir, "downloads");
 const csrExportPayloadStore = new Map();
 let exportBrowserPromise = null;
@@ -650,16 +649,6 @@ function ensureCsrDbDir() {
   }
 }
 
-function ensureBackupDir() {
-  try {
-    if (!fs.existsSync(backupDirPath)) {
-      fs.mkdirSync(backupDirPath, { recursive: true });
-    }
-  } catch (_) {
-    // Ignore directory creation errors here; callers handle read/write failures.
-  }
-}
-
 function ensureDownloadsDir() {
   try {
     if (!fs.existsSync(downloadsDirPath)) {
@@ -688,7 +677,29 @@ function toLegacyMunicipalityFileBaseName(value) {
   return sanitizeMunicipalityName(value).replace(/[^\w.-]+/g, "_");
 }
 
-function getCsrDbFilePath(municipality) {
+function normalizeCsrDatasetKind(value) {
+  return String(value || "").trim().toLowerCase() === "scsr" ? "scsr" : "csr";
+}
+
+function getCsrDbFilePath(municipality, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
+  const safe = toMunicipalityFileBaseName(municipality);
+  if (!safe) {
+    return null;
+  }
+  return path.resolve(csrDbDirPath, `${datasetKind}_${safe}.json`);
+}
+
+function getLegacyCsrDbFilePath(municipality, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
+  const safe = toLegacyMunicipalityFileBaseName(municipality);
+  if (!safe) {
+    return null;
+  }
+  return path.resolve(csrDbDirPath, `${datasetKind}_${safe}.json`);
+}
+
+function getUnprefixedCsrDbFilePath(municipality) {
   const safe = toMunicipalityFileBaseName(municipality);
   if (!safe) {
     return null;
@@ -696,28 +707,12 @@ function getCsrDbFilePath(municipality) {
   return path.resolve(csrDbDirPath, `${safe}.json`);
 }
 
-function getLegacyCsrDbFilePath(municipality) {
+function getUnprefixedLegacyCsrDbFilePath(municipality) {
   const safe = toLegacyMunicipalityFileBaseName(municipality);
   if (!safe) {
     return null;
   }
   return path.resolve(csrDbDirPath, `${safe}.json`);
-}
-
-function getBackupFilePath(municipality) {
-  const safe = toMunicipalityFileBaseName(municipality);
-  if (!safe) {
-    return null;
-  }
-  return path.resolve(backupDirPath, `${safe}.json`);
-}
-
-function getLegacyBackupFilePath(municipality) {
-  const safe = toLegacyMunicipalityFileBaseName(municipality);
-  if (!safe) {
-    return null;
-  }
-  return path.resolve(backupDirPath, `${safe}.json`);
 }
 
 function migrateLegacyMunicipalityFilePath(primaryPath, legacyPath) {
@@ -733,23 +728,33 @@ function migrateLegacyMunicipalityFilePath(primaryPath, legacyPath) {
   }
 }
 
-function resolveCsrDbReadFilePath(municipality) {
-  const primaryPath = getCsrDbFilePath(municipality);
-  const legacyPath = getLegacyCsrDbFilePath(municipality);
-  migrateLegacyMunicipalityFilePath(primaryPath, legacyPath);
+function resolveCsrDbReadFilePath(municipality, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
+  const primaryPath = getCsrDbFilePath(municipality, datasetKind);
+  const legacyPaths = [getLegacyCsrDbFilePath(municipality, datasetKind)];
+  if (datasetKind === "csr") {
+    legacyPaths.push(getUnprefixedCsrDbFilePath(municipality));
+    legacyPaths.push(getUnprefixedLegacyCsrDbFilePath(municipality));
+  }
+  legacyPaths.forEach((legacyPath) => {
+    migrateLegacyMunicipalityFilePath(primaryPath, legacyPath);
+  });
 
   if (primaryPath && fs.existsSync(primaryPath)) {
     return primaryPath;
   }
-  if (legacyPath && fs.existsSync(legacyPath)) {
-    return legacyPath;
+  for (const legacyPath of legacyPaths) {
+    if (legacyPath && fs.existsSync(legacyPath)) {
+      return legacyPath;
+    }
   }
   return primaryPath;
 }
 
-async function readCsrRecordsByMunicipalityAsync(municipality) {
+async function readCsrRecordsByMunicipalityAsync(municipality, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
   ensureCsrDbDir();
-  const filePath = resolveCsrDbReadFilePath(municipality);
+  const filePath = resolveCsrDbReadFilePath(municipality, datasetKind);
   if (!filePath) {
     return [];
   }
@@ -764,22 +769,36 @@ async function readCsrRecordsByMunicipalityAsync(municipality) {
   }
 }
 
-async function writeCsrRecordsByMunicipalityAsync(municipality, records) {
+async function writeCsrRecordsByMunicipalityAsync(municipality, records, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
   ensureCsrDbDir();
-  const filePath = getCsrDbFilePath(municipality);
-  const legacyPath = getLegacyCsrDbFilePath(municipality);
-  migrateLegacyMunicipalityFilePath(filePath, legacyPath);
+  const filePath = getCsrDbFilePath(municipality, datasetKind);
+  const legacyPaths = [getLegacyCsrDbFilePath(municipality, datasetKind)];
+  if (datasetKind === "csr") {
+    legacyPaths.push(getUnprefixedCsrDbFilePath(municipality));
+    legacyPaths.push(getUnprefixedLegacyCsrDbFilePath(municipality));
+  }
+  legacyPaths.forEach((legacyPath) => {
+    migrateLegacyMunicipalityFilePath(filePath, legacyPath);
+  });
   if (!filePath) {
     throw new Error("Invalid municipality.");
   }
   await fsp.writeFile(filePath, JSON.stringify(records || [], null, 2), "utf8");
 }
 
-async function ensureCsrDbFileByMunicipalityAsync(municipality) {
+async function ensureCsrDbFileByMunicipalityAsync(municipality, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
   ensureCsrDbDir();
-  const filePath = getCsrDbFilePath(municipality);
-  const legacyPath = getLegacyCsrDbFilePath(municipality);
-  migrateLegacyMunicipalityFilePath(filePath, legacyPath);
+  const filePath = getCsrDbFilePath(municipality, datasetKind);
+  const legacyPaths = [getLegacyCsrDbFilePath(municipality, datasetKind)];
+  if (datasetKind === "csr") {
+    legacyPaths.push(getUnprefixedCsrDbFilePath(municipality));
+    legacyPaths.push(getUnprefixedLegacyCsrDbFilePath(municipality));
+  }
+  legacyPaths.forEach((legacyPath) => {
+    migrateLegacyMunicipalityFilePath(filePath, legacyPath);
+  });
   if (!filePath) {
     return false;
   }
@@ -792,8 +811,9 @@ async function ensureCsrDbFileByMunicipalityAsync(municipality) {
   }
 }
 
-async function upsertCsrRecordByMunicipalityAsync(municipality, record) {
-  const records = await readCsrRecordsByMunicipalityAsync(municipality);
+async function upsertCsrRecordByMunicipalityAsync(municipality, record, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
+  const records = await readCsrRecordsByMunicipalityAsync(municipality, datasetKind);
   const csrId = String(record && record.csrId ? record.csrId : "").trim();
   if (!csrId) {
     throw new Error("Missing csrId.");
@@ -807,74 +827,18 @@ async function upsertCsrRecordByMunicipalityAsync(municipality, record) {
   } else {
     records.push(record);
   }
-  await writeCsrRecordsByMunicipalityAsync(municipality, records);
-  await createMunicipalityBackupSnapshotAsync(municipality);
+  await writeCsrRecordsByMunicipalityAsync(municipality, records, datasetKind);
   return record;
-}
-
-async function cleanupLegacyMunicipalityBackupsAsync(municipality) {
-  const safe = sanitizeMunicipalityName(municipality);
-  if (!safe) {
-    return;
-  }
-
-  try {
-    const entries = await fsp.readdir(backupDirPath);
-    const legacyPrefix = `${safe}-`;
-    await Promise.all(
-      entries.map(async (name) => {
-        const lower = String(name).toLowerCase();
-        if (!lower.endsWith(".json")) {
-          return;
-        }
-        if (!name.startsWith(legacyPrefix)) {
-          return;
-        }
-        const candidatePath = path.resolve(backupDirPath, name);
-        try {
-          await fsp.unlink(candidatePath);
-        } catch (_) {
-          // Ignore per-file cleanup failures.
-        }
-      })
-    );
-  } catch (_) {
-    // Ignore cleanup failures.
-  }
-}
-
-async function createMunicipalityBackupSnapshotAsync(municipality) {
-  ensureCsrDbDir();
-  ensureBackupDir();
-  const filePath = resolveCsrDbReadFilePath(municipality);
-  const backupPath = getBackupFilePath(municipality);
-  const legacyBackupPath = getLegacyBackupFilePath(municipality);
-  migrateLegacyMunicipalityFilePath(backupPath, legacyBackupPath);
-  if (!filePath || !backupPath) {
-    return;
-  }
-
-  try {
-    await fsp.access(filePath);
-  } catch (_) {
-    return;
-  }
-
-  try {
-    await cleanupLegacyMunicipalityBackupsAsync(municipality);
-    const raw = await fsp.readFile(filePath, "utf8");
-    await fsp.writeFile(backupPath, raw, "utf8");
-  } catch (_) {
-    // Backup failure should not block primary save.
-  }
 }
 
 async function cleanupOrphanCsrRecordsByMunicipalityAsync(
   municipality,
-  validHouseholdIds
+  validHouseholdIds,
+  kind
 ) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
   ensureCsrDbDir();
-  const filePath = resolveCsrDbReadFilePath(municipality);
+  const filePath = resolveCsrDbReadFilePath(municipality, datasetKind);
   if (!filePath) {
     return {
       municipality,
@@ -919,9 +883,8 @@ async function cleanupOrphanCsrRecordsByMunicipalityAsync(
   }
 
   if (removedCount > 0) {
-    const writePath = getCsrDbFilePath(municipality) || filePath;
+    const writePath = getCsrDbFilePath(municipality, datasetKind) || filePath;
     await fsp.writeFile(writePath, JSON.stringify(kept || [], null, 2), "utf8");
-    await createMunicipalityBackupSnapshotAsync(municipality);
   }
 
   return {
@@ -932,8 +895,9 @@ async function cleanupOrphanCsrRecordsByMunicipalityAsync(
   };
 }
 
-function enqueueMunicipalityWrite(municipality, task) {
-  const key = sanitizeMunicipalityName(municipality);
+function enqueueMunicipalityWrite(municipality, task, kind) {
+  const datasetKind = normalizeCsrDatasetKind(kind);
+  const key = `${datasetKind}:${sanitizeMunicipalityName(municipality)}`;
   const previous = municipalityWriteQueues.get(key) || Promise.resolve();
   const next = previous
     .catch(() => undefined)
@@ -953,15 +917,20 @@ function enqueueMunicipalityWrite(municipality, task) {
 async function findCsrRecordByIdAsync(csrId, municipality, options) {
   const config = {
     restrictToMunicipality: false,
+    kind: "csr",
     ...options,
   };
+  const datasetKind = normalizeCsrDatasetKind(config.kind);
   const id = String(csrId || "").trim();
   if (!id) {
     return null;
   }
 
   if (municipality) {
-    const scopedRecords = await readCsrRecordsByMunicipalityAsync(municipality);
+    const scopedRecords = await readCsrRecordsByMunicipalityAsync(
+      municipality,
+      datasetKind
+    );
     const scoped = scopedRecords.find(
       (record) => String(record && record.csrId ? record.csrId : "") === id
     );
@@ -975,9 +944,17 @@ async function findCsrRecordByIdAsync(csrId, municipality, options) {
 
   ensureCsrDbDir();
   try {
-    const files = (await fsp.readdir(csrDbDirPath)).filter((name) =>
-      name.toLowerCase().endsWith(".json")
-    );
+    const kindPrefix = `${datasetKind}_`;
+    const files = (await fsp.readdir(csrDbDirPath)).filter((name) => {
+      const lower = String(name || "").toLowerCase();
+      if (!lower.endsWith(".json")) {
+        return false;
+      }
+      if (datasetKind === "csr") {
+        return lower.startsWith("csr_") || !lower.startsWith("scsr_");
+      }
+      return lower.startsWith(kindPrefix);
+    });
     for (const file of files) {
       const filePath = path.resolve(csrDbDirPath, file);
       const raw = await fsp.readFile(filePath, "utf8");
@@ -1048,8 +1025,7 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        await ensureCsrDbFileByMunicipalityAsync(municipality);
-        await createMunicipalityBackupSnapshotAsync(municipality);
+        await ensureCsrDbFileByMunicipalityAsync(municipality, "csr");
 
         const session = writeSession({
           loggedIn: true,
@@ -1132,6 +1108,21 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (pathname === "/api/runtime/diagnostics" && req.method === "GET") {
+    sendJson(res, 200, {
+      ok: true,
+      diagnostics: {
+        port,
+        pid: process.pid,
+        dataRootDir,
+        downloadsDirPath,
+        csrDbDirPath,
+        sessionFilePath,
+      },
+    });
+    return;
+  }
+
   if (pathname === "/api/downloads/verify" && req.method === "POST") {
     parseJsonBody(req)
       .then(async (body) => {
@@ -1177,7 +1168,9 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/api/downloads/sheet" && req.method === "POST") {
-    parseJsonBody(req)
+    // Municipality datasets can exceed the default JSON parser limit.
+    // Allow a larger request body for this endpoint.
+    parseJsonBody(req, { maxBytes: 100_000_000 })
       .then(async (body) => {
         ensureDownloadsDir();
         const sheetName = String(body && body.sheetName ? body.sheetName : "").trim();
@@ -1201,13 +1194,34 @@ const server = http.createServer((req, res) => {
           path: targetPath,
         });
       })
-      .catch(() => {
-        sendJson(res, 400, { ok: false, error: "Invalid JSON payload." });
+      .catch((error) => {
+        const message = String((error && error.message) || "");
+        const isSyntaxError = error && error.name === "SyntaxError";
+        const isPayloadTooLarge = /too large/i.test(message);
+        const status = isSyntaxError ? 400 : isPayloadTooLarge ? 413 : 500;
+        const responsePayload = {
+          ok: false,
+          error: isSyntaxError
+            ? "Invalid JSON payload."
+            : isPayloadTooLarge
+              ? "Request payload too large."
+              : "Unable to write municipality JSON file.",
+        };
+        if (error && error.code) {
+          responsePayload.code = String(error.code);
+        }
+        if (message) {
+          responsePayload.detail = message;
+        }
+        sendJson(res, status, responsePayload);
       });
     return;
   }
 
   if (pathname === "/api/csr" && req.method === "GET") {
+    const datasetKind = normalizeCsrDatasetKind(
+      requestUrl.searchParams.get("kind")
+    );
     let municipality = sanitizeMunicipalityName(
       requestUrl.searchParams.get("municipality")
     );
@@ -1227,17 +1241,20 @@ const server = http.createServer((req, res) => {
       sendJson(res, 400, { ok: false, error: "municipality is required." });
       return;
     }
-    readCsrRecordsByMunicipalityAsync(municipality)
+    readCsrRecordsByMunicipalityAsync(municipality, datasetKind)
       .then((records) => {
-        sendJson(res, 200, { ok: true, municipality, records });
+        sendJson(res, 200, { ok: true, municipality, kind: datasetKind, records });
       })
       .catch(() => {
-        sendJson(res, 200, { ok: true, municipality, records: [] });
+        sendJson(res, 200, { ok: true, municipality, kind: datasetKind, records: [] });
       });
     return;
   }
 
   if (pathname === "/api/csr/status" && req.method === "GET") {
+    const datasetKind = normalizeCsrDatasetKind(
+      requestUrl.searchParams.get("kind")
+    );
     let municipality = sanitizeMunicipalityName(
       requestUrl.searchParams.get("municipality")
     );
@@ -1257,24 +1274,24 @@ const server = http.createServer((req, res) => {
       sendJson(res, 400, { ok: false, error: "municipality is required." });
       return;
     }
-    const filePath = getCsrDbFilePath(municipality);
-    const backupPath = getBackupFilePath(municipality);
+    const filePath = getCsrDbFilePath(municipality, datasetKind);
     Promise.all([
       filePath ? fsp.access(filePath).then(() => true).catch(() => false) : false,
-      backupPath ? fsp.access(backupPath).then(() => true).catch(() => false) : false,
     ])
-      .then(([fileExists, backupExists]) => {
+      .then(([fileExists]) => {
         sendJson(res, 200, {
           ok: true,
           municipality,
+          kind: datasetKind,
           fileExists,
-          backupExists,
+          backupExists: false,
         });
       })
       .catch(() => {
         sendJson(res, 200, {
           ok: true,
           municipality,
+          kind: datasetKind,
           fileExists: false,
           backupExists: false,
         });
@@ -1283,6 +1300,9 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/api/csr/by-id" && req.method === "GET") {
+    const datasetKind = normalizeCsrDatasetKind(
+      requestUrl.searchParams.get("kind")
+    );
     const csrId = String(requestUrl.searchParams.get("id") || "").trim();
     let municipality = sanitizeMunicipalityName(
       requestUrl.searchParams.get("municipality")
@@ -1305,12 +1325,17 @@ const server = http.createServer((req, res) => {
     }
     findCsrRecordByIdAsync(csrId, municipality, {
       restrictToMunicipality: USE_SERVER_AUTH,
+      kind: datasetKind,
     })
       .then((record) => {
-        sendJson(res, 200, { ok: true, record: record || null });
+        sendJson(res, 200, {
+          ok: true,
+          kind: datasetKind,
+          record: record || null,
+        });
       })
       .catch(() => {
-        sendJson(res, 200, { ok: true, record: null });
+        sendJson(res, 200, { ok: true, kind: datasetKind, record: null });
       });
     return;
   }
@@ -1318,6 +1343,7 @@ const server = http.createServer((req, res) => {
   if (pathname === "/api/csr" && req.method === "POST") {
     parseJsonBody(req)
       .then((body) => {
+        const datasetKind = normalizeCsrDatasetKind(body && body.kind);
         let municipality = sanitizeMunicipalityName(body && body.municipality);
         const session = USE_SERVER_AUTH ? getAuthenticatedSession() : null;
         if (USE_SERVER_AUTH && !session) {
@@ -1339,12 +1365,15 @@ const server = http.createServer((req, res) => {
           });
           return;
         }
-        return enqueueMunicipalityWrite(municipality, () => {
-          return upsertCsrRecordByMunicipalityAsync(municipality, record);
-        }).then((saved) => {
+        return enqueueMunicipalityWrite(
+          municipality,
+          () => upsertCsrRecordByMunicipalityAsync(municipality, record, datasetKind),
+          datasetKind
+        ).then((saved) => {
           sendJson(res, 200, {
             ok: true,
             municipality,
+            kind: datasetKind,
             record: saved,
           });
         });
@@ -1358,6 +1387,7 @@ const server = http.createServer((req, res) => {
   if (pathname === "/api/csr/cleanup" && req.method === "POST") {
     parseJsonBody(req)
       .then((body) => {
+        const datasetKind = normalizeCsrDatasetKind(body && body.kind);
         let municipality = sanitizeMunicipalityName(body && body.municipality);
         const session = USE_SERVER_AUTH ? getAuthenticatedSession() : null;
         if (USE_SERVER_AUTH && !session) {
@@ -1381,13 +1411,17 @@ const server = http.createServer((req, res) => {
           });
           return;
         }
-        return enqueueMunicipalityWrite(municipality, () =>
-          cleanupOrphanCsrRecordsByMunicipalityAsync(
-            municipality,
-            validHouseholdIds
-          )
+        return enqueueMunicipalityWrite(
+          municipality,
+          () =>
+            cleanupOrphanCsrRecordsByMunicipalityAsync(
+              municipality,
+              validHouseholdIds,
+              datasetKind
+            ),
+          datasetKind
         ).then((result) => {
-          sendJson(res, 200, { ok: true, ...result });
+          sendJson(res, 200, { ok: true, kind: datasetKind, ...result });
         });
       })
       .catch(() => {
@@ -1399,6 +1433,7 @@ const server = http.createServer((req, res) => {
   if (pathname === "/api/csr/ensure" && req.method === "POST") {
     parseJsonBody(req)
       .then((body) => {
+        const datasetKind = normalizeCsrDatasetKind(body && body.kind);
         let municipality = sanitizeMunicipalityName(body && body.municipality);
         const session = USE_SERVER_AUTH ? getAuthenticatedSession() : null;
         if (USE_SERVER_AUTH && !session) {
@@ -1417,16 +1452,19 @@ const server = http.createServer((req, res) => {
           return;
         }
         return enqueueMunicipalityWrite(municipality, async () => {
-          const ensured = await ensureCsrDbFileByMunicipalityAsync(municipality);
+          const ensured = await ensureCsrDbFileByMunicipalityAsync(
+            municipality,
+            datasetKind
+          );
           if (!ensured) {
             throw new Error("Invalid municipality.");
           }
-          await createMunicipalityBackupSnapshotAsync(municipality);
           return { ensured: true };
-        }).then((result) => {
+        }, datasetKind).then((result) => {
           sendJson(res, 200, {
             ok: true,
             municipality,
+            kind: datasetKind,
             ensured: !!(result && result.ensured),
           });
         });
@@ -1453,7 +1491,8 @@ const server = http.createServer((req, res) => {
       .then(async (body) => {
         const fileNameInput = String(body && body.fileName ? body.fileName : "").trim();
         const desktopDir = path.resolve(os.homedir(), "Desktop");
-        const csrDir = path.resolve(desktopDir, "CSR");
+        const reportRootDir = path.resolve(desktopDir, "Social Case Report");
+        const csrDir = path.resolve(reportRootDir, "CSR");
         const safeBaseName = sanitizePdfFileName(fileNameInput).replace(/\.pdf$/i, "");
         const safeFileName = `${safeBaseName}.pdf`;
         const targetPath = path.resolve(csrDir, safeFileName);
@@ -1518,6 +1557,77 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (pathname === "/api/export/scsr-pdf" && req.method === "POST") {
+    parseJsonBody(req, { maxBytes: 50_000_000 })
+      .then(async (body) => {
+        const fileNameInput = String(body && body.fileName ? body.fileName : "").trim();
+        const desktopDir = path.resolve(os.homedir(), "Desktop");
+        const reportRootDir = path.resolve(desktopDir, "Social Case Report");
+        const scsrDir = path.resolve(reportRootDir, "SCSR");
+        const safeBaseName = sanitizePdfFileName(fileNameInput).replace(/\.pdf$/i, "");
+        const safeFileName = `${safeBaseName}.pdf`;
+        const targetPath = path.resolve(scsrDir, safeFileName);
+        if (!targetPath.startsWith(scsrDir)) {
+          sendJson(res, 400, { ok: false, error: "Invalid file name." });
+          return;
+        }
+        await fsp.mkdir(scsrDir, { recursive: true });
+        const payload = body && body.payload && typeof body.payload === "object"
+          ? body.payload
+          : null;
+        if (payload) {
+          const token = createExportToken();
+          csrExportPayloadStore.set(token, payload);
+          try {
+            const url = `http://127.0.0.1:${port}/main/scsr-template.html?embedded=1&printMode=1&exportToken=${encodeURIComponent(token)}&t=${Date.now()}`;
+            await renderPdfWithPlaywright(url, targetPath);
+          } finally {
+            csrExportPayloadStore.delete(token);
+          }
+        } else {
+          const base64Pdf = String(body && body.base64Pdf ? body.base64Pdf : "").trim();
+          if (!base64Pdf) {
+            sendJson(res, 400, { ok: false, error: "payload or base64Pdf is required." });
+            return;
+          }
+          const pdfBuffer = Buffer.from(base64Pdf, "base64");
+          if (!pdfBuffer || !pdfBuffer.length) {
+            sendJson(res, 400, { ok: false, error: "Invalid PDF payload." });
+            return;
+          }
+          await fsp.writeFile(targetPath, pdfBuffer);
+        }
+        sendJson(res, 200, {
+          ok: true,
+          fileName: safeFileName,
+          directory: scsrDir,
+          path: targetPath,
+        });
+      })
+      .catch((error) => {
+        const isSyntaxError = error && error.name === "SyntaxError";
+        const isTooLarge =
+          error && String(error.message || "").toLowerCase().includes("too large");
+        const errorMessage = String((error && error.message) || "").trim();
+        if (isSyntaxError) {
+          sendJson(res, 400, { ok: false, error: "Invalid JSON payload." });
+          return;
+        }
+        if (isTooLarge) {
+          sendJson(res, 413, { ok: false, error: "PDF payload too large." });
+          return;
+        }
+        console.error("SCSR PDF export error:", error);
+        sendJson(res, 500, {
+          ok: false,
+          error: errorMessage
+            ? `Unable to save PDF export: ${errorMessage}`
+            : "Unable to save PDF export.",
+        });
+      });
+    return;
+  }
+
   if (pathname === "/api/export/payload" && req.method === "GET") {
     const token = String(requestUrl.searchParams.get("token") || "").trim();
     if (!token) {
@@ -1539,6 +1649,8 @@ const server = http.createServer((req, res) => {
         const payload = body && body.payload && typeof body.payload === "object"
           ? body.payload
           : null;
+        const template = String(body && body.template ? body.template : "").trim().toLowerCase();
+        const templateFile = template === "scsr" ? "scsr-template.html" : "csr-template.html";
         if (!payload) {
           sendJson(res, 400, { ok: false, error: "payload is required." });
           return;
@@ -1552,7 +1664,7 @@ const server = http.createServer((req, res) => {
         sendJson(res, 200, {
           ok: true,
           token,
-          url: `http://127.0.0.1:${port}/main/csr-template.html?embedded=1&printMode=1&exportToken=${encodeURIComponent(token)}&t=${Date.now()}`,
+          url: `http://127.0.0.1:${port}/main/${templateFile}?embedded=1&printMode=1&exportToken=${encodeURIComponent(token)}&t=${Date.now()}`,
         });
       })
       .catch((error) => {
