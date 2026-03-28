@@ -13564,6 +13564,7 @@
         void enqueueCrossWorkflowSync(() =>
           syncRecordToCounterpartWorkflow(snapshot, {
             syncFamilyComposition: true,
+            replaceFamilyCompositionState: true,
             sourceSavedAt: normalizeText(
               snapshot &&
               snapshot.familyComposition &&
@@ -15469,6 +15470,7 @@
   function applySharedFamilyCompositionToRecord(record, familyComposition, options) {
     const config = {
       onlyIfEmpty: false,
+      replaceEntireState: false,
       savedAt: "",
       lastSaveMode: "autosave",
       sourceWorkflow: "",
@@ -15497,8 +15499,16 @@
       sourceStore.memberProfileOverrides && typeof sourceStore.memberProfileOverrides === "object"
         ? cloneJsonValue(sourceStore.memberProfileOverrides) || {}
         : {};
+    const sourceDeletedKeys = Array.isArray(sourceStore.deletedMemberKeys)
+      ? sourceStore.deletedMemberKeys.map((item) => normalizeText(item)).filter(Boolean)
+      : [];
     const sourceMemberKeys = Object.keys(sourceMembers);
-    if (!sourceMemberKeys.length && !sourceAddedMembers.length && !Object.keys(sourceProfileOverrides).length) {
+    if (
+      !config.replaceEntireState &&
+      !sourceMemberKeys.length &&
+      !sourceAddedMembers.length &&
+      !Object.keys(sourceProfileOverrides).length
+    ) {
       return { record, changed: false };
     }
 
@@ -15510,8 +15520,55 @@
       existingStore.members && typeof existingStore.members === "object"
         ? existingStore.members
         : {};
-    const nextMembers = cloneJsonValue(existingMembers) || {};
+    const nextMembers = config.replaceEntireState
+      ? {}
+      : cloneJsonValue(existingMembers) || {};
     let changed = false;
+
+    if (config.replaceEntireState) {
+      const existingAddedMembers = Array.isArray(existingStore.addedMembers)
+        ? cloneJsonValue(existingStore.addedMembers) || []
+        : [];
+      const existingProfileOverrides =
+        existingStore.memberProfileOverrides && typeof existingStore.memberProfileOverrides === "object"
+          ? cloneJsonValue(existingStore.memberProfileOverrides) || {}
+          : {};
+      const existingDeletedKeys = Array.isArray(existingStore.deletedMemberKeys)
+        ? existingStore.deletedMemberKeys.map((item) => normalizeText(item)).filter(Boolean)
+        : [];
+      const nextFamilyComposition = setFamilyCompositionSyncAuditMetadata(
+        {
+          ...existingStore,
+          members: cloneJsonValue(sourceMembers) || {},
+          addedMembers: sourceAddedMembers,
+          memberProfileOverrides: sourceProfileOverrides,
+          deletedMemberKeys: sourceDeletedKeys,
+          savedAt: normalizeText(config.savedAt) || new Date().toISOString(),
+          lastSaveMode: normalizeText(config.lastSaveMode) || "autosave",
+        },
+        {
+          sourceWorkflow: config.sourceWorkflow,
+          sourceCsrId: config.sourceCsrId,
+          updatedAt: normalizeText(config.savedAt) || new Date().toISOString(),
+          syncMode: config.syncMode,
+        }
+      );
+      const replaceChanged =
+        JSON.stringify(existingMembers || {}) !== JSON.stringify(sourceMembers || {}) ||
+        JSON.stringify(existingAddedMembers) !== JSON.stringify(sourceAddedMembers) ||
+        JSON.stringify(existingProfileOverrides || {}) !== JSON.stringify(sourceProfileOverrides || {}) ||
+        JSON.stringify(existingDeletedKeys) !== JSON.stringify(sourceDeletedKeys);
+      if (!replaceChanged) {
+        return { record, changed: false };
+      }
+      return {
+        record: {
+          ...record,
+          familyComposition: nextFamilyComposition,
+        },
+        changed: true,
+      };
+    }
 
     sourceMemberKeys.forEach((memberKey) => {
       const sourceEntry =
@@ -15611,6 +15668,7 @@
     const config = {
       syncBasicInfo: false,
       syncFamilyComposition: false,
+      replaceFamilyCompositionState: false,
       sourceSavedAt: "",
       onlyIfEmpty: false,
       ...options,
@@ -15668,11 +15726,12 @@
         sourceRecord.familyComposition,
         {
           onlyIfEmpty: !!config.onlyIfEmpty,
+          replaceEntireState: !!config.replaceFamilyCompositionState,
           savedAt,
           lastSaveMode: "autosave",
           sourceWorkflow: sourceWorkflowType,
           sourceCsrId,
-          syncMode: "auto-sync",
+          syncMode: config.replaceFamilyCompositionState ? "reset-sync" : "auto-sync",
         }
       );
       nextRecord = familyResult.record;
@@ -15739,6 +15798,13 @@
       counterpartRecord.familyComposition,
       {
         onlyIfEmpty: false,
+        replaceEntireState:
+          normalizeText(
+            counterpartRecord &&
+            counterpartRecord.familyComposition &&
+            counterpartRecord.familyComposition.syncAudit &&
+            counterpartRecord.familyComposition.syncAudit.lastSyncMode
+          ) === "reset-sync",
         savedAt,
         lastSaveMode: "autosave",
         sourceWorkflow: counterpartWorkflow,
