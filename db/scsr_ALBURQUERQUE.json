@@ -94,6 +94,7 @@
       "members": {
         "50244632|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
           "birthday": "1945-02-10",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
@@ -101,6 +102,7 @@
         },
         "50244609|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
           "birthday": "1948-03-28",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
@@ -108,6 +110,7 @@
         },
         "50244655|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "birthday": "1979-05-20",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
@@ -123,6 +126,7 @@
         },
         "50244705|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "birthday": "1999-09-23",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
@@ -130,6 +134,7 @@
         },
         "50244904|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 10",
           "birthday": "2001-03-19",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
@@ -137,6 +142,7 @@
         },
         "50244931|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
           "birthday": "2008-10-20",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
@@ -144,20 +150,24 @@
         },
         "50244981|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Day care",
           "birthday": "2010-11-13",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         }
       },
-      "deletedMemberKeys": [],
-      "savedAt": "2026-03-28T12:41:48.801Z",
+      "deletedMemberKeys": [
+        "50244683|071201008-7945-00011",
+        "50244705|071201008-7945-00011"
+      ],
+      "savedAt": "2026-03-28T12:57:48.641Z",
       "lastSaveMode": "manual",
       "syncAudit": {
         "lastUpdatedByWorkflow": "CSR",
-        "lastUpdatedAt": "2026-03-28T12:41:21.249Z",
+        "lastUpdatedAt": "2026-03-28T12:55:37.933Z",
         "lastSourceCsrId": "50594",
-        "lastSyncMode": "auto-sync"
+        "lastSyncMode": "hydrate-sync"
       },
       "ui": {
         "expandedMemberKeys": [
@@ -168,7 +178,7 @@
       "addedMembers": [],
       "memberProfileOverrides": {}
     },
-    "activeStep": 4,
+    "activeStep": 5,
     "scsrRecommendation": {
       "details": {
         "date": "2026-03-28",
@@ -177,69 +187,89 @@
         "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
         "approvedBy": "LUZ C. FEGARIDO,RSW"
       },
-      "savedAt": "2026-03-28T12:44:29.036Z",
-      "lastSaveMode": "autosave"
-    },
-    "presentingProblem": {
-      "html": "",
-      "savedAt": "2026-03-28T12:44:29.033Z",
+      "savedAt": "2026-03-28T13:12:49.658Z",
       "lastSaveMode": "autosave"
     },
     "backgroundInformation": {
       "tabs": {
-        "client": {
-          "html": "",
-          "savedAt": "2026-03-28T12:44:29.034Z",
-          "lastSaveMode": "autosave"
-        },
         "socioEconomic": {
-          "html": "",
-          "savedAt": "2026-03-28T09:59:49.265Z",
+          "html": "<p style=\"text-align: justify\">Farming on their own farm land is the family’s main source of income.\nTito, cultivate their farm regularly and earning a seasonal income\napproximately ₱8,000.00 pesos per month to support his family. While Edna looks after and\ntake good care of their home and their children, Nico who is now in second year\nhigh school, Tito Jr. who is now in grade 6 elementary school and Blessy who is\nnow in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also\nsells their root crops and vegetables to neighbors and schools to augment their\ndaily expenses which sometimes reaches ₱1,500 pesos per month.</p>\n\n<p style=\"text-align: justify\">Family is living in their own house located at the remote part of the\nbarangay. It is made of light materials, has two rooms and a comfort room\nlocated inside their house. The house appears to be clean, simple and\nmodest.</p>\n\n<p style=\"text-align: justify\">Edna expressed that even though they live simply, they work together to\nkeep their home running smoothly of maintaining good relationship with each\nother. Everyone in the family assumes household chores. Edna oversees the\nhousehold chores particularly in cooking meals for the family, their children\nassist sometimes household chores such as wash dishes, wiping tables, sweeping\nthe floor, watering the plants, washing laundries and feeding live stocks.</p>\n\n<p style=\"text-align: justify\">They often go to church since it is just accessible for about through\nwalking from their house, her family remains hopeful for better future\nespecially for their three children.</p>",
+          "savedAt": "2026-03-28T12:56:15.788Z",
           "lastSaveMode": "autosave"
         },
         "healthCondition": {
-          "html": "",
-          "savedAt": "2026-03-28T10:00:53.032Z",
+          "html": "<p style=\"text-align: justify\">Farming on their own farm land is the family’s main source of income.\nTito, cultivate their farm regularly and earning a seasonal income\napproximately ₱8,000.00 pesos per month to support his family. While Edna looks after and\ntake good care of their home and their children, Nico who is now in second year\nhigh school, Tito Jr. who is now in grade 6 elementary school and Blessy who is\nnow in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also\nsells their root crops and vegetables to neighbors and schools to augment their\ndaily expenses which sometimes reaches ₱1,500 pesos per month.</p>\n\n<p style=\"text-align: justify\">Family is living in their own house located at the remote part of the\nbarangay. It is made of light materials, has two rooms and a comfort room\nlocated inside their house. The house appears to be clean, simple and\nmodest.</p>\n\n<p style=\"text-align: justify\">Edna expressed that even though they live simply, they work together to\nkeep their home running smoothly of maintaining good relationship with each\nother. Everyone in the family assumes household chores. Edna oversees the\nhousehold chores particularly in cooking meals for the family, their children\nassist sometimes household chores such as wash dishes, wiping tables, sweeping\nthe floor, watering the plants, washing laundries and feeding live stocks.</p>\n\n<p style=\"text-align: justify\">They often go to church since it is just accessible for about through\nwalking from their house, her family remains hopeful for better future\nespecially for their three children.</p><p style=\"text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p><p style=\"text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p>",
+          "savedAt": "2026-03-28T13:01:23.345Z",
           "lastSaveMode": "autosave"
         },
         "environmentalLivingConditions": {
-          "html": "",
-          "savedAt": "2026-03-28T10:00:52.320Z",
+          "html": "<p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p>",
+          "savedAt": "2026-03-28T13:01:25.155Z",
           "lastSaveMode": "autosave"
         },
         "environmentCommunity": {
-          "html": "",
-          "savedAt": "2026-03-28T10:00:51.920Z",
+          "html": "<p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235); color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; orphans: 2; text-transform: none; widows: 2; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p>",
+          "savedAt": "2026-03-28T13:12:49.649Z",
           "lastSaveMode": "autosave"
         }
       },
-      "activeTab": "client",
-      "savedAt": "2026-03-28T12:44:29.034Z",
+      "activeTab": "environmentCommunity",
+      "savedAt": "2026-03-28T13:12:49.649Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "<p style=\"text-align: justify\">Farming on their own farm land is the family’s main source of income.\nTito, cultivate their farm regularly and earning a seasonal income\napproximately ₱8,000.00 pesos per month to support his family. While Edna looks after and\ntake good care of their home and their children, Nico who is now in second year\nhigh school, Tito Jr. who is now in grade 6 elementary school and Blessy who is\nnow in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also\nsells their root crops and vegetables to neighbors and schools to augment their\ndaily expenses which sometimes reaches ₱1,500 pesos per month.</p>\n\n<p style=\"text-align: justify\">Family is living in their own house located at the remote part of the\nbarangay. It is made of light materials, has two rooms and a comfort room\nlocated inside their house. The house appears to be clean, simple and\nmodest.</p>\n\n<p style=\"text-align: justify\">Edna expressed that even though they live simply, they work together to\nkeep their home running smoothly of maintaining good relationship with each\nother. Everyone in the family assumes household chores. Edna oversees the\nhousehold chores particularly in cooking meals for the family, their children\nassist sometimes household chores such as wash dishes, wiping tables, sweeping\nthe floor, watering the plants, washing laundries and feeding live stocks.</p>\n\n<p style=\"text-align: justify\">They often go to church since it is just accessible for about through\nwalking from their house, her family remains hopeful for better future\nespecially for their three children.</p><p style=\"text-align: justify\">Farming on their own farm land is the family’s main source of income. Tito, cultivate their farm regularly and earning a seasonal income approximately ₱8,000.00 pesos per month to support his family. While Edna looks after and take good care of their home and their children, Nico who is now in second year high school, Tito Jr. who is now in grade 6 elementary school and Blessy who is now in grade 4 elementary level. Since Tito’s earnings are seasonal, Edna also sells their root crops and vegetables to neighbors and schools to augment their daily expenses which sometimes reaches ₱1,500 pesos per month.</p><p style=\"text-align: justify\">Family is living in their own house located at the remote part of the barangay. It is made of light materials, has two rooms and a comfort room located inside their house. The house appears to be clean, simple and modest.</p><p style=\"text-align: justify\">Edna expressed that even though they live simply, they work together to keep their home running smoothly of maintaining good relationship with each other. Everyone in the family assumes household chores. Edna oversees the household chores particularly in cooking meals for the family, their children assist sometimes household chores such as wash dishes, wiping tables, sweeping the floor, watering the plants, washing laundries and feeding live stocks.</p><p style=\"text-align: justify\">They often go to church since it is just accessible for about through walking from their house, her family remains hopeful for better future especially for their three children.</p>",
+      "savedAt": "2026-03-28T13:12:49.646Z",
       "lastSaveMode": "autosave"
     },
     "caseAssessment": {
       "html": "",
-      "savedAt": "2026-03-28T12:44:29.035Z",
-      "lastSaveMode": "autosave"
-    },
-    "interventionPlanImplementation": {
-      "items": [],
-      "savedAt": "2026-03-28T12:44:29.036Z",
+      "savedAt": "2026-03-28T13:12:49.651Z",
       "lastSaveMode": "autosave"
     },
     "caseManagementEvaluation": {
       "html": "",
-      "savedAt": "2026-03-28T12:44:29.035Z",
+      "savedAt": "2026-03-28T13:12:49.653Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [
+        {
+          "specificObjective": "",
+          "activities": "",
+          "timeframe": "",
+          "personResponsible": "",
+          "materialsNeeded": "",
+          "expectedOutput": ""
+        },
+        {
+          "specificObjective": "",
+          "activities": "",
+          "timeframe": "",
+          "personResponsible": "",
+          "materialsNeeded": "",
+          "expectedOutput": ""
+        },
+        {
+          "specificObjective": "",
+          "activities": "",
+          "timeframe": "",
+          "personResponsible": "",
+          "materialsNeeded": "",
+          "expectedOutput": ""
+        }
+      ],
+      "savedAt": "2026-03-28T13:12:49.656Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
       "items": [],
-      "savedAt": "2026-03-28T12:44:29.037Z",
+      "savedAt": "2026-03-28T13:12:49.662Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
       "items": [],
-      "savedAt": "2026-03-28T12:44:29.038Z",
+      "savedAt": "2026-03-28T13:12:49.665Z",
       "lastSaveMode": "autosave"
     }
   }

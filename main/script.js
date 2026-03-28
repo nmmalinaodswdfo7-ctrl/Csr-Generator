@@ -50,7 +50,6 @@
     "Case Recommendation",
   ]);
   const SCSR_BACKGROUND_TABS = Object.freeze([
-    { key: "client", label: "The Client" },
     { key: "socioEconomic", label: "Socio-Economic" },
     { key: "healthCondition", label: "Health Condition" },
     { key: "environmentalLivingConditions", label: "Environmental and Living Conditions" },

@@ -829,11 +829,7 @@
 
                 const groups = [
                     {
-                        heading: "A. The Client",
-                        tabs: [{ key: "client", heading: null }],
-                    },
-                    {
-                        heading: "B. The Family",
+                        heading: "A. The Family",
                         tabs: [
                             { key: "socioEconomic", heading: "Socio-Economic" },
                             { key: "healthCondition", heading: "Health Condition" },
@@ -841,7 +837,7 @@
                         ],
                     },
                     {
-                        heading: "C. The Environment / Community",
+                        heading: "B. The Environment / Community",
                         tabs: [{ key: "environmentCommunity", heading: null }],
                     },
                 ];
@@ -2707,7 +2703,6 @@
 
             function buildPagedJsFlowHtml(payload) {
                 const caseHtml = getNormalizedNarrativeHtml(payload && payload.presentingProblem && payload.presentingProblem.html);
-                const backgroundClientHtml = getBackgroundTabHtml(payload, "client");
                 const backgroundSocioEconomicHtml = getBackgroundTabHtml(payload, "socioEconomic");
                 const backgroundHealthConditionHtml = getBackgroundTabHtml(payload, "healthCondition");
                 const backgroundEnvironmentalHtml = getBackgroundTabHtml(payload, "environmentalLivingConditions");
@@ -2774,17 +2769,14 @@
                     "<div class=\"text-[12pt] leading-[1.2] text-justify case-development-body\">" + caseHtml + "</div></section>" +
                     "<section class=\"section-gap\"><h2 class=\"font-bold text-[12pt] mb-2 uppercase\">IV. BACKGROUND INFORMATION</h2>" +
                     "<div class=\"text-[12pt] leading-[1.2] text-justify case-development-body\">" +
-                    (text(backgroundClientHtml)
-                        ? "<p class=\"font-bold mb-3\">A. The Client</p>" + getNormalizedNarrativeHtml(backgroundClientHtml)
-                        : "") +
                     ((text(backgroundSocioEconomicHtml) || text(backgroundHealthConditionHtml) || text(backgroundEnvironmentalHtml))
-                        ? "<p class=\"font-bold mb-3\">B. The Family</p>" +
+                        ? "<p class=\"font-bold mb-3\">A. The Family</p>" +
                         (text(backgroundSocioEconomicHtml) ? "<p class=\"font-bold mb-3 ml-[1.27cm]\">Socio-Economic</p>" + getNormalizedNarrativeHtml(backgroundSocioEconomicHtml) : "") +
                         (text(backgroundHealthConditionHtml) ? "<p class=\"font-bold mb-3 ml-[1.27cm]\">Health Condition</p>" + getNormalizedNarrativeHtml(backgroundHealthConditionHtml) : "") +
                         (text(backgroundEnvironmentalHtml) ? "<p class=\"font-bold mb-3 ml-[1.27cm]\">Environmental and Living Condition</p>" + getNormalizedNarrativeHtml(backgroundEnvironmentalHtml) : "")
                         : "") +
                     (text(backgroundCommunityHtml)
-                        ? "<p class=\"font-bold mb-3\">C. The Environment / Community</p>" + getNormalizedNarrativeHtml(backgroundCommunityHtml)
+                        ? "<p class=\"font-bold mb-3\">B. The Environment / Community</p>" + getNormalizedNarrativeHtml(backgroundCommunityHtml)
                         : "") +
                     "</div></section>" +
                     "<section class=\"section-gap\"><h2 class=\"font-bold text-[12pt] mb-2 uppercase\">V. CASE ASSESSMENT</h2>" +
