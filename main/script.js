@@ -169,6 +169,8 @@
   let familyCompositionAutoSaveTimer = null;
   let familyCompositionAccordionStateSaveTimer = null;
   let familyCompositionNewMemberBadgeTimer = null;
+  let familyCompositionMemberModalMode = "add";
+  let familyCompositionEditingMemberKey = "";
   let caseDevelopmentAutoSaveTimer = null;
   let scsrPresentingProblemAutoSaveTimer = null;
   let interventionsProvidedAutoSaveTimer = null;
@@ -359,6 +361,7 @@
   const familyCompositionRestoreCloseButton = document.getElementById("family-composition-restore-close-btn");
   const familyCompositionRestoreCancelButton = document.getElementById("family-composition-restore-cancel-btn");
   const familyCompositionAddModal = document.getElementById("family-composition-add-modal");
+  const familyCompositionAddModalTitle = document.getElementById("family-composition-add-modal-title");
   const familyCompositionAddCloseButton = document.getElementById("family-composition-add-close-btn");
   const familyCompositionAddCancelButton = document.getElementById("family-composition-add-cancel-btn");
   const familyCompositionAddSubmitButton = document.getElementById("family-composition-add-submit-btn");
@@ -9050,18 +9053,27 @@
       .filter((row) => !deletedKeys.has(getFamilyCompositionMemberKey(row)))
       .map((row) => {
         const memberKey = getFamilyCompositionMemberKey(row);
+        const resolvedProfile = isGranteeFamilyCompositionRow(row)
+          ? getGranteeFamilyCompositionDisplayDetails(row)
+          : getNonGranteeFamilyCompositionDisplayDetails(row);
         return {
-          name: normalizeText(row && (row.NAMES || row.NAME)),
-          sex: normalizeText(row && row.SEX),
+          name: normalizeText(resolvedProfile && resolvedProfile.name),
+          sex: normalizeText(resolvedProfile && resolvedProfile.sex),
           birthday: getMemberFieldValue(
             membersStore,
             memberKey,
             "birthday",
-            formatFamilyCompositionBirthdayValue(row && row.BIRTHDAY)
+            formatFamilyCompositionBirthdayValue(
+              (resolvedProfile && resolvedProfile.birthday) || row && row.BIRTHDAY
+            )
           ),
-          age: normalizeText(getFamilyCompositionRowAgeValue(row)),
-          civilStatus: normalizeText(row && row.CIVIL_STATUS),
-          relationship: normalizeText(row && row.RELATION_TO_HH_HEAD),
+          age: normalizeText(
+            isGranteeFamilyCompositionRow(row)
+              ? normalizeText(collectBasicInfoForTemplate().age) || getFamilyCompositionRowAgeValue(row)
+              : getFamilyCompositionResolvedMemberProfile(row).age
+          ),
+          civilStatus: normalizeText(resolvedProfile && resolvedProfile.civilStatus),
+          relationship: normalizeText(resolvedProfile && resolvedProfile.relationship),
           monitoredChild: getMemberFieldValue(
             membersStore,
             memberKey,
@@ -9097,6 +9109,16 @@
   }
 
   async function handleFamilyCompositionListClick(event) {
+    const editButton = event.target.closest("[data-fc-edit-member]");
+    if (editButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const memberKey = normalizeText(editButton.getAttribute("data-fc-edit-member"));
+      if (memberKey) {
+        openFamilyCompositionEditMemberModal(memberKey);
+      }
+      return;
+    }
     const deleteButton = event.target.closest("[data-fc-delete-member]");
     if (!deleteButton) {
       return;
@@ -12081,6 +12103,18 @@
       .map((member) => cloneJsonValue(member) || {});
   }
 
+  function getFamilyCompositionProfileOverridesStore() {
+    const familyComposition =
+      currentCsrRecord && currentCsrRecord.familyComposition
+        ? currentCsrRecord.familyComposition
+        : null;
+    if (!familyComposition || typeof familyComposition !== "object") {
+      return {};
+    }
+    const overrides = familyComposition.memberProfileOverrides;
+    return overrides && typeof overrides === "object" ? cloneJsonValue(overrides) || {} : {};
+  }
+
   function isAddedFamilyCompositionRow(row) {
     return normalizeText(row && row.ADDED_MEMBER).toUpperCase() === "YES";
   }
@@ -12100,6 +12134,54 @@
       return directAge;
     }
     return computeAgeFromBirthday(row && row.BIRTHDAY);
+  }
+
+  function getFamilyCompositionResolvedMemberProfile(row) {
+    const memberKey = getFamilyCompositionMemberKey(row);
+    const overrides = getFamilyCompositionProfileOverridesStore();
+    const profileOverride =
+      memberKey &&
+      overrides[memberKey] &&
+      typeof overrides[memberKey] === "object"
+        ? overrides[memberKey]
+        : {};
+    const birthdaySource =
+      normalizeText(profileOverride.birthday) ||
+      normalizeText(row && row.BIRTHDAY);
+    const birthdayIso = toFamilyCompositionBirthdayIso(birthdaySource);
+    const age =
+      normalizeText(profileOverride.age) ||
+      computeAgeFromBirthday(birthdayIso) ||
+      normalizeText(row && row.AGE);
+    return {
+      memberKey,
+      entryId: normalizeText(row && row.ENTRY_ID),
+      name:
+        normalizeText(profileOverride.name) ||
+        normalizeText(row && (row.NAMES || row.NAME)),
+      relationship:
+        normalizeText(profileOverride.relationship) ||
+        normalizeText(row && row.RELATION_TO_HH_HEAD),
+      birthday: birthdayIso,
+      age,
+      sex:
+        normalizeText(profileOverride.sex) ||
+        normalizeText(row && row.SEX),
+      civilStatus:
+        normalizeText(profileOverride.civilStatus) ||
+        normalizeText(row && row.CIVIL_STATUS),
+    };
+  }
+
+  function findFamilyCompositionRowByMemberKey(memberKey) {
+    if (!memberKey) {
+      return null;
+    }
+    return (
+      getFamilyCompositionRenderRows(latestFamilyCompositionRows).find(
+        (row) => getFamilyCompositionMemberKey(row) === memberKey
+      ) || null
+    );
   }
 
   function normalizeFamilyCompositionAddedMemberName(value) {
@@ -12278,7 +12360,9 @@
     });
     const existingMembers = getFamilyCompositionMembersStore();
     const existingDeleted = getFamilyCompositionDeletedKeysStore();
+    const existingProfileOverrides = getFamilyCompositionProfileOverridesStore();
     const cleanedMembers = {};
+    const cleanedProfileOverrides = {};
     Object.keys(existingMembers).forEach((memberKey) => {
       if (availableKeys.has(memberKey)) {
         cleanedMembers[memberKey] = existingMembers[memberKey];
@@ -12295,10 +12379,24 @@
       .map((memberKey) => legacyToEntryHhKey.get(memberKey) || memberKey)
       .filter((memberKey) => availableKeys.has(memberKey))
       .filter((memberKey) => !isGranteeMemberKey(memberKey));
+    Object.keys(existingProfileOverrides).forEach((memberKey) => {
+      if (availableKeys.has(memberKey)) {
+        cleanedProfileOverrides[memberKey] = existingProfileOverrides[memberKey];
+        return;
+      }
+      const mappedKey = legacyToEntryHhKey.get(memberKey);
+      if (mappedKey && availableKeys.has(mappedKey)) {
+        if (!Object.prototype.hasOwnProperty.call(cleanedProfileOverrides, mappedKey)) {
+          cleanedProfileOverrides[mappedKey] = existingProfileOverrides[memberKey];
+        }
+      }
+    });
 
     const previousDeleted = Array.from(existingDeleted);
     const existingMemberKeys = Object.keys(existingMembers).sort();
     const cleanedMemberKeys = Object.keys(cleanedMembers).sort();
+    const existingOverrideKeys = Object.keys(existingProfileOverrides).sort();
+    const cleanedOverrideKeys = Object.keys(cleanedProfileOverrides).sort();
     const memberChanged =
       existingMemberKeys.length !== cleanedMemberKeys.length ||
       existingMemberKeys.some((key, index) => key !== cleanedMemberKeys[index]) ||
@@ -12310,14 +12408,23 @@
     const deletedChanged =
       cleanedDeleted.length !== previousDeleted.length ||
       cleanedDeleted.some((key, idx) => key !== previousDeleted[idx]);
+    const profileOverridesChanged =
+      existingOverrideKeys.length !== cleanedOverrideKeys.length ||
+      existingOverrideKeys.some((key, index) => key !== cleanedOverrideKeys[index]) ||
+      cleanedOverrideKeys.some((key) => {
+        const before = existingProfileOverrides[key];
+        const after = cleanedProfileOverrides[key];
+        return JSON.stringify(before || {}) !== JSON.stringify(after || {});
+      });
 
-    if (!memberChanged && !deletedChanged) {
+    if (!memberChanged && !deletedChanged && !profileOverridesChanged) {
       return;
     }
 
     currentCsrRecord.familyComposition = {
       ...(currentCsrRecord.familyComposition || {}),
       members: cleanedMembers,
+      memberProfileOverrides: cleanedProfileOverrides,
       deletedMemberKeys: cleanedDeleted,
       savedAt: new Date().toISOString(),
       lastSaveMode: "autosave",
@@ -12585,6 +12692,11 @@
   }
 
   function primeFamilyCompositionAddMemberForm() {
+    familyCompositionMemberModalMode = "add";
+    familyCompositionEditingMemberKey = "";
+    if (familyCompositionAddModalTitle) {
+      familyCompositionAddModalTitle.textContent = "Additional Member";
+    }
     if (familyCompositionAddMemberIdField) {
       familyCompositionAddMemberIdField.value = generateUniqueFamilyCompositionMemberId();
     }
@@ -12625,7 +12737,54 @@
     }
     familyCompositionAddModal.classList.add("hidden");
     familyCompositionAddModal.classList.remove("flex");
+    familyCompositionMemberModalMode = "add";
+    familyCompositionEditingMemberKey = "";
+    if (familyCompositionAddModalTitle) {
+      familyCompositionAddModalTitle.textContent = "Additional Member";
+    }
     resetFamilyCompositionAddMemberValidation();
+  }
+
+  function openFamilyCompositionEditMemberModal(memberKey) {
+    if (!familyCompositionAddModal || !memberKey || isGranteeMemberKey(memberKey)) {
+      return;
+    }
+    const row = findFamilyCompositionRowByMemberKey(memberKey);
+    if (!row) {
+      showToast("Unable to load member details right now.");
+      return;
+    }
+    const profile = getFamilyCompositionResolvedMemberProfile(row);
+    familyCompositionMemberModalMode = "edit";
+    familyCompositionEditingMemberKey = memberKey;
+    if (familyCompositionAddModalTitle) {
+      familyCompositionAddModalTitle.textContent = "Edit Member";
+    }
+    resetFamilyCompositionAddMemberValidation();
+    if (familyCompositionAddMemberIdField) {
+      familyCompositionAddMemberIdField.value = profile.entryId;
+    }
+    if (familyCompositionAddFullNameField) {
+      familyCompositionAddFullNameField.value = profile.name;
+    }
+    if (familyCompositionAddRelationshipField) {
+      familyCompositionAddRelationshipField.value = profile.relationship;
+    }
+    if (familyCompositionAddBirthdayField) {
+      familyCompositionAddBirthdayField.value = profile.birthday;
+      familyCompositionAddBirthdayField.max = getPhilippinesTodayIsoDate();
+    }
+    if (familyCompositionAddAgeField) {
+      familyCompositionAddAgeField.value = profile.age;
+    }
+    if (familyCompositionAddSexField) {
+      familyCompositionAddSexField.value = profile.sex;
+    }
+    if (familyCompositionAddCivilStatusField) {
+      familyCompositionAddCivilStatusField.value = profile.civilStatus;
+    }
+    familyCompositionAddModal.classList.remove("hidden");
+    familyCompositionAddModal.classList.add("flex");
   }
 
   function handleFamilyCompositionAddFullNameInput() {
@@ -12671,7 +12830,11 @@
     };
   }
 
-  function validateFamilyCompositionAddMemberDraft(draft) {
+  function validateFamilyCompositionAddMemberDraft(draft, options) {
+    const config = {
+      allowExistingEntryId: "",
+      ...options,
+    };
     const safeDraft = draft && typeof draft === "object" ? draft : {};
     let firstInvalidField = null;
     const existingIds = getFamilyCompositionExistingEntryIds();
@@ -12713,7 +12876,10 @@
         clearModalFieldError(field);
       }
     });
-    const memberIdInvalid = !safeDraft.entryId || existingIds.has(safeDraft.entryId);
+    const memberIdInvalid =
+      !safeDraft.entryId ||
+      (existingIds.has(safeDraft.entryId) &&
+        normalizeText(config.allowExistingEntryId) !== safeDraft.entryId);
     return {
       valid: !memberIdInvalid && !birthdayInvalid && !!safeDraft.age && !firstInvalidField,
       firstInvalidField,
@@ -12725,12 +12891,22 @@
       return;
     }
     const draft = collectFamilyCompositionAddMemberDraft();
-    const validation = validateFamilyCompositionAddMemberDraft(draft);
+    const validation = validateFamilyCompositionAddMemberDraft(draft, {
+      allowExistingEntryId:
+        familyCompositionMemberModalMode === "edit"
+          ? normalizeText(familyCompositionAddMemberIdField && familyCompositionAddMemberIdField.value)
+          : "",
+    });
     if (!validation.valid) {
       if (validation.firstInvalidField && typeof validation.firstInvalidField.focus === "function") {
         validation.firstInvalidField.focus();
       }
       showToast("Please complete the additional member details.");
+      return;
+    }
+
+    if (familyCompositionMemberModalMode === "edit") {
+      await handleFamilyCompositionEditMemberSubmit(draft);
       return;
     }
 
@@ -12794,6 +12970,102 @@
     }
     renderFamilyCompositionRows(latestFamilyCompositionRows);
     showToast("Additional member added.", "success", 2600);
+  }
+
+  async function handleFamilyCompositionEditMemberSubmit(draft) {
+    const memberKey = normalizeText(familyCompositionEditingMemberKey);
+    if (!memberKey) {
+      showToast("Unable to update member right now.");
+      return;
+    }
+    const row = findFamilyCompositionRowByMemberKey(memberKey);
+    if (!row || isGranteeMemberKey(memberKey)) {
+      showToast("Unable to update member right now.");
+      return;
+    }
+
+    const nextMembers = collectFamilyCompositionEditsFromDom();
+    const nextEntry = {
+      ...(nextMembers[memberKey] && typeof nextMembers[memberKey] === "object"
+        ? nextMembers[memberKey]
+        : {}),
+    };
+    nextEntry.birthday = normalizeFamilyCompositionFieldForStorage("birthday", draft.birthday);
+    nextMembers[memberKey] = nextEntry;
+
+    const nextAddedMembers = getFamilyCompositionAddedMembersStore();
+    const nextProfileOverrides = getFamilyCompositionProfileOverridesStore();
+    if (isAddedFamilyCompositionRow(row)) {
+      const updatedAddedMembers = nextAddedMembers.map((member) => {
+        if (getFamilyCompositionMemberKey(member) !== memberKey) {
+          return member;
+        }
+        return {
+          ...member,
+          NAMES: draft.fullName,
+          NAME: draft.fullName,
+          RELATION_TO_HH_HEAD: draft.relationship,
+          SEX: draft.sex,
+          BIRTHDAY: toFamilyCompositionBirthdayIso(draft.birthday),
+          AGE: draft.age,
+          CIVIL_STATUS: draft.civilStatus,
+        };
+      });
+      currentCsrRecord.familyComposition = {
+        ...(currentCsrRecord.familyComposition || {}),
+        members: nextMembers,
+        addedMembers: updatedAddedMembers,
+        memberProfileOverrides: nextProfileOverrides,
+        deletedMemberKeys: Array.from(getFamilyCompositionDeletedKeysStore()),
+        savedAt: new Date().toISOString(),
+        lastSaveMode: "manual",
+      };
+      const saved = await persistFamilyCompositionEdits({
+        isAutoSave: false,
+        membersOverride: nextMembers,
+        addedMembersOverride: updatedAddedMembers,
+        profileOverridesOverride: nextProfileOverrides,
+      });
+      if (saved) {
+        closeFamilyCompositionAddMemberModal();
+        renderFamilyCompositionRows(latestFamilyCompositionRows);
+        showToast("Member updated.", "success", 2400);
+      } else {
+        showToast("Unable to update member right now.");
+      }
+      return;
+    }
+
+    nextProfileOverrides[memberKey] = {
+      name: draft.fullName,
+      relationship: draft.relationship,
+      birthday: toFamilyCompositionBirthdayIso(draft.birthday),
+      age: draft.age,
+      sex: draft.sex,
+      civilStatus: draft.civilStatus,
+    };
+    currentCsrRecord.familyComposition = {
+      ...(currentCsrRecord.familyComposition || {}),
+      members: nextMembers,
+      addedMembers: nextAddedMembers,
+      memberProfileOverrides: nextProfileOverrides,
+      deletedMemberKeys: Array.from(getFamilyCompositionDeletedKeysStore()),
+      savedAt: new Date().toISOString(),
+      lastSaveMode: "manual",
+    };
+    const saved = await persistFamilyCompositionEdits({
+      isAutoSave: false,
+      membersOverride: nextMembers,
+      addedMembersOverride: nextAddedMembers,
+      profileOverridesOverride: nextProfileOverrides,
+    });
+    if (saved) {
+      closeFamilyCompositionAddMemberModal();
+      renderFamilyCompositionRows(latestFamilyCompositionRows);
+      showToast("Member updated.", "success", 2400);
+    } else {
+      showToast("Unable to update member right now.");
+    }
   }
 
   function isGranteeFamilyCompositionRow(row) {
@@ -12978,6 +13250,18 @@
     };
   }
 
+  function getNonGranteeFamilyCompositionDisplayDetails(row) {
+    const resolved = getFamilyCompositionResolvedMemberProfile(row);
+    return {
+      name: resolved.name || "N/A",
+      relationship: resolved.relationship || "N/A",
+      birthday: resolved.birthday,
+      sex: resolved.sex || "N/A",
+      ageLabel: formatAgeLabel(resolved.age),
+      civilStatus: resolved.civilStatus || "N/A",
+    };
+  }
+
   function renderFamilyCompositionRows(rows) {
     if (!familyCompositionList || !familyCompositionEmpty) {
       return;
@@ -13039,25 +13323,26 @@
   function renderFamilyCompositionMemberAccordion(row, membersStore, expandedKeys) {
     const memberKey = getFamilyCompositionMemberKey(row);
     const encodedKey = escapeHtml(memberKey);
+    const isGrantee = normalizeText(row && row.GRANTEE).toUpperCase() === "YES";
+    const resolvedProfile = getNonGranteeFamilyCompositionDisplayDetails(row);
     const entryId = escapeHtml(normalizeText(row && row.ENTRY_ID) || "N/A");
     const relation = escapeHtml(
-      normalizeText(row && row.RELATION_TO_HH_HEAD) || "N/A"
+      isGrantee ? normalizeText(row && row.RELATION_TO_HH_HEAD) || "N/A" : resolvedProfile.relationship
     );
-    const isGrantee = normalizeText(row && row.GRANTEE).toUpperCase() === "YES";
     const granteeDisplay = isGrantee ? getGranteeFamilyCompositionDisplayDetails(row) : null;
     const name = escapeHtml(
-      granteeDisplay ? granteeDisplay.name : normalizeText(row && (row.NAMES || row.NAME)) || "N/A"
+      granteeDisplay ? granteeDisplay.name : resolvedProfile.name
     );
     const sex = escapeHtml(
-      granteeDisplay ? granteeDisplay.sex : normalizeText(row && row.SEX) || "N/A"
+      granteeDisplay ? granteeDisplay.sex : resolvedProfile.sex
     );
     const age = escapeHtml(
-      granteeDisplay ? granteeDisplay.ageLabel : formatAgeLabel(getFamilyCompositionRowAgeValue(row))
+      granteeDisplay ? granteeDisplay.ageLabel : resolvedProfile.ageLabel
     );
     const civilStatus = escapeHtml(
       granteeDisplay
         ? granteeDisplay.civilStatus
-        : normalizeText(row && row.CIVIL_STATUS) || "N/A"
+        : resolvedProfile.civilStatus
     );
     const granteeTag = isGrantee
       ? '<span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">GRANTEE</span>'
@@ -13103,10 +13388,11 @@
     const memberStatusRaw = normalizeText(row && row.MEMBER_STATUS);
     const memberStatusLabel = memberStatusRaw || "Unknown";
     const memberStatusKey = escapeHtml(memberStatusRaw.toUpperCase());
+    const canEdit = !isGranteeFamilyCompositionRow(row);
     const canDelete = !isGranteeFamilyCompositionRow(row);
     const isScsr = activeWorkflowType === "SCSR";
     const isExpanded = expandedKeys instanceof Set && expandedKeys.has(memberKey);
-    const badge = `<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">${escapeHtml(memberStatusLabel)}</span>`;
+    const badge = `<span class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary">${escapeHtml(memberStatusLabel)}</span>`;
     const newlyAddedBadge = shouldShowNewlyAddedMemberBadge(row)
       ? '<span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] italic font-semibold text-emerald-700 ring-1 ring-emerald-200">Newly added member</span>'
       : "";
@@ -13124,8 +13410,11 @@
           </div>
           <div class="ml-auto flex items-center gap-3">
             ${badge}
+            ${canEdit
+              ? `<button type="button" data-fc-edit-member="${encodedKey}" class="inline-flex items-center rounded-full bg-white px-3 py-1.5 text-sm font-bold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-600 dark:hover:bg-slate-700">Edit</button>`
+              : ""}
             ${canDelete
-              ? `<button type="button" data-fc-delete-member="${encodedKey}" class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100">Delete</button>`
+              ? `<button type="button" data-fc-delete-member="${encodedKey}" class="inline-flex items-center rounded-full bg-red-50 px-3 py-1.5 text-sm font-bold text-red-700 ring-1 ring-red-200 hover:bg-red-100">Delete</button>`
               : ""}
             <span class="text-slate-500 dark:text-slate-400 transition-transform duration-200 group-open:rotate-180">&#9660;</span>
           </div>
@@ -13235,6 +13524,7 @@
       membersOverride: null,
       deletedMemberKeysOverride: null,
       addedMembersOverride: null,
+      profileOverridesOverride: null,
       ...options,
     };
     if (!isActiveFamilyCompositionRecord()) {
@@ -13250,10 +13540,15 @@
     const addedMembers = Array.isArray(config.addedMembersOverride)
       ? cloneJsonValue(config.addedMembersOverride) || []
       : getFamilyCompositionAddedMembersStore();
+    const memberProfileOverrides =
+      config.profileOverridesOverride && typeof config.profileOverridesOverride === "object"
+        ? cloneJsonValue(config.profileOverridesOverride) || {}
+        : getFamilyCompositionProfileOverridesStore();
     currentCsrRecord.familyComposition = {
       ...(currentCsrRecord.familyComposition || {}),
       members,
       addedMembers,
+      memberProfileOverrides,
       deletedMemberKeys,
       savedAt: new Date().toISOString(),
       lastSaveMode: config.isAutoSave ? "autosave" : "manual",
@@ -13305,12 +13600,15 @@
     if (isAddedMember) {
       const nextMembers = collectFamilyCompositionEditsFromDom();
       delete nextMembers[memberKey];
+      const nextProfileOverrides = getFamilyCompositionProfileOverridesStore();
+      delete nextProfileOverrides[memberKey];
       currentCsrRecord.familyComposition = {
         ...(currentCsrRecord.familyComposition || {}),
         members: nextMembers,
         addedMembers: existingAddedMembers.filter(
           (member) => getFamilyCompositionMemberKey(member) !== memberKey
         ),
+        memberProfileOverrides: nextProfileOverrides,
         deletedMemberKeys: Array.from(deletedKeys),
         savedAt: new Date().toISOString(),
         lastSaveMode: "manual",
@@ -13319,6 +13617,7 @@
         isAutoSave: false,
         membersOverride: nextMembers,
         addedMembersOverride: currentCsrRecord.familyComposition.addedMembers,
+        profileOverridesOverride: nextProfileOverrides,
         deletedMemberKeysOverride: Array.from(deletedKeys),
       });
       if (removed) {
@@ -13385,11 +13684,12 @@
     familyCompositionRestoreList.innerHTML = deletedRows
       .map((row) => {
         const key = getFamilyCompositionMemberKey(row);
-        const name = escapeHtml(normalizeText(row && (row.NAMES || row.NAME)) || "N/A");
-        const sex = escapeHtml(normalizeText(row && row.SEX) || "N/A");
-        const age = escapeHtml(formatAgeLabel(row && row.AGE));
-        const civilStatus = escapeHtml(normalizeText(row && row.CIVIL_STATUS) || "N/A");
-        const relation = escapeHtml(normalizeText(row && row.RELATION_TO_HH_HEAD) || "N/A");
+        const resolved = getNonGranteeFamilyCompositionDisplayDetails(row);
+        const name = escapeHtml(resolved.name || "N/A");
+        const sex = escapeHtml(resolved.sex || "N/A");
+        const age = escapeHtml(resolved.ageLabel || "N/A");
+        const civilStatus = escapeHtml(resolved.civilStatus || "N/A");
+        const relation = escapeHtml(resolved.relationship || "N/A");
         return `
           <div class="rounded-lg border border-slate-200 dark:border-slate-700 p-4">
             <div class="font-semibold text-slate-900 dark:text-slate-100">${name}</div>
@@ -13471,6 +13771,7 @@
     const preservedDeletedMemberKeys = Array.from(getFamilyCompositionDeletedKeysStore());
     const currentMembers = collectFamilyCompositionEditsFromDom();
     const addedMembers = getFamilyCompositionAddedMembersStore();
+    const currentProfileOverrides = getFamilyCompositionProfileOverridesStore();
     const rowsByKey = new Map(
       latestFamilyCompositionRows
         .map((row) => [getFamilyCompositionMemberKey(row), row])
@@ -13523,11 +13824,21 @@
         nextMembers[memberKey] = nextEntry;
       }
     });
+    const nextProfileOverrides = {};
+    Object.keys(currentProfileOverrides).forEach((memberKey) => {
+      const row = rowsByKey.get(memberKey);
+      if (!row) {
+        nextProfileOverrides[memberKey] = currentProfileOverrides[memberKey];
+      } else {
+        resetCount += 1;
+      }
+    });
 
     currentCsrRecord.familyComposition = {
       ...(currentCsrRecord.familyComposition || {}),
       members: nextMembers,
       addedMembers,
+      memberProfileOverrides: nextProfileOverrides,
       deletedMemberKeys: preservedDeletedMemberKeys,
       savedAt: new Date().toISOString(),
       lastSaveMode: "manual",
@@ -15183,8 +15494,12 @@
     const sourceAddedMembers = Array.isArray(sourceStore.addedMembers)
       ? cloneJsonValue(sourceStore.addedMembers) || []
       : [];
+    const sourceProfileOverrides =
+      sourceStore.memberProfileOverrides && typeof sourceStore.memberProfileOverrides === "object"
+        ? cloneJsonValue(sourceStore.memberProfileOverrides) || {}
+        : {};
     const sourceMemberKeys = Object.keys(sourceMembers);
-    if (!sourceMemberKeys.length && !sourceAddedMembers.length) {
+    if (!sourceMemberKeys.length && !sourceAddedMembers.length && !Object.keys(sourceProfileOverrides).length) {
       return { record, changed: false };
     }
 
@@ -15251,9 +15566,18 @@
     const existingAddedMembers = Array.isArray(existingStore.addedMembers)
       ? cloneJsonValue(existingStore.addedMembers) || []
       : [];
+    const existingProfileOverrides =
+      existingStore.memberProfileOverrides && typeof existingStore.memberProfileOverrides === "object"
+        ? cloneJsonValue(existingStore.memberProfileOverrides) || {}
+        : {};
     const addedMembersChanged =
       JSON.stringify(existingAddedMembers) !== JSON.stringify(sourceAddedMembers);
+    const profileOverridesChanged =
+      JSON.stringify(existingProfileOverrides) !== JSON.stringify(sourceProfileOverrides);
     if (addedMembersChanged) {
+      changed = true;
+    }
+    if (profileOverridesChanged) {
       changed = true;
     }
     if (!changed) {
@@ -15265,6 +15589,7 @@
         ...existingStore,
         members: nextMembers,
         addedMembers: sourceAddedMembers,
+        memberProfileOverrides: sourceProfileOverrides,
         deletedMemberKeys: existingDeletedKeys,
         savedAt,
         lastSaveMode: normalizeText(config.lastSaveMode) || "autosave",
