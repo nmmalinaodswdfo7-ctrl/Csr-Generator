@@ -83,26 +83,27 @@
       "members": {
         "50244632|071201008-7945-00011": {
           "monitoredChild": "No",
-          "occupation": "NONE",
-          "monthlyIncome": "NONE",
+          "educationalAttainment": "Grade 6",
+          "occupation": "tae",
+          "monthlyIncome": "₱ 5,000",
           "typeOfDisability": "None"
         },
         "50244609|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Elementary Graduate",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "Elementary Graduate"
+          "typeOfDisability": "None"
         },
         "50244655|071201008-7945-00011": {
-          "monitoredChild": "No",
+          "monitoredChild": "Yes",
+          "educationalAttainment": "High School Graduate",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "High School Graduate"
+          "typeOfDisability": "None"
         },
         "50244683|071201008-7945-00011": {
-          "monitoredChild": "No",
+          "monitoredChild": "Yes",
           "educationalAttainment": "2ND YEAR COLLEGE / VOCATIONAL",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
@@ -110,64 +111,103 @@
         },
         "50244705|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "High School Graduate"
+          "typeOfDisability": "None"
         },
         "50244904|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 10",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "Grade 10"
+          "typeOfDisability": "None"
         },
         "50244931|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "No Grade Completed"
+          "typeOfDisability": "None"
         },
         "50244981|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Day care",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "Day care"
+          "typeOfDisability": "None"
+        },
+        "72459374|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
         }
       },
-      "deletedMemberKeys": [
-        "50244632|071201008-7945-00011"
-      ],
-      "savedAt": "2026-03-28T07:04:45.419Z",
+      "deletedMemberKeys": [],
+      "savedAt": "2026-03-28T09:54:41.695Z",
       "lastSaveMode": "autosave",
       "syncAudit": {
         "lastUpdatedByWorkflow": "SCSR",
-        "lastUpdatedAt": "2026-03-28T07:04:45.419Z",
+        "lastUpdatedAt": "2026-03-28T09:54:41.695Z",
         "lastSourceCsrId": "48390",
-        "lastSyncMode": "hydrate-sync"
+        "lastSyncMode": "auto-sync"
       },
       "ui": {
         "expandedMemberKeys": [
-          "50244609|071201008-7945-00011"
+          "72459374|071201008-7945-00011",
+          "50244655|071201008-7945-00011",
+          "50244632|071201008-7945-00011"
         ]
-      }
+      },
+      "addedMembers": [
+        {
+          "ENTRY_ID": "72459374",
+          "HH_ID": "071201008-7945-00011",
+          "NAMES": "NEIL ABBIE MALINAO",
+          "NAME": "NEIL ABBIE MALINAO",
+          "RELATION_TO_HH_HEAD": "Son / Daughter",
+          "SEX": "MALE",
+          "BIRTHDAY": "1996-01-22",
+          "AGE": "30",
+          "CIVIL_STATUS": "Single",
+          "GRADE_LEVEL": "Select Level",
+          "OCCUPATION": "NONE",
+          "MONTHLY_INCOME": "NONE",
+          "DISABILITY_TYPES": "None",
+          "HEALTH_MONITORED": "NOT MONITORED IN HEALTH",
+          "EDUC_MONITORED": "NO",
+          "GRANTEE": "NO",
+          "MEMBER_STATUS": "1 - Active",
+          "ADDED_MEMBER": "YES",
+          "addedAt": "2026-03-28T09:43:42.444Z",
+          "showNewlyAddedBadgeUntil": "",
+          "defaults": {
+            "monitoredChild": "No",
+            "educationalAttainment": "Select Level",
+            "birthday": "1996-01-22",
+            "occupation": "NONE",
+            "monthlyIncome": "NONE",
+            "typeOfDisability": "None"
+          }
+        }
+      ]
     },
     "activeStep": 2,
     "caseDevelopment": {
       "html": "",
-      "savedAt": "2026-03-28T07:33:11.456Z",
+      "savedAt": "2026-03-28T11:07:51.100Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
       "items": [],
-      "savedAt": "2026-03-28T07:33:11.457Z",
+      "savedAt": "2026-03-28T11:07:51.101Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
       "items": [],
-      "savedAt": "2026-03-28T07:33:11.457Z",
+      "savedAt": "2026-03-28T11:07:51.101Z",
       "lastSaveMode": "autosave"
     },
     "recommendation": {
@@ -181,14 +221,14 @@
         "hhGrantee": "AGAPITO MORANO LAGUNSAD",
         "mswdOfficer": "ESTRELLA S. MALNEGRO, RSW"
       },
-      "savedAt": "2026-03-28T07:33:11.457Z",
+      "savedAt": "2026-03-28T11:07:51.101Z",
       "lastSaveMode": "autosave"
     }
   },
   {
     "csrId": "19132",
     "createdAt": "2026-03-28T03:33:46.281Z",
-    "activeStep": 6,
+    "activeStep": 2,
     "workflowType": "CSR",
     "completion": {
       "status": "in_progress",
@@ -219,17 +259,17 @@
     },
     "caseDevelopment": {
       "html": "",
-      "savedAt": "2026-03-28T03:36:15.634Z",
+      "savedAt": "2026-03-28T09:32:11.244Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
       "items": [],
-      "savedAt": "2026-03-28T03:36:15.635Z",
+      "savedAt": "2026-03-28T09:32:11.245Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
       "items": [],
-      "savedAt": "2026-03-28T03:36:15.635Z",
+      "savedAt": "2026-03-28T09:32:11.245Z",
       "lastSaveMode": "autosave"
     },
     "recommendation": {
@@ -243,7 +283,7 @@
         "hhGrantee": "AGRIPINA CLARABAL SAGURAN",
         "mswdOfficer": "ESTRELLA S. MALNEGRO, RSW"
       },
-      "savedAt": "2026-03-28T03:36:15.635Z",
+      "savedAt": "2026-03-28T09:32:11.245Z",
       "lastSaveMode": "autosave"
     }
   },

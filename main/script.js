@@ -71,6 +71,7 @@
   ]);
   const BASIC_INFO_AUTOSAVE_DELAY_MS = 700;
   const FAMILY_COMPOSITION_AUTOSAVE_DELAY_MS = 700;
+  const FAMILY_COMPOSITION_NEW_MEMBER_BADGE_DURATION_MS = 60 * 1000;
   const CASE_DEVELOPMENT_AUTOSAVE_DELAY_MS = 700;
   const INTERVENTIONS_PROVIDED_AUTOSAVE_DELAY_MS = 700;
   const INTERVENTIONS_PROVIDED_DRAFT_AUTOSAVE_DELAY_MS = 700;
@@ -167,6 +168,7 @@
   let basicInfoAutoSaveTimer = null;
   let familyCompositionAutoSaveTimer = null;
   let familyCompositionAccordionStateSaveTimer = null;
+  let familyCompositionNewMemberBadgeTimer = null;
   let caseDevelopmentAutoSaveTimer = null;
   let scsrPresentingProblemAutoSaveTimer = null;
   let interventionsProvidedAutoSaveTimer = null;
@@ -339,6 +341,7 @@
   );
   const scsrRecommendationPreviewCloseButton = document.getElementById("scsr-recommendation-preview-close-btn");
   const familyCompositionRestoreButton = document.getElementById("family-composition-restore-btn");
+  const familyCompositionAddButton = document.getElementById("family-composition-add-btn");
   const familyCompositionResetButton = document.getElementById("family-composition-reset-btn");
   const basicInfoRestoreButton = document.getElementById("basic-info-restore-btn");
   const basicInfoSectionTitle = document.getElementById("basic-info-section-title");
@@ -355,6 +358,17 @@
   const familyCompositionRestoreList = document.getElementById("family-composition-restore-list");
   const familyCompositionRestoreCloseButton = document.getElementById("family-composition-restore-close-btn");
   const familyCompositionRestoreCancelButton = document.getElementById("family-composition-restore-cancel-btn");
+  const familyCompositionAddModal = document.getElementById("family-composition-add-modal");
+  const familyCompositionAddCloseButton = document.getElementById("family-composition-add-close-btn");
+  const familyCompositionAddCancelButton = document.getElementById("family-composition-add-cancel-btn");
+  const familyCompositionAddSubmitButton = document.getElementById("family-composition-add-submit-btn");
+  const familyCompositionAddMemberIdField = document.getElementById("family-composition-add-member-id");
+  const familyCompositionAddFullNameField = document.getElementById("family-composition-add-full-name");
+  const familyCompositionAddRelationshipField = document.getElementById("family-composition-add-relationship");
+  const familyCompositionAddBirthdayField = document.getElementById("family-composition-add-birthday");
+  const familyCompositionAddAgeField = document.getElementById("family-composition-add-age");
+  const familyCompositionAddSexField = document.getElementById("family-composition-add-sex");
+  const familyCompositionAddCivilStatusField = document.getElementById("family-composition-add-civil-status");
   const basicGranteeNameInput = document.getElementById("basic-grantee-name");
   const basicHhIdInput = document.getElementById("basic-hh-id");
   const basicHhSetInput = document.getElementById("basic-hh-set");
@@ -625,6 +639,9 @@
   if (familyCompositionRestoreButton) {
     familyCompositionRestoreButton.addEventListener("click", openFamilyCompositionRestoreModal);
   }
+  if (familyCompositionAddButton) {
+    familyCompositionAddButton.addEventListener("click", openFamilyCompositionAddMemberModal);
+  }
   if (familyCompositionResetButton) {
     familyCompositionResetButton.addEventListener("click", () => {
       void handleFamilyCompositionResetClick();
@@ -648,6 +665,43 @@
       }
     });
   }
+  if (familyCompositionAddCloseButton) {
+    familyCompositionAddCloseButton.addEventListener("click", closeFamilyCompositionAddMemberModal);
+  }
+  if (familyCompositionAddCancelButton) {
+    familyCompositionAddCancelButton.addEventListener("click", closeFamilyCompositionAddMemberModal);
+  }
+  if (familyCompositionAddModal) {
+    familyCompositionAddModal.addEventListener("click", (event) => {
+      if (event.target === familyCompositionAddModal) {
+        closeFamilyCompositionAddMemberModal();
+      }
+    });
+  }
+  if (familyCompositionAddSubmitButton) {
+    familyCompositionAddSubmitButton.addEventListener("click", () => {
+      void handleFamilyCompositionAddMemberSubmit();
+    });
+  }
+  if (familyCompositionAddFullNameField) {
+    familyCompositionAddFullNameField.addEventListener("input", handleFamilyCompositionAddFullNameInput);
+  }
+  if (familyCompositionAddBirthdayField) {
+    familyCompositionAddBirthdayField.addEventListener("input", handleFamilyCompositionAddBirthdayInput);
+    familyCompositionAddBirthdayField.addEventListener("change", handleFamilyCompositionAddBirthdayInput);
+  }
+  [
+    familyCompositionAddRelationshipField,
+    familyCompositionAddSexField,
+    familyCompositionAddCivilStatusField,
+  ].forEach((field) => {
+    if (!field) {
+      return;
+    }
+    field.addEventListener("change", () => {
+      clearModalFieldError(field);
+    });
+  });
   bindStepperEvents();
   bindBasicInfoEditValidationListeners();
   bindBasicInfoFieldConstraints();
@@ -8980,9 +9034,15 @@
       }
     }
 
+    sourceRows = getFamilyCompositionRenderRows(sourceRows);
+
     const rows = sourceRows
       .slice()
-      .sort((a, b) => parseAgeForSort(b && b.AGE) - parseAgeForSort(a && a.AGE));
+      .sort(
+        (a, b) =>
+          parseAgeForSort(getFamilyCompositionRowAgeValue(b)) -
+          parseAgeForSort(getFamilyCompositionRowAgeValue(a))
+      );
     const membersStore = getFamilyCompositionMembersStore();
     const deletedKeys = getFamilyCompositionDeletedKeysStore();
 
@@ -8999,7 +9059,7 @@
             "birthday",
             formatFamilyCompositionBirthdayValue(row && row.BIRTHDAY)
           ),
-          age: normalizeText(row && row.AGE),
+          age: normalizeText(getFamilyCompositionRowAgeValue(row)),
           civilStatus: normalizeText(row && row.CIVIL_STATUS),
           relationship: normalizeText(row && row.RELATION_TO_HH_HEAD),
           monitoredChild: getMemberFieldValue(
@@ -9047,8 +9107,13 @@
     if (!memberKey) {
       return;
     }
+    const isAddedMember = getFamilyCompositionAddedMembersStore().some(
+      (member) => getFamilyCompositionMemberKey(member) === memberKey
+    );
     const confirmed = await confirmUserAction(
-      "Delete this member from the Family Composition view? You can restore later."
+      isAddedMember
+        ? "Delete this added member permanently from the Family Composition record?"
+        : "Delete this member from the Family Composition view? You can restore later."
     );
     if (!confirmed) {
       return;
@@ -10939,9 +11004,7 @@
   }
 
   function getVisibleFamilyCompositionMemberCount() {
-    const sourceRows = Array.isArray(latestFamilyCompositionRows)
-      ? latestFamilyCompositionRows
-      : [];
+    const sourceRows = getFamilyCompositionRenderRows(latestFamilyCompositionRows);
     if (!sourceRows.length) {
       return 0;
     }
@@ -12005,6 +12068,179 @@
     return new Set(keys.map((value) => normalizeText(value)).filter(Boolean));
   }
 
+  function getFamilyCompositionAddedMembersStore() {
+    const familyComposition =
+      currentCsrRecord && currentCsrRecord.familyComposition
+        ? currentCsrRecord.familyComposition
+        : null;
+    const addedMembers = familyComposition && Array.isArray(familyComposition.addedMembers)
+      ? familyComposition.addedMembers
+      : [];
+    return addedMembers
+      .filter((member) => member && typeof member === "object")
+      .map((member) => cloneJsonValue(member) || {});
+  }
+
+  function isAddedFamilyCompositionRow(row) {
+    return normalizeText(row && row.ADDED_MEMBER).toUpperCase() === "YES";
+  }
+
+  function getFamilyCompositionRenderRows(rows) {
+    const sourceRows = Array.isArray(rows) ? rows : [];
+    const addedMembers = getFamilyCompositionAddedMembersStore();
+    if (!addedMembers.length) {
+      return sourceRows.slice();
+    }
+    return sourceRows.concat(addedMembers);
+  }
+
+  function getFamilyCompositionRowAgeValue(row) {
+    const directAge = normalizeText(row && row.AGE);
+    if (directAge) {
+      return directAge;
+    }
+    return computeAgeFromBirthday(row && row.BIRTHDAY);
+  }
+
+  function normalizeFamilyCompositionAddedMemberName(value) {
+    const uppercase = normalizeText(value).toUpperCase().replace(/\d+/g, "");
+    return uppercase.replace(/\s+/g, " ").trim();
+  }
+
+  function formatFamilyCompositionAddedMemberNameForInput(value) {
+    const raw = String(value == null ? "" : value)
+      .toUpperCase()
+      .replace(/\d+/g, "")
+      .replace(/[^\p{L}\s.,'-]/gu, "");
+    return raw.replace(/\s{2,}/g, " ");
+  }
+
+  function getFamilyCompositionExistingEntryIds() {
+    const ids = new Set();
+    const sourceRows = Array.isArray(latestFamilyCompositionRows)
+      ? latestFamilyCompositionRows
+      : [];
+    sourceRows.forEach((row) => {
+      const entryId = normalizeText(row && row.ENTRY_ID);
+      if (entryId) {
+        ids.add(entryId);
+      }
+    });
+    getFamilyCompositionAddedMembersStore().forEach((row) => {
+      const entryId = normalizeText(row && row.ENTRY_ID);
+      if (entryId) {
+        ids.add(entryId);
+      }
+    });
+    return ids;
+  }
+
+  function generateUniqueFamilyCompositionMemberId() {
+    const existingIds = getFamilyCompositionExistingEntryIds();
+    for (let attempt = 0; attempt < 500; attempt += 1) {
+      const nextId = String(Math.floor(10000000 + Math.random() * 90000000));
+      if (!existingIds.has(nextId)) {
+        return nextId;
+      }
+    }
+    const base = Date.now().toString().slice(-8);
+    if (!existingIds.has(base)) {
+      return base;
+    }
+    let fallback = 10000000;
+    while (existingIds.has(String(fallback)) && fallback <= 99999999) {
+      fallback += 1;
+    }
+    return String(Math.min(fallback, 99999999));
+  }
+
+  function buildAddedFamilyCompositionDefaultEntry(row) {
+    return {
+      monitoredChild: normalizeFamilyCompositionFieldForStorage("monitoredChild", "No"),
+      educationalAttainment: normalizeFamilyCompositionFieldForStorage(
+        "educationalAttainment",
+        "Select Level"
+      ),
+      birthday: normalizeFamilyCompositionFieldForStorage("birthday", row && row.BIRTHDAY),
+      occupation: normalizeFamilyCompositionFieldForStorage("occupation", ""),
+      monthlyIncome: normalizeFamilyCompositionFieldForStorage("monthlyIncome", ""),
+      typeOfDisability: normalizeFamilyCompositionFieldForStorage("typeOfDisability", "None"),
+    };
+  }
+
+  function shouldShowNewlyAddedMemberBadge(row) {
+    if (!isAddedFamilyCompositionRow(row)) {
+      return false;
+    }
+    const until = normalizeText(row && row.showNewlyAddedBadgeUntil);
+    if (!until) {
+      return false;
+    }
+    const deadline = Date.parse(until);
+    if (Number.isNaN(deadline)) {
+      return false;
+    }
+    return deadline > Date.now();
+  }
+
+  function syncFamilyCompositionAddedMemberBadgeState(rows) {
+    if (!currentCsrRecord || !currentCsrRecord.csrId) {
+      return;
+    }
+    const addedMembers = getFamilyCompositionAddedMembersStore();
+    if (!addedMembers.length) {
+      return;
+    }
+    const expiredIds = new Set(
+      (Array.isArray(rows) ? rows : [])
+        .filter((row) => isAddedFamilyCompositionRow(row) && !shouldShowNewlyAddedMemberBadge(row))
+        .map((row) => normalizeText(row && row.ENTRY_ID))
+        .filter(Boolean)
+    );
+    if (!expiredIds.size) {
+      return;
+    }
+    let changed = false;
+    const nextAddedMembers = addedMembers.map((member) => {
+      const entryId = normalizeText(member && member.ENTRY_ID);
+      if (!entryId || !expiredIds.has(entryId) || !normalizeText(member && member.showNewlyAddedBadgeUntil)) {
+        return member;
+      }
+      changed = true;
+      return {
+        ...member,
+        showNewlyAddedBadgeUntil: "",
+      };
+    });
+    if (!changed) {
+      return;
+    }
+    currentCsrRecord.familyComposition = {
+      ...(currentCsrRecord.familyComposition || {}),
+      addedMembers: nextAddedMembers,
+    };
+    void persistCsrRecord(currentCsrRecord);
+  }
+
+  function scheduleFamilyCompositionNewMemberBadgeRefresh(rows) {
+    if (familyCompositionNewMemberBadgeTimer) {
+      window.clearTimeout(familyCompositionNewMemberBadgeTimer);
+      familyCompositionNewMemberBadgeTimer = null;
+    }
+    const deadlines = (Array.isArray(rows) ? rows : [])
+      .filter((row) => isAddedFamilyCompositionRow(row))
+      .map((row) => Date.parse(normalizeText(row && row.showNewlyAddedBadgeUntil)))
+      .filter((value) => Number.isFinite(value) && value > Date.now());
+    if (!deadlines.length) {
+      return;
+    }
+    const nextDelay = Math.max(Math.min(Math.min(...deadlines) - Date.now() + 50, 2147483647), 50);
+    familyCompositionNewMemberBadgeTimer = window.setTimeout(() => {
+      familyCompositionNewMemberBadgeTimer = null;
+      renderFamilyCompositionRows(latestFamilyCompositionRows);
+    }, nextDelay);
+  }
+
   function updateFamilyCompositionRestoreButtonVisibility() {
     if (!familyCompositionRestoreButton) {
       return;
@@ -12020,14 +12256,16 @@
       return;
     }
     const normalizedRows = Array.isArray(rows) ? rows : [];
+    const addedRows = getFamilyCompositionAddedMembersStore();
+    const allRows = normalizedRows.concat(addedRows);
     const availableKeys = new Set(
-      normalizedRows
+      allRows
         .map((row) => getFamilyCompositionMemberKey(row))
         .filter(Boolean)
     );
     // Map older member key formats to ENTRY_ID|HH_ID keys for backward compatibility.
     const legacyToEntryHhKey = new Map();
-    normalizedRows.forEach((row) => {
+    allRows.forEach((row) => {
       const stableKey = getFamilyCompositionStableMemberKey(row);
       const entryOnlyKey = getFamilyCompositionEntryOnlyMemberKey(row);
       const entryHhKey = getFamilyCompositionEntryMemberKey(row);
@@ -12330,6 +12568,234 @@
     };
   }
 
+  function getFamilyCompositionAddMemberFields() {
+    return [
+      familyCompositionAddFullNameField,
+      familyCompositionAddRelationshipField,
+      familyCompositionAddBirthdayField,
+      familyCompositionAddSexField,
+      familyCompositionAddCivilStatusField,
+    ].filter(Boolean);
+  }
+
+  function resetFamilyCompositionAddMemberValidation() {
+    getFamilyCompositionAddMemberFields().forEach((field) => {
+      clearModalFieldError(field);
+    });
+  }
+
+  function primeFamilyCompositionAddMemberForm() {
+    if (familyCompositionAddMemberIdField) {
+      familyCompositionAddMemberIdField.value = generateUniqueFamilyCompositionMemberId();
+    }
+    if (familyCompositionAddFullNameField) {
+      familyCompositionAddFullNameField.value = "";
+    }
+    if (familyCompositionAddRelationshipField) {
+      familyCompositionAddRelationshipField.value = "";
+    }
+    if (familyCompositionAddBirthdayField) {
+      familyCompositionAddBirthdayField.value = "";
+      familyCompositionAddBirthdayField.max = getPhilippinesTodayIsoDate();
+    }
+    if (familyCompositionAddAgeField) {
+      familyCompositionAddAgeField.value = "";
+    }
+    if (familyCompositionAddSexField) {
+      familyCompositionAddSexField.value = "";
+    }
+    if (familyCompositionAddCivilStatusField) {
+      familyCompositionAddCivilStatusField.value = "";
+    }
+    resetFamilyCompositionAddMemberValidation();
+  }
+
+  function openFamilyCompositionAddMemberModal() {
+    if (!familyCompositionAddModal || !currentCsrRecord || !currentCsrRecord.csrId) {
+      return;
+    }
+    primeFamilyCompositionAddMemberForm();
+    familyCompositionAddModal.classList.remove("hidden");
+    familyCompositionAddModal.classList.add("flex");
+  }
+
+  function closeFamilyCompositionAddMemberModal() {
+    if (!familyCompositionAddModal) {
+      return;
+    }
+    familyCompositionAddModal.classList.add("hidden");
+    familyCompositionAddModal.classList.remove("flex");
+    resetFamilyCompositionAddMemberValidation();
+  }
+
+  function handleFamilyCompositionAddFullNameInput() {
+    if (!familyCompositionAddFullNameField) {
+      return;
+    }
+    const normalized = formatFamilyCompositionAddedMemberNameForInput(
+      familyCompositionAddFullNameField.value
+    );
+    if (familyCompositionAddFullNameField.value !== normalized) {
+      familyCompositionAddFullNameField.value = normalized;
+    }
+    clearModalFieldError(familyCompositionAddFullNameField);
+  }
+
+  function handleFamilyCompositionAddBirthdayInput() {
+    if (!familyCompositionAddBirthdayField || !familyCompositionAddAgeField) {
+      return;
+    }
+    familyCompositionAddAgeField.value = computeAgeFromBirthday(
+      familyCompositionAddBirthdayField.value
+    );
+    clearModalFieldError(familyCompositionAddBirthdayField);
+  }
+
+  function collectFamilyCompositionAddMemberDraft() {
+    const birthday = normalizeText(familyCompositionAddBirthdayField && familyCompositionAddBirthdayField.value);
+    const age = computeAgeFromBirthday(birthday);
+    return {
+      entryId: normalizeText(familyCompositionAddMemberIdField && familyCompositionAddMemberIdField.value),
+      fullName: normalizeFamilyCompositionAddedMemberName(
+        familyCompositionAddFullNameField && familyCompositionAddFullNameField.value
+      ),
+      relationship: normalizeText(
+        familyCompositionAddRelationshipField && familyCompositionAddRelationshipField.value
+      ),
+      birthday,
+      age,
+      sex: normalizeText(familyCompositionAddSexField && familyCompositionAddSexField.value).toUpperCase(),
+      civilStatus: normalizeText(
+        familyCompositionAddCivilStatusField && familyCompositionAddCivilStatusField.value
+      ),
+    };
+  }
+
+  function validateFamilyCompositionAddMemberDraft(draft) {
+    const safeDraft = draft && typeof draft === "object" ? draft : {};
+    let firstInvalidField = null;
+    const existingIds = getFamilyCompositionExistingEntryIds();
+    const birthdayIso = toFamilyCompositionBirthdayIso(safeDraft.birthday);
+    const todayIso = getPhilippinesTodayIsoDate();
+    const birthdayInvalid = !birthdayIso || birthdayIso > todayIso;
+    const checks = [
+      {
+        field: familyCompositionAddFullNameField,
+        invalid: !safeDraft.fullName || /\d/.test(safeDraft.fullName),
+      },
+      {
+        field: familyCompositionAddRelationshipField,
+        invalid: !safeDraft.relationship,
+      },
+      {
+        field: familyCompositionAddBirthdayField,
+        invalid: birthdayInvalid,
+      },
+      {
+        field: familyCompositionAddSexField,
+        invalid: !safeDraft.sex,
+      },
+      {
+        field: familyCompositionAddCivilStatusField,
+        invalid: !safeDraft.civilStatus,
+      },
+    ];
+    checks.forEach(({ field, invalid }) => {
+      if (!field) {
+        return;
+      }
+      if (invalid) {
+        setModalFieldError(field);
+        if (!firstInvalidField) {
+          firstInvalidField = field;
+        }
+      } else {
+        clearModalFieldError(field);
+      }
+    });
+    const memberIdInvalid = !safeDraft.entryId || existingIds.has(safeDraft.entryId);
+    return {
+      valid: !memberIdInvalid && !birthdayInvalid && !!safeDraft.age && !firstInvalidField,
+      firstInvalidField,
+    };
+  }
+
+  async function handleFamilyCompositionAddMemberSubmit() {
+    if (!currentCsrRecord || !currentCsrRecord.csrId) {
+      return;
+    }
+    const draft = collectFamilyCompositionAddMemberDraft();
+    const validation = validateFamilyCompositionAddMemberDraft(draft);
+    if (!validation.valid) {
+      if (validation.firstInvalidField && typeof validation.firstInvalidField.focus === "function") {
+        validation.firstInvalidField.focus();
+      }
+      showToast("Please complete the additional member details.");
+      return;
+    }
+
+    const workflowType = getActiveRecordWorkflowType();
+    const createdAt = new Date().toISOString();
+    const showUntil = new Date(
+      Date.now() + FAMILY_COMPOSITION_NEW_MEMBER_BADGE_DURATION_MS
+    ).toISOString();
+    const addedRow = {
+      ENTRY_ID: draft.entryId,
+      HH_ID: normalizeText(currentCsrRecord.cardData && currentCsrRecord.cardData.hhid),
+      NAMES: draft.fullName,
+      NAME: draft.fullName,
+      RELATION_TO_HH_HEAD: draft.relationship,
+      SEX: draft.sex,
+      BIRTHDAY: toFamilyCompositionBirthdayIso(draft.birthday),
+      AGE: draft.age,
+      CIVIL_STATUS: draft.civilStatus,
+      GRADE_LEVEL: "Select Level",
+      OCCUPATION: workflowType === "SCSR" ? "" : "NONE",
+      MONTHLY_INCOME: workflowType === "SCSR" ? "" : "NONE",
+      DISABILITY_TYPES: "None",
+      HEALTH_MONITORED: "NOT MONITORED IN HEALTH",
+      EDUC_MONITORED: "NO",
+      GRANTEE: "NO",
+      MEMBER_STATUS: "1 - Active",
+      ADDED_MEMBER: "YES",
+      addedAt: createdAt,
+      showNewlyAddedBadgeUntil: showUntil,
+      defaults: buildAddedFamilyCompositionDefaultEntry({
+        BIRTHDAY: draft.birthday,
+      }),
+    };
+    const memberKey = getFamilyCompositionMemberKey(addedRow);
+    const nextMembers = collectFamilyCompositionEditsFromDom();
+    nextMembers[memberKey] = buildAddedFamilyCompositionDefaultEntry(addedRow);
+    const nextAddedMembers = getFamilyCompositionAddedMembersStore();
+    nextAddedMembers.push(addedRow);
+    currentCsrRecord.familyComposition = {
+      ...(currentCsrRecord.familyComposition || {}),
+      members: nextMembers,
+      addedMembers: nextAddedMembers,
+      deletedMemberKeys: Array.from(getFamilyCompositionDeletedKeysStore()),
+      savedAt: createdAt,
+      lastSaveMode: "manual",
+    };
+    const saved = await persistFamilyCompositionEdits({
+      isAutoSave: false,
+      membersOverride: nextMembers,
+      addedMembersOverride: nextAddedMembers,
+    });
+    if (!saved) {
+      showToast("Unable to add member right now.");
+      return;
+    }
+    closeFamilyCompositionAddMemberModal();
+    const expandedKeys = new Set(getFamilyCompositionAccordionExpandedKeys());
+    expandedKeys.add(memberKey);
+    if (setFamilyCompositionAccordionExpandedKeys(Array.from(expandedKeys))) {
+      await persistCsrRecord(currentCsrRecord);
+    }
+    renderFamilyCompositionRows(latestFamilyCompositionRows);
+    showToast("Additional member added.", "success", 2600);
+  }
+
   function isGranteeFamilyCompositionRow(row) {
     return normalizeText(row && row.GRANTEE).toUpperCase() === "YES";
   }
@@ -12533,7 +12999,12 @@
       setFamilyCompositionSaveStatus("", "neutral");
     }
 
-    if (!Array.isArray(rows) || rows.length === 0) {
+    const renderRows = getFamilyCompositionRenderRows(rows);
+    if (!Array.isArray(renderRows) || renderRows.length === 0) {
+      if (familyCompositionNewMemberBadgeTimer) {
+        window.clearTimeout(familyCompositionNewMemberBadgeTimer);
+        familyCompositionNewMemberBadgeTimer = null;
+      }
       familyCompositionList.innerHTML = "";
       familyCompositionEmpty.classList.remove("hidden");
       updateFamilyCompositionRestoreButtonVisibility();
@@ -12541,9 +13012,15 @@
       return;
     }
 
-    const sortedRows = rows
+    syncFamilyCompositionAddedMemberBadgeState(renderRows);
+    scheduleFamilyCompositionNewMemberBadgeRefresh(renderRows);
+    const sortedRows = renderRows
       .slice()
-      .sort((a, b) => parseAgeForSort(b && b.AGE) - parseAgeForSort(a && a.AGE));
+      .sort(
+        (a, b) =>
+          parseAgeForSort(getFamilyCompositionRowAgeValue(b)) -
+          parseAgeForSort(getFamilyCompositionRowAgeValue(a))
+      );
     const membersStore = getFamilyCompositionMembersStore();
     const deletedKeys = getFamilyCompositionDeletedKeysStore();
     const expandedKeys = new Set(getFamilyCompositionAccordionExpandedKeys());
@@ -12575,7 +13052,7 @@
       granteeDisplay ? granteeDisplay.sex : normalizeText(row && row.SEX) || "N/A"
     );
     const age = escapeHtml(
-      granteeDisplay ? granteeDisplay.ageLabel : formatAgeLabel(row && row.AGE)
+      granteeDisplay ? granteeDisplay.ageLabel : formatAgeLabel(getFamilyCompositionRowAgeValue(row))
     );
     const civilStatus = escapeHtml(
       granteeDisplay
@@ -12630,6 +13107,9 @@
     const isScsr = activeWorkflowType === "SCSR";
     const isExpanded = expandedKeys instanceof Set && expandedKeys.has(memberKey);
     const badge = `<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">${escapeHtml(memberStatusLabel)}</span>`;
+    const newlyAddedBadge = shouldShowNewlyAddedMemberBadge(row)
+      ? '<span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] italic font-semibold text-emerald-700 ring-1 ring-emerald-200">Newly added member</span>'
+      : "";
 
     return `
       <details data-fc-accordion data-fc-member-key="${encodedKey}" class="group bg-white dark:bg-[#1a2632] border border-slate-200 dark:border-slate-700 rounded-lg"${isExpanded ? " open" : ""}>
@@ -12638,6 +13118,7 @@
             <div class="flex items-center gap-2">
               <div class="font-semibold text-slate-900 dark:text-slate-100">${entryId} - ${name}</div>
               ${granteeTag}
+              ${newlyAddedBadge}
             </div>
             <div class="text-sm font-semibold text-slate-500 dark:text-slate-100 mt-1">${relation} &bull; ${sex} &bull; ${age} &bull; ${civilStatus}</div>
           </div>
@@ -12751,16 +13232,28 @@
   async function persistFamilyCompositionEdits(options) {
     const config = {
       isAutoSave: true,
+      membersOverride: null,
+      deletedMemberKeysOverride: null,
+      addedMembersOverride: null,
       ...options,
     };
     if (!isActiveFamilyCompositionRecord()) {
       return false;
     }
-    const members = collectFamilyCompositionEditsFromDom();
-    const deletedMemberKeys = Array.from(getFamilyCompositionDeletedKeysStore());
+    const members =
+      config.membersOverride && typeof config.membersOverride === "object"
+        ? cloneJsonValue(config.membersOverride) || {}
+        : collectFamilyCompositionEditsFromDom();
+    const deletedMemberKeys = Array.isArray(config.deletedMemberKeysOverride)
+      ? config.deletedMemberKeysOverride.map((value) => normalizeText(value)).filter(Boolean)
+      : Array.from(getFamilyCompositionDeletedKeysStore());
+    const addedMembers = Array.isArray(config.addedMembersOverride)
+      ? cloneJsonValue(config.addedMembersOverride) || []
+      : getFamilyCompositionAddedMembersStore();
     currentCsrRecord.familyComposition = {
       ...(currentCsrRecord.familyComposition || {}),
       members,
+      addedMembers,
       deletedMemberKeys,
       savedAt: new Date().toISOString(),
       lastSaveMode: config.isAutoSave ? "autosave" : "manual",
@@ -12805,6 +13298,38 @@
     if (deletedKeys.has(memberKey)) {
       return;
     }
+    const existingAddedMembers = getFamilyCompositionAddedMembersStore();
+    const isAddedMember = existingAddedMembers.some(
+      (member) => getFamilyCompositionMemberKey(member) === memberKey
+    );
+    if (isAddedMember) {
+      const nextMembers = collectFamilyCompositionEditsFromDom();
+      delete nextMembers[memberKey];
+      currentCsrRecord.familyComposition = {
+        ...(currentCsrRecord.familyComposition || {}),
+        members: nextMembers,
+        addedMembers: existingAddedMembers.filter(
+          (member) => getFamilyCompositionMemberKey(member) !== memberKey
+        ),
+        deletedMemberKeys: Array.from(deletedKeys),
+        savedAt: new Date().toISOString(),
+        lastSaveMode: "manual",
+      };
+      const removed = await persistFamilyCompositionEdits({
+        isAutoSave: false,
+        membersOverride: nextMembers,
+        addedMembersOverride: currentCsrRecord.familyComposition.addedMembers,
+        deletedMemberKeysOverride: Array.from(deletedKeys),
+      });
+      if (removed) {
+        renderFamilyCompositionRows(latestFamilyCompositionRows);
+        renderFamilyCompositionRestoreModalList();
+        showToast("Added member deleted permanently.", "success", 2500);
+      } else {
+        showToast("Unable to delete member right now.");
+      }
+      return;
+    }
     deletedKeys.add(memberKey);
     currentCsrRecord.familyComposition = {
       ...(currentCsrRecord.familyComposition || {}),
@@ -12813,7 +13338,11 @@
       savedAt: new Date().toISOString(),
       lastSaveMode: "manual",
     };
-    const saved = await persistFamilyCompositionEdits({ isAutoSave: false });
+    const saved = await persistFamilyCompositionEdits({
+      isAutoSave: false,
+      membersOverride: currentCsrRecord.familyComposition.members,
+      deletedMemberKeysOverride: currentCsrRecord.familyComposition.deletedMemberKeys,
+    });
     if (saved) {
       renderFamilyCompositionRows(latestFamilyCompositionRows);
       renderFamilyCompositionRestoreModalList();
@@ -12904,7 +13433,11 @@
       savedAt: new Date().toISOString(),
       lastSaveMode: "manual",
     };
-    const saved = await persistFamilyCompositionEdits({ isAutoSave: false });
+    const saved = await persistFamilyCompositionEdits({
+      isAutoSave: false,
+      membersOverride: currentCsrRecord.familyComposition.members,
+      deletedMemberKeysOverride: currentCsrRecord.familyComposition.deletedMemberKeys,
+    });
     if (saved) {
       renderFamilyCompositionRows(latestFamilyCompositionRows);
       renderFamilyCompositionRestoreModalList();
@@ -12937,6 +13470,7 @@
 
     const preservedDeletedMemberKeys = Array.from(getFamilyCompositionDeletedKeysStore());
     const currentMembers = collectFamilyCompositionEditsFromDom();
+    const addedMembers = getFamilyCompositionAddedMembersStore();
     const rowsByKey = new Map(
       latestFamilyCompositionRows
         .map((row) => [getFamilyCompositionMemberKey(row), row])
@@ -12953,7 +13487,15 @@
           : {};
       const row = rowsByKey.get(memberKey);
       if (!row) {
-        nextMembers[memberKey] = currentEntry;
+        const addedMember = addedMembers.find(
+          (member) => getFamilyCompositionMemberKey(member) === memberKey
+        );
+        if (addedMember && addedMember.defaults && typeof addedMember.defaults === "object") {
+          nextMembers[memberKey] = cloneJsonValue(addedMember.defaults) || {};
+          resetCount += 1;
+        } else {
+          nextMembers[memberKey] = currentEntry;
+        }
         return;
       }
 
@@ -12985,6 +13527,7 @@
     currentCsrRecord.familyComposition = {
       ...(currentCsrRecord.familyComposition || {}),
       members: nextMembers,
+      addedMembers,
       deletedMemberKeys: preservedDeletedMemberKeys,
       savedAt: new Date().toISOString(),
       lastSaveMode: "manual",
@@ -14637,8 +15180,11 @@
       sourceStore.members && typeof sourceStore.members === "object"
         ? cloneJsonValue(sourceStore.members) || {}
         : {};
+    const sourceAddedMembers = Array.isArray(sourceStore.addedMembers)
+      ? cloneJsonValue(sourceStore.addedMembers) || []
+      : [];
     const sourceMemberKeys = Object.keys(sourceMembers);
-    if (!sourceMemberKeys.length) {
+    if (!sourceMemberKeys.length && !sourceAddedMembers.length) {
       return { record, changed: false };
     }
 
@@ -14699,18 +15245,26 @@
       }
     });
 
-    if (!changed) {
-      return { record, changed: false };
-    }
-
     const existingDeletedKeys = Array.isArray(existingStore.deletedMemberKeys)
       ? existingStore.deletedMemberKeys.map((item) => normalizeText(item)).filter(Boolean)
       : [];
+    const existingAddedMembers = Array.isArray(existingStore.addedMembers)
+      ? cloneJsonValue(existingStore.addedMembers) || []
+      : [];
+    const addedMembersChanged =
+      JSON.stringify(existingAddedMembers) !== JSON.stringify(sourceAddedMembers);
+    if (addedMembersChanged) {
+      changed = true;
+    }
+    if (!changed) {
+      return { record, changed: false };
+    }
     const savedAt = normalizeText(config.savedAt) || new Date().toISOString();
     const nextFamilyComposition = setFamilyCompositionSyncAuditMetadata(
       {
         ...existingStore,
         members: nextMembers,
+        addedMembers: sourceAddedMembers,
         deletedMemberKeys: existingDeletedKeys,
         savedAt,
         lastSaveMode: normalizeText(config.lastSaveMode) || "autosave",

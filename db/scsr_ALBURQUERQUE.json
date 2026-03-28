@@ -792,7 +792,7 @@
         "monthlyIncome": "",
         "perCapitaIncome": ""
       },
-      "savedAt": "2026-03-28T06:59:46.764Z",
+      "savedAt": "2026-03-28T08:35:21.157Z",
       "lastSaveMode": "autosave",
       "syncAudit": {
         "sharedFields": {
@@ -849,28 +849,30 @@
       "members": {
         "50244632|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
           "birthday": "1945-02-10",
-          "occupation": "NONE",
-          "monthlyIncome": "NONE",
+          "occupation": "tae",
+          "monthlyIncome": "₱ 5,000",
           "typeOfDisability": "None"
         },
         "50244609|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Elementary Graduate",
+          "birthday": "1948-03-28",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "Elementary Graduate"
+          "typeOfDisability": "None"
         },
         "50244655|071201008-7945-00011": {
-          "monitoredChild": "No",
+          "monitoredChild": "Yes",
+          "educationalAttainment": "High School Graduate",
           "birthday": "1979-05-20",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "High School Graduate"
+          "typeOfDisability": "None"
         },
         "50244683|071201008-7945-00011": {
-          "monitoredChild": "No",
+          "monitoredChild": "Yes",
           "educationalAttainment": "2ND YEAR COLLEGE / VOCATIONAL",
           "birthday": "1986-01-29",
           "occupation": "NONE",
@@ -879,51 +881,92 @@
         },
         "50244705|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "birthday": "1999-09-23",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "High School Graduate"
+          "typeOfDisability": "None"
         },
         "50244904|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 10",
           "birthday": "2001-03-19",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "Grade 10"
+          "typeOfDisability": "None"
         },
         "50244931|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
           "birthday": "2008-10-20",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "No Grade Completed"
+          "typeOfDisability": "None"
         },
         "50244981|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Day care",
           "birthday": "2010-11-13",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
-          "typeOfDisability": "None",
-          "educationalAttainment": "Day care"
+          "typeOfDisability": "None"
+        },
+        "72459374|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "birthday": "1996-01-22",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
         }
       },
-      "deletedMemberKeys": [
-        "50244632|071201008-7945-00011"
-      ],
-      "savedAt": "2026-03-28T06:59:20.924Z",
-      "lastSaveMode": "autosave",
+      "deletedMemberKeys": [],
+      "savedAt": "2026-03-28T10:14:20.629Z",
+      "lastSaveMode": "manual",
       "syncAudit": {
         "lastUpdatedByWorkflow": "CSR",
-        "lastUpdatedAt": "2026-03-28T06:59:20.924Z",
+        "lastUpdatedAt": "2026-03-28T09:59:40.940Z",
         "lastSourceCsrId": "26531",
-        "lastSyncMode": "auto-sync"
+        "lastSyncMode": "hydrate-sync"
       },
       "ui": {
-        "expandedMemberKeys": []
-      }
+        "expandedMemberKeys": [
+          "16278435|071201008-7945-00011",
+          "50244632|071201008-7945-00011"
+        ]
+      },
+      "addedMembers": [
+        {
+          "ENTRY_ID": "72459374",
+          "HH_ID": "071201008-7945-00011",
+          "NAMES": "NEIL ABBIE MALINAO",
+          "NAME": "NEIL ABBIE MALINAO",
+          "RELATION_TO_HH_HEAD": "Son / Daughter",
+          "SEX": "MALE",
+          "BIRTHDAY": "1996-01-22",
+          "AGE": "30",
+          "CIVIL_STATUS": "Single",
+          "GRADE_LEVEL": "Select Level",
+          "OCCUPATION": "NONE",
+          "MONTHLY_INCOME": "NONE",
+          "DISABILITY_TYPES": "None",
+          "HEALTH_MONITORED": "NOT MONITORED IN HEALTH",
+          "EDUC_MONITORED": "NO",
+          "GRANTEE": "NO",
+          "MEMBER_STATUS": "1 - Active",
+          "ADDED_MEMBER": "YES",
+          "addedAt": "2026-03-28T09:43:42.444Z",
+          "showNewlyAddedBadgeUntil": "",
+          "defaults": {
+            "monitoredChild": "No",
+            "educationalAttainment": "Select Level",
+            "birthday": "1996-01-22",
+            "occupation": "NONE",
+            "monthlyIncome": "NONE",
+            "typeOfDisability": "None"
+          }
+        }
+      ]
     },
     "activeStep": 2,
     "scsrRecommendation": {
@@ -934,49 +977,69 @@
         "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
         "approvedBy": "LUZ C. FEGARIDO,RSW"
       },
-      "savedAt": "2026-03-28T07:02:55.447Z",
+      "savedAt": "2026-03-28T11:10:53.051Z",
       "lastSaveMode": "autosave"
     },
     "presentingProblem": {
       "html": "",
-      "savedAt": "2026-03-28T07:02:55.445Z",
+      "savedAt": "2026-03-28T11:10:53.048Z",
       "lastSaveMode": "autosave"
     },
     "backgroundInformation": {
       "tabs": {
         "client": {
           "html": "",
-          "savedAt": "2026-03-28T07:02:55.446Z",
+          "savedAt": "2026-03-28T11:10:53.049Z",
+          "lastSaveMode": "autosave"
+        },
+        "socioEconomic": {
+          "html": "",
+          "savedAt": "2026-03-28T09:59:49.265Z",
+          "lastSaveMode": "autosave"
+        },
+        "healthCondition": {
+          "html": "",
+          "savedAt": "2026-03-28T10:00:53.032Z",
+          "lastSaveMode": "autosave"
+        },
+        "environmentalLivingConditions": {
+          "html": "",
+          "savedAt": "2026-03-28T10:00:52.320Z",
+          "lastSaveMode": "autosave"
+        },
+        "environmentCommunity": {
+          "html": "",
+          "savedAt": "2026-03-28T10:00:51.920Z",
           "lastSaveMode": "autosave"
         }
       },
       "activeTab": "client",
-      "savedAt": "2026-03-28T07:02:55.446Z",
+      "savedAt": "2026-03-28T11:10:53.049Z",
       "lastSaveMode": "autosave"
     },
     "caseAssessment": {
       "html": "",
-      "savedAt": "2026-03-28T07:02:55.446Z",
-      "lastSaveMode": "autosave"
-    },
-    "caseManagementEvaluation": {
-      "html": "",
-      "savedAt": "2026-03-28T07:02:55.446Z",
+      "savedAt": "2026-03-28T11:10:53.049Z",
       "lastSaveMode": "autosave"
     },
     "interventionPlanImplementation": {
       "items": [],
-      "savedAt": "2026-03-28T07:02:55.447Z",
+      "savedAt": "2026-03-28T11:10:53.050Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-28T11:10:53.050Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
       "items": [],
-      "savedAt": "2026-03-28T07:02:55.448Z",
+      "savedAt": "2026-03-28T11:10:53.051Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
       "items": [],
-      "savedAt": "2026-03-28T07:02:55.448Z",
+      "savedAt": "2026-03-28T11:10:53.053Z",
       "lastSaveMode": "autosave"
     }
   },
@@ -1370,6 +1433,93 @@
     "householdInterventionPlan": {
       "items": [],
       "savedAt": "2026-03-28T07:04:43.390Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "12371",
+    "createdAt": "2026-03-28T09:32:14.458Z",
+    "activeStep": 2,
+    "workflowType": "SCSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201004-8011-00004",
+    "cardData": {
+      "name": "AGRIPINA CLARABAL SAGURAN",
+      "hhid": "071201004-8011-00004",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "DANGAY"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "AGRIPINA CLARABAL SAGURAN",
+        "hhid": "071201004-8011-00004",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "November 9, 1960",
+        "age": "65",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "GRADE 10",
+        "clientStatusOnExit": "14 - No Eligible (0-18 y/o) for CVS Monitoring (Certified by RPMO)"
+      }
+    },
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-28",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO,RSW"
+      },
+      "savedAt": "2026-03-28T09:32:20.654Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-28T09:32:20.652Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "client": {
+          "html": "",
+          "savedAt": "2026-03-28T09:32:20.653Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "client",
+      "savedAt": "2026-03-28T09:32:20.653Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-28T09:32:20.653Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-28T09:32:20.653Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-28T09:32:20.654Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-28T09:32:20.655Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-28T09:32:20.655Z",
       "lastSaveMode": "autosave"
     }
   }
