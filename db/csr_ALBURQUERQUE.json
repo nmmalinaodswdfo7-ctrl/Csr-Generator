@@ -1,0 +1,200 @@
+[
+  {
+    "csrId": "50594",
+    "workflowType": "CSR",
+    "cardData": {
+      "name": "AGAPITO MORANO LAGUNSAD",
+      "hhid": "071201008-7945-00011",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "SANTA FILOMENA"
+    },
+    "basicInformation": {
+      "editDetails": {
+        "granteeName": "AGAPITO MORANO LAGUNSAD",
+        "sex": "MALE",
+        "birthday": "1948-03-28",
+        "age": "78",
+        "civilStatus": "Married with spouse present",
+        "educationalAttainment": "Grade 6",
+        "contactInfo": "09212039326",
+        "religion": "Jehovah's Witness"
+      },
+      "savedAt": "2026-03-28T12:38:03.204Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "sharedFields": {
+          "granteeName": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          },
+          "sex": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          },
+          "birthday": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          },
+          "age": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          },
+          "civilStatus": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          },
+          "educationalAttainment": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          },
+          "contactInfo": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          },
+          "religion": {
+            "lastUpdatedByWorkflow": "SCSR",
+            "updatedAt": "2026-03-28T12:38:03.204Z",
+            "sourceCsrId": "48390",
+            "syncMode": "hydrate-sync"
+          }
+        },
+        "lastUpdatedByWorkflow": "SCSR",
+        "lastUpdatedAt": "2026-03-28T12:38:03.204Z",
+        "lastSourceCsrId": "48390",
+        "lastSyncMode": "hydrate-sync"
+      },
+      "prefilled": {
+        "name": "AGAPITO MORANO LAGUNSAD",
+        "hhid": "071201008-7945-00011",
+        "hhSet": "6A",
+        "sex": "MALE",
+        "birthday": "March 28, 1948",
+        "age": "77",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "clientStatusOnExit": "14 - No Eligible (0-18 y/o) for CVS Monitoring (Certified by RPMO)"
+      }
+    },
+    "familyComposition": {
+      "members": {
+        "50244632|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244609|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244655|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244683|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "2ND YEAR COLLEGE / VOCATIONAL",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244705|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244904|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 10",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244931|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "50244981|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Day care",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        }
+      },
+      "addedMembers": [],
+      "memberProfileOverrides": {},
+      "deletedMemberKeys": [],
+      "savedAt": "2026-03-28T12:41:48.801Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "lastUpdatedByWorkflow": "SCSR",
+        "lastUpdatedAt": "2026-03-28T12:41:48.801Z",
+        "lastSourceCsrId": "48390",
+        "lastSyncMode": "auto-sync"
+      },
+      "ui": {
+        "expandedMemberKeys": [
+          "50244632|071201008-7945-00011",
+          "34082524|071201008-7945-00011"
+        ]
+      }
+    },
+    "activeStep": 2,
+    "caseDevelopment": {
+      "html": "",
+      "savedAt": "2026-03-28T12:41:37.341Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-28T12:41:37.342Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-28T12:41:37.342Z",
+      "lastSaveMode": "autosave"
+    },
+    "recommendation": {
+      "details": {
+        "recommendationText": "",
+        "date": "2026-03-28",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "notedBy": "LUZ C. FEGARIDO, RSW",
+        "approvedBy": "JIAH L. SAYSON",
+        "hhGrantee": "AGAPITO MORANO LAGUNSAD",
+        "mswdOfficer": "ESTRELLA S. MALNEGRO, RSW"
+      },
+      "savedAt": "2026-03-28T12:41:37.342Z",
+      "lastSaveMode": "autosave"
+    }
+  }
+]

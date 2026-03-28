@@ -29,7 +29,7 @@
         "civilStatus": "Married with spouse present",
         "educationalAttainment": "Grade 6",
         "contactInfo": "09212039326",
-        "religion": "Select Religion",
+        "religion": "Jehovah's Witness",
         "presentAddress": "Santa Filomena, Alburquerque, Bohol",
         "placeOfBirth": "",
         "sourceOfIncome": "",
@@ -37,7 +37,7 @@
         "monthlyIncome": "",
         "perCapitaIncome": ""
       },
-      "savedAt": "2026-03-28T08:35:21.157Z",
+      "savedAt": "2026-03-28T12:37:30.159Z",
       "lastSaveMode": "autosave",
       "syncAudit": {
         "sharedFields": {
@@ -95,8 +95,8 @@
         "50244632|071201008-7945-00011": {
           "monitoredChild": "No",
           "birthday": "1945-02-10",
-          "occupation": "tae",
-          "monthlyIncome": "₱ 5,000",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244609|071201008-7945-00011": {
@@ -107,12 +107,14 @@
           "typeOfDisability": "None"
         },
         "50244655|071201008-7945-00011": {
+          "monitoredChild": "No",
           "birthday": "1979-05-20",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244683|071201008-7945-00011": {
+          "monitoredChild": "No",
           "educationalAttainment": "2ND YEAR COLLEGE / VOCATIONAL",
           "birthday": "1986-01-29",
           "occupation": "NONE",
@@ -146,66 +148,27 @@
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
-        },
-        "72459374|071201008-7945-00011": {
-          "monitoredChild": "No",
-          "educationalAttainment": "Select Level",
-          "birthday": "1996-01-22",
-          "occupation": "NONE",
-          "monthlyIncome": "NONE",
-          "typeOfDisability": "None"
         }
       },
       "deletedMemberKeys": [],
-      "savedAt": "2026-03-28T11:25:42.714Z",
+      "savedAt": "2026-03-28T12:41:48.801Z",
       "lastSaveMode": "manual",
       "syncAudit": {
         "lastUpdatedByWorkflow": "CSR",
-        "lastUpdatedAt": "2026-03-28T09:59:40.940Z",
-        "lastSourceCsrId": "26531",
-        "lastSyncMode": "hydrate-sync"
+        "lastUpdatedAt": "2026-03-28T12:41:21.249Z",
+        "lastSourceCsrId": "50594",
+        "lastSyncMode": "auto-sync"
       },
       "ui": {
         "expandedMemberKeys": [
           "16278435|071201008-7945-00011",
-          "50244931|071201008-7945-00011"
+          "34082524|071201008-7945-00011"
         ]
       },
-      "addedMembers": [
-        {
-          "ENTRY_ID": "72459374",
-          "HH_ID": "071201008-7945-00011",
-          "NAMES": "NEIL ABBIE MALINAO",
-          "NAME": "NEIL ABBIE MALINAO",
-          "RELATION_TO_HH_HEAD": "Son / Daughter",
-          "SEX": "MALE",
-          "BIRTHDAY": "1996-01-22",
-          "AGE": "30",
-          "CIVIL_STATUS": "Single",
-          "GRADE_LEVEL": "Select Level",
-          "OCCUPATION": "NONE",
-          "MONTHLY_INCOME": "NONE",
-          "DISABILITY_TYPES": "None",
-          "HEALTH_MONITORED": "NOT MONITORED IN HEALTH",
-          "EDUC_MONITORED": "NO",
-          "GRANTEE": "NO",
-          "MEMBER_STATUS": "1 - Active",
-          "ADDED_MEMBER": "YES",
-          "addedAt": "2026-03-28T09:43:42.444Z",
-          "showNewlyAddedBadgeUntil": "",
-          "defaults": {
-            "monitoredChild": "No",
-            "educationalAttainment": "Select Level",
-            "birthday": "1996-01-22",
-            "occupation": "NONE",
-            "monthlyIncome": "NONE",
-            "typeOfDisability": "None"
-          }
-        }
-      ],
+      "addedMembers": [],
       "memberProfileOverrides": {}
     },
-    "activeStep": 2,
+    "activeStep": 4,
     "scsrRecommendation": {
       "details": {
         "date": "2026-03-28",
@@ -214,19 +177,19 @@
         "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
         "approvedBy": "LUZ C. FEGARIDO,RSW"
       },
-      "savedAt": "2026-03-28T11:29:21.368Z",
+      "savedAt": "2026-03-28T12:44:29.036Z",
       "lastSaveMode": "autosave"
     },
     "presentingProblem": {
       "html": "",
-      "savedAt": "2026-03-28T11:29:21.366Z",
+      "savedAt": "2026-03-28T12:44:29.033Z",
       "lastSaveMode": "autosave"
     },
     "backgroundInformation": {
       "tabs": {
         "client": {
           "html": "",
-          "savedAt": "2026-03-28T11:29:21.367Z",
+          "savedAt": "2026-03-28T12:44:29.034Z",
           "lastSaveMode": "autosave"
         },
         "socioEconomic": {
@@ -251,32 +214,32 @@
         }
       },
       "activeTab": "client",
-      "savedAt": "2026-03-28T11:29:21.367Z",
+      "savedAt": "2026-03-28T12:44:29.034Z",
       "lastSaveMode": "autosave"
     },
     "caseAssessment": {
       "html": "",
-      "savedAt": "2026-03-28T11:29:21.367Z",
+      "savedAt": "2026-03-28T12:44:29.035Z",
       "lastSaveMode": "autosave"
     },
     "interventionPlanImplementation": {
       "items": [],
-      "savedAt": "2026-03-28T11:29:21.368Z",
+      "savedAt": "2026-03-28T12:44:29.036Z",
       "lastSaveMode": "autosave"
     },
     "caseManagementEvaluation": {
       "html": "",
-      "savedAt": "2026-03-28T11:29:21.367Z",
+      "savedAt": "2026-03-28T12:44:29.035Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
       "items": [],
-      "savedAt": "2026-03-28T11:29:21.369Z",
+      "savedAt": "2026-03-28T12:44:29.037Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
       "items": [],
-      "savedAt": "2026-03-28T11:29:21.369Z",
+      "savedAt": "2026-03-28T12:44:29.038Z",
       "lastSaveMode": "autosave"
     }
   }
