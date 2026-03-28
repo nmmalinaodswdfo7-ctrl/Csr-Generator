@@ -538,6 +538,8 @@
 
                 const remainder = paragraphNode.cloneNode(true);
                 remainder.textContent = remainingText;
+                remainder.classList.remove("indent-[1.27cm]");
+                remainder.style.textIndent = "0";
                 return remainder;
             }
 
@@ -973,6 +975,7 @@
                         if (isNodeOverFooter(currentPage, node)) {
                             node.remove();
                             const remainder = splitCaseParagraphToFitPage(currentPage, caseBody, node);
+                            const shouldIncludeHeadingOnNextPage = !caseBody.childNodes.length;
                             if (!caseBody.childNodes.length && caseSection.parentElement) {
                                 caseSection.remove();
                             }
@@ -987,7 +990,7 @@
                                 currentHost,
                                 "case",
                                 "III. CASE DEVELOPMENT",
-                                false
+                                shouldIncludeHeadingOnNextPage
                             );
                             if (!narrativeAppendResult.success) {
                                 break;
