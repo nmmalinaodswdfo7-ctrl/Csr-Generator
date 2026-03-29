@@ -25,9 +25,9 @@
         "placeOfBirth": "Tagbilaran City Bohols",
         "sourceOfInfo": "Grantee",
         "clientStatusOnExit": "14 - No Eligible (0-18 y/o) for CVS Monitoring (Certified by RPMO)",
-        "prevWellBeingLevel": ""
+        "prevWellBeingLevel": "Level 3 - Self-Sufficient Index Score : 2.923"
       },
-      "savedAt": "2026-03-29T03:03:52.848Z",
+      "savedAt": "2026-03-29T03:47:38.967Z",
       "lastSaveMode": "autosave",
       "syncAudit": {
         "sharedFields": {
@@ -182,10 +182,10 @@
         ]
       }
     },
-    "activeStep": 2,
+    "activeStep": 1,
     "caseDevelopment": {
       "html": "<div style=\"text-align: justify\">The Ancog family was checked using the Family Risk and Vulnerability\nAssessment (FRVA). The results showed they have low risk in finances and the\nenvironment, and no risks in health, safety, or protecting children.</div><div style=\"text-align: justify\">Their latest Social Welfare and Development Indicator (SWDI) assessment\nwas done on October 10, 2025. It showed their family’s income is at Level 2,\nmeaning they just meet basic needs (subsistence level). Their average monthly\nincome per person is Php1,713.33. The poverty line in Bohol is Php2,170.74 per\nperson each month, and the average food cost in the province is Php1,515.83.</div><div style=\"text-align: justify\">The family has four more years to be in the program basing on the 7-year\nlimit R.A 11310 and since they are still legible for the program due to their\nthree children Nico, Tito Jr. and Blessy.</div><div style=\"text-align: justify\">Edna is a 43-year-old grantee who has been a partner-beneficiary of the\nPantawid Pamilyang Pilipino Program (4Ps) for two years. Their main concern is\nthe family’s insufficient income coming from unstable type of work and only her\nhusband making for a living, which makes it difficult for them to cover\nessential needs such as healthcare and education for their children Nico, Tito\nJr. and Blessy. This situation has continued over time, mainly due to their\nlimited sources of income where Edna only assists her husband depending on the\nseason of selling harvested root crops and vegetables. While her husband, Tito,\nworks as a farmer. Based on the latest Social Welfare and Development Indicator\n(SWDI), their family is at level 2 (Subsistence Level). Their combined earnings\nare just enough to meet basic needs, with an average monthly income per person\nof Php1,713.33, which is below the poverty line which resulted insufficient to\ncomfortably afford health and educational expenses. With the rising health and\neducation costs have put a real strain on their finances. Plus, living on a\nremote Barangay and relying only on farming, which is easily get affected by\nweather and environmental condition, it poses burden in terms of family’s\nfinances. The Ancog family have been struggling for a while but this burden was\nunloaded through the aid of the program; but things are getting more pressing\nnow that their children Nico, Tito Jr. and Blessy must continue in their\nstudies which needs increasing financial demands of supporting such as their school\nexpenses such as food, school supplies, allowances, and other educational\nneeds.</div><div style=\"text-align: justify\">The family’s situation is not entirely permanent. The family may have\nbig problems which mainly comes from social and economic issues that can be\nsolve with the right help, support, and community programs. Ancog family is\nresilient, and they're involved in their community, which shows they want to\nchange and improve for their family. Edna, in particular, has demonstrated her\nhardworking nature and willingness to seek solutions, which suggests that with\nappropriate support given, positive change is achievable.</div><div style=\"text-align: justify\">Their environment also offers some available resources that can promote\nimprovement. Local government programs which facilitate waste management,\nhealth services, and possible livelihood initiatives. The community has also\nbasic facilities such as a health station, barangay hall, and water refilling\nstations, which can support health and sanitation needs. However, restraining\nforces such as limited income, geographic location, and dependence on\nvulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to</div>",
-      "savedAt": "2026-03-29T03:07:07.632Z",
+      "savedAt": "2026-03-29T03:47:39.147Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
@@ -241,7 +241,7 @@
           "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
         }
       ],
-      "savedAt": "2026-03-29T03:07:07.633Z",
+      "savedAt": "2026-03-29T03:47:39.171Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
@@ -275,7 +275,7 @@
           "outcome": "Educational materials"
         }
       ],
-      "savedAt": "2026-03-29T03:07:07.633Z",
+      "savedAt": "2026-03-29T03:47:39.173Z",
       "lastSaveMode": "autosave"
     },
     "recommendation": {
@@ -289,8 +289,15 @@
         "hhGrantee": "AGAPITO MORANO LAGUNSAD",
         "mswdOfficer": "ESTRELLA S. MALNEGRO, RSW"
       },
-      "savedAt": "2026-03-29T03:07:07.634Z",
+      "savedAt": "2026-03-29T03:47:39.175Z",
       "lastSaveMode": "autosave"
+    },
+    "completion": {
+      "status": "completed",
+      "completedAt": "2026-03-29T03:15:30.744Z",
+      "lastExportedAt": "2026-03-29T03:15:30.744Z",
+      "lastExportedFileName": "AGAPITO MORANO LAGUNSAD.pdf",
+      "exportCount": 1
     }
   },
   {

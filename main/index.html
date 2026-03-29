@@ -210,8 +210,8 @@
                 <!-- Controls Toolbar -->
                 <div
                     class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
-                        <div class="relative w-full sm:w-80">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 w-full md:w-auto items-stretch md:items-center">
+                        <div class="relative w-full sm:flex-1 sm:min-w-[220px] md:max-w-[320px]">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                                 <span class="material-symbols-outlined text-[24px]">search</span>
                             </span>
@@ -220,13 +220,13 @@
                                 class="w-full pl-11 pr-4 py-3 text-base border-slate-200 rounded-lg focus:ring-primary focus:border-primary placeholder:text-slate-400"
                                 placeholder="Search HHID or Name" type="text" />
                         </div>
-                        <div class="relative w-full sm:w-80">
+                        <div class="relative w-full sm:flex-1 sm:min-w-[220px] md:max-w-[320px]">
                             <select id="barangay-filter"
                                 class="form-select w-full pl-3 pr-8 py-3 text-base border-slate-200 rounded-lg focus:ring-primary focus:border-primary bg-slate-50 hover:bg-white transition-colors cursor-pointer text-slate-600">
                                 <option value="">Filter by Barangay</option>
                             </select>
                         </div>
-                        <div class="relative w-full sm:w-80">
+                        <div class="relative w-full sm:flex-1 sm:min-w-[220px] md:max-w-[320px]">
                             <select id="status-filter"
                                 class="form-select w-full pl-3 pr-8 py-3 text-base border-slate-200 rounded-lg focus:ring-primary focus:border-primary bg-slate-50 hover:bg-white transition-colors cursor-pointer text-slate-600">
                                 <option value="">Filter by Status</option>
@@ -1536,7 +1536,7 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+    <script src="../libraries/html2pdf/html2pdf.bundle.min.js" defer></script>
     <script src="script.js" defer></script>
 
 </body>

@@ -5273,10 +5273,28 @@
       }
       const eventName = field.tagName === "SELECT" ? "change" : "input";
       field.addEventListener(eventName, scheduleBasicInfoAutoSave);
+      if (field === basicGranteeNameInput) {
+        field.addEventListener(eventName, () => {
+          syncRecommendationHhGranteeField();
+          refreshExportValidationGlow();
+        });
+      }
       if (eventName !== "change") {
         field.addEventListener("change", scheduleBasicInfoAutoSave);
+        if (field === basicGranteeNameInput) {
+          field.addEventListener("change", () => {
+            syncRecommendationHhGranteeField();
+            refreshExportValidationGlow();
+          });
+        }
       }
       field.addEventListener("blur", scheduleBasicInfoAutoSave);
+      if (field === basicGranteeNameInput) {
+        field.addEventListener("blur", () => {
+          syncRecommendationHhGranteeField();
+          refreshExportValidationGlow();
+        });
+      }
     });
 
     if (basicBirthdayInput) {
@@ -7331,18 +7349,35 @@
     }
   }
 
+  function getResolvedRecommendationHhGranteeValue(preferredValue) {
+    const liveBasicInfo = collectBasicInfoForTemplate();
+    return (
+      normalizeText(liveBasicInfo && liveBasicInfo.granteeName) ||
+      normalizeText(preferredValue) ||
+      normalizeText(currentCsrRecord && currentCsrRecord.cardData && currentCsrRecord.cardData.name)
+    );
+  }
+
+  function syncRecommendationHhGranteeField() {
+    if (!recommendationHhGranteeField) {
+      return;
+    }
+    const resolvedValue = getResolvedRecommendationHhGranteeValue(
+      recommendationHhGranteeField.value
+    );
+    if (
+      resolvedValue &&
+      normalizeText(recommendationHhGranteeField.value) !== normalizeText(resolvedValue)
+    ) {
+      recommendationHhGranteeField.value = resolvedValue;
+    }
+  }
+
   function applyRecommendationStaticPrefill() {
     if (recommendationDateField && !normalizeText(recommendationDateField.value)) {
       recommendationDateField.value = getPhilippinesTodayIsoDate();
     }
-    if (
-      recommendationHhGranteeField &&
-      !normalizeText(recommendationHhGranteeField.value) &&
-      currentCsrRecord &&
-      currentCsrRecord.cardData
-    ) {
-      recommendationHhGranteeField.value = normalizeText(currentCsrRecord.cardData.name);
-    }
+    syncRecommendationHhGranteeField();
     applyRecommendationDefaultNamesToInputs();
   }
 
@@ -7354,7 +7389,9 @@
       reviewedBy: normalizeText(recommendationReviewedByField && recommendationReviewedByField.value),
       notedBy: normalizeText(recommendationNotedByField && recommendationNotedByField.value),
       approvedBy: normalizeText(recommendationApprovedByField && recommendationApprovedByField.value),
-      hhGrantee: normalizeText(recommendationHhGranteeField && recommendationHhGranteeField.value),
+      hhGrantee: getResolvedRecommendationHhGranteeValue(
+        recommendationHhGranteeField && recommendationHhGranteeField.value
+      ),
       mswdOfficer: normalizeText(recommendationMswdOfficerField && recommendationMswdOfficerField.value),
     };
   }
@@ -7380,7 +7417,7 @@
       recommendationApprovedByField.value = normalizeText(safe.approvedBy);
     }
     if (recommendationHhGranteeField) {
-      recommendationHhGranteeField.value = normalizeText(safe.hhGrantee);
+      recommendationHhGranteeField.value = getResolvedRecommendationHhGranteeValue(safe.hhGrantee);
     }
     if (recommendationMswdOfficerField) {
       recommendationMswdOfficerField.value = normalizeText(safe.mswdOfficer);
