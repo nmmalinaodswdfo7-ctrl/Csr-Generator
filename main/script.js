@@ -232,6 +232,7 @@
   const csrStepper = document.getElementById("csr-stepper");
   const csrStepperMobile = document.getElementById("csr-stepper-mobile");
   const csrStepperDesktop = document.getElementById("csr-stepper-desktop");
+  const csrStepperDesktopWrap = document.getElementById("csr-stepper-desktop-wrap");
   const stepSections = Array.from(document.querySelectorAll("[data-step-section]"));
   const summaryStart = document.getElementById("summary-start");
   const summaryEnd = document.getElementById("summary-end");
@@ -4370,7 +4371,28 @@
       csrStepperDesktop.innerHTML = desktopMarkup;
     }
 
+    applyWorkflowStepperResponsiveMode();
     refreshStepperTriggers();
+  }
+
+  function applyWorkflowStepperResponsiveMode() {
+    if (csrStepperMobile) {
+      csrStepperMobile.classList.remove("lg:hidden", "xl:hidden");
+      if (activeWorkflowType === "SCSR") {
+        csrStepperMobile.classList.add("xl:hidden");
+      } else {
+        csrStepperMobile.classList.add("lg:hidden");
+      }
+    }
+    if (csrStepperDesktopWrap) {
+      csrStepperDesktopWrap.classList.remove("hidden", "lg:block", "xl:block");
+      csrStepperDesktopWrap.classList.add("hidden");
+      if (activeWorkflowType === "SCSR") {
+        csrStepperDesktopWrap.classList.add("xl:block");
+      } else {
+        csrStepperDesktopWrap.classList.add("lg:block");
+      }
+    }
   }
 
   function setWorkflowType(type) {

@@ -31,13 +31,13 @@
         "contactInfo": "09212039326",
         "religion": "Jehovah's Witness",
         "presentAddress": "Santa Filomena, Alburquerque, Bohol",
-        "placeOfBirth": "",
+        "placeOfBirth": "Tagbilaran City Bohols",
         "sourceOfIncome": "",
         "wellBeingLevel": "",
         "monthlyIncome": "",
         "perCapitaIncome": ""
       },
-      "savedAt": "2026-03-28T22:27:19.053Z",
+      "savedAt": "2026-03-28T22:44:49.254Z",
       "lastSaveMode": "autosave",
       "syncAudit": {
         "sharedFields": {
@@ -82,27 +82,39 @@
             "updatedAt": "2026-03-28T06:56:18.594Z",
             "sourceCsrId": "26531",
             "syncMode": "auto-sync"
+          },
+          "placeOfBirth": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-28T22:44:49.254Z",
+            "sourceCsrId": "50594",
+            "syncMode": "auto-sync"
           }
         },
         "lastUpdatedByWorkflow": "CSR",
-        "lastUpdatedAt": "2026-03-28T06:59:46.764Z",
-        "lastSourceCsrId": "26531",
+        "lastUpdatedAt": "2026-03-28T22:44:49.254Z",
+        "lastSourceCsrId": "50594",
         "lastSyncMode": "auto-sync"
       }
     },
     "familyComposition": {
       "members": {
         "50244632|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
           "occupation": "ting",
           "monthlyIncome": "₱ 7,000",
           "typeOfDisability": "None"
         },
         "50244609|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
           "occupation": "test",
-          "monthlyIncome": "₱ 1,000"
+          "monthlyIncome": "₱ 1,000",
+          "typeOfDisability": "None"
         },
         "50244655|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
@@ -116,53 +128,55 @@
         },
         "50244705|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244904|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 10",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244931|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244981|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Day care",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         }
       },
       "deletedMemberKeys": [
-        "50244904|071201008-7945-00011",
         "50244632|071201008-7945-00011"
       ],
-      "savedAt": "2026-03-28T22:28:27.676Z",
+      "savedAt": "2026-03-28T22:38:40.217Z",
       "lastSaveMode": "autosave",
       "syncAudit": {
         "lastUpdatedByWorkflow": "CSR",
-        "lastUpdatedAt": "2026-03-28T22:28:27.676Z",
+        "lastUpdatedAt": "2026-03-28T22:38:40.217Z",
         "lastSourceCsrId": "50594",
-        "lastSyncMode": "hydrate-sync"
+        "lastSyncMode": "reset-sync"
       },
       "ui": {
         "expandedMemberKeys": [
           "16278435|071201008-7945-00011",
           "34082524|071201008-7945-00011",
-          "50244632|071201008-7945-00011",
           "50244609|071201008-7945-00011"
         ]
       },
       "addedMembers": [],
       "memberProfileOverrides": {}
     },
-    "activeStep": 2,
+    "activeStep": 8,
     "scsrRecommendation": {
       "details": {
         "date": "2026-03-29",
@@ -171,49 +185,49 @@
         "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
         "approvedBy": "LUZ C. FEGARIDO,RSW"
       },
-      "savedAt": "2026-03-28T22:28:34.436Z",
+      "savedAt": "2026-03-28T22:58:31.682Z",
       "lastSaveMode": "autosave"
     },
     "presentingProblem": {
       "html": "",
-      "savedAt": "2026-03-28T22:28:34.423Z",
+      "savedAt": "2026-03-28T22:58:31.679Z",
       "lastSaveMode": "autosave"
     },
     "backgroundInformation": {
       "tabs": {
         "socioEconomic": {
           "html": "",
-          "savedAt": "2026-03-28T22:28:34.429Z",
+          "savedAt": "2026-03-28T22:58:31.680Z",
           "lastSaveMode": "autosave"
         }
       },
       "activeTab": "socioEconomic",
-      "savedAt": "2026-03-28T22:28:34.429Z",
+      "savedAt": "2026-03-28T22:58:31.680Z",
       "lastSaveMode": "autosave"
     },
     "caseAssessment": {
       "html": "",
-      "savedAt": "2026-03-28T22:28:34.431Z",
+      "savedAt": "2026-03-28T22:58:31.681Z",
       "lastSaveMode": "autosave"
     },
     "caseManagementEvaluation": {
       "html": "",
-      "savedAt": "2026-03-28T22:28:34.433Z",
+      "savedAt": "2026-03-28T22:58:31.681Z",
       "lastSaveMode": "autosave"
     },
     "interventionPlanImplementation": {
       "items": [],
-      "savedAt": "2026-03-28T22:28:34.436Z",
+      "savedAt": "2026-03-28T22:58:31.682Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
       "items": [],
-      "savedAt": "2026-03-28T22:28:34.437Z",
+      "savedAt": "2026-03-28T22:58:31.682Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
       "items": [],
-      "savedAt": "2026-03-28T22:28:34.438Z",
+      "savedAt": "2026-03-28T22:58:31.683Z",
       "lastSaveMode": "autosave"
     }
   }

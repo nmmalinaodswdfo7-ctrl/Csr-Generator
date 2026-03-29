@@ -17,9 +17,17 @@
         "civilStatus": "Married with spouse present",
         "educationalAttainment": "Grade 8",
         "contactInfo": "09212039326",
-        "religion": "Jehovah's Witness"
+        "nationalId": "NONE",
+        "religion": "Jehovah's Witness",
+        "yearOfRegistration": "2012",
+        "yearsInProgram": "14",
+        "presentAddress": "Santa Filomena, Alburquerque, Bohol",
+        "placeOfBirth": "Tagbilaran City Bohols",
+        "sourceOfInfo": "Grantee",
+        "clientStatusOnExit": "14 - No Eligible (0-18 y/o) for CVS Monitoring (Certified by RPMO)",
+        "prevWellBeingLevel": "Level 2 - Subsistence Index Score : 2.56792"
       },
-      "savedAt": "2026-03-28T22:27:19.053Z",
+      "savedAt": "2026-03-28T22:44:49.254Z",
       "lastSaveMode": "autosave",
       "syncAudit": {
         "sharedFields": {
@@ -92,16 +100,22 @@
     "familyComposition": {
       "members": {
         "50244632|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
           "occupation": "ting",
           "monthlyIncome": "₱ 7,000",
           "typeOfDisability": "None"
         },
         "50244609|071201008-7945-00011": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
           "occupation": "test",
-          "monthlyIncome": "₱ 1,000"
+          "monthlyIncome": "₱ 1,000",
+          "typeOfDisability": "None"
         },
         "50244655|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
@@ -115,24 +129,28 @@
         },
         "50244705|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244904|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Grade 10",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244931|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
         },
         "50244981|071201008-7945-00011": {
           "monitoredChild": "No",
+          "educationalAttainment": "Day care",
           "occupation": "NONE",
           "monthlyIncome": "NONE",
           "typeOfDisability": "None"
@@ -141,14 +159,13 @@
       "addedMembers": [],
       "memberProfileOverrides": {},
       "deletedMemberKeys": [
-        "50244904|071201008-7945-00011",
         "50244632|071201008-7945-00011"
       ],
-      "savedAt": "2026-03-28T22:28:24.037Z",
+      "savedAt": "2026-03-28T22:38:40.217Z",
       "lastSaveMode": "manual",
       "syncAudit": {
         "lastUpdatedByWorkflow": "SCSR",
-        "lastUpdatedAt": "2026-03-28T22:27:26.598Z",
+        "lastUpdatedAt": "2026-03-28T22:34:04.574Z",
         "lastSourceCsrId": "48390",
         "lastSyncMode": "reset-sync"
       },
@@ -156,14 +173,20 @@
         "expandedMemberKeys": [
           "34082524|071201008-7945-00011",
           "50244632|071201008-7945-00011",
-          "50244609|071201008-7945-00011"
+          "50244609|071201008-7945-00011",
+          "50244655|071201008-7945-00011",
+          "50244683|071201008-7945-00011",
+          "50244904|071201008-7945-00011",
+          "50244705|071201008-7945-00011",
+          "50244931|071201008-7945-00011",
+          "50244981|071201008-7945-00011"
         ]
       }
     },
-    "activeStep": 2,
+    "activeStep": 4,
     "caseDevelopment": {
-      "html": "<p style=\"text-align: justify\">The Ancog family was checked using the Family Risk and Vulnerability\nAssessment (FRVA). The results showed they have low risk in finances and the\nenvironment, and no risks in health, safety, or protecting children.<br>Their latest Social Welfare and Development Indicator (SWDI) assessment\nwas done on October 10, 2025. It showed their family’s income is at Level 2,\nmeaning they just meet basic needs (subsistence level). Their average monthly\nincome per person is Php1,713.33. The poverty line in Bohol is Php2,170.74 per\nperson each month, and the average food cost in the province is Php1,515.83.<br>The family has four more years to be in the program basing on the 7-year\nlimit R.A 11310 and since they are still legible for the program due to their\nthree children Nico, Tito Jr. and Blessy.<br>Edna is a 43-year-old grantee who has been a partner-beneficiary of the\nPantawid Pamilyang Pilipino Program (4Ps) for two years. Their main concern is\nthe family’s insufficient income coming from unstable type of work and only her\nhusband making for a living, which makes it difficult for them to cover\nessential needs such as healthcare and education for their children Nico, Tito\nJr. and Blessy. This situation has continued over time, mainly due to their\nlimited sources of income where Edna only assists her husband depending on the\nseason of selling harvested root crops and vegetables. While her husband, Tito,\nworks as a farmer. Based on the latest Social Welfare and Development Indicator\n(SWDI), their family is at level 2 (Subsistence Level). Their combined earnings\nare just enough to meet basic needs, with an average monthly income per person\nof Php1,713.33, which is below the poverty line which resulted insufficient to\ncomfortably afford health and educational expenses. With the rising health and\neducation costs have put a real strain on their finances. Plus, living on a\nremote Barangay and relying only on farming, which is easily get affected by\nweather and environmental condition, it poses burden in terms of family’s\nfinances. The Ancog family have been struggling for a while but this burden was\nunloaded through the aid of the program; but things are getting more pressing\nnow that their children Nico, Tito Jr. and Blessy must continue in their\nstudies which needs increasing financial demands of supporting such as their school\nexpenses such as food, school supplies, allowances, and other educational\nneeds.<br>The family’s situation is not entirely permanent. The family may have\nbig problems which mainly comes from social and economic issues that can be\nsolve with the right help, support, and community programs. Ancog family is\nresilient, and they're involved in their community, which shows they want to\nchange and improve for their family. Edna, in particular, has demonstrated her\nhardworking nature and willingness to seek solutions, which suggests that with\nappropriate support given, positive change is achievable.<br>Their environment also offers some available resources that can promote\nimprovement. Local government programs which facilitate waste management,\nhealth services, and possible livelihood initiatives. The community has also\nbasic facilities such as a health station, barangay hall, and water refilling\nstations, which can support health and sanitation needs. However, restraining\nforces such as limited income, geographic location, and dependence on\nvulnerable livelihood sources poses significant barriers to</p>",
-      "savedAt": "2026-03-28T22:28:25.786Z",
+      "html": "<div style=\"text-align: justify\">The Ancog family was checked using the Family Risk and Vulnerability\nAssessment (FRVA). The results showed they have low risk in finances and the\nenvironment, and no risks in health, safety, or protecting children.</div><div style=\"text-align: justify\">Their latest Social Welfare and Development Indicator (SWDI) assessment\nwas done on October 10, 2025. It showed their family’s income is at Level 2,\nmeaning they just meet basic needs (subsistence level). Their average monthly\nincome per person is Php1,713.33. The poverty line in Bohol is Php2,170.74 per\nperson each month, and the average food cost in the province is Php1,515.83.</div><div style=\"text-align: justify\">The family has four more years to be in the program basing on the 7-year\nlimit R.A 11310 and since they are still legible for the program due to their\nthree children Nico, Tito Jr. and Blessy.</div><div style=\"text-align: justify\">Edna is a 43-year-old grantee who has been a partner-beneficiary of the\nPantawid Pamilyang Pilipino Program (4Ps) for two years. Their main concern is\nthe family’s insufficient income coming from unstable type of work and only her\nhusband making for a living, which makes it difficult for them to cover\nessential needs such as healthcare and education for their children Nico, Tito\nJr. and Blessy. This situation has continued over time, mainly due to their\nlimited sources of income where Edna only assists her husband depending on the\nseason of selling harvested root crops and vegetables. While her husband, Tito,\nworks as a farmer. Based on the latest Social Welfare and Development Indicator\n(SWDI), their family is at level 2 (Subsistence Level). Their combined earnings\nare just enough to meet basic needs, with an average monthly income per person\nof Php1,713.33, which is below the poverty line which resulted insufficient to\ncomfortably afford health and educational expenses. With the rising health and\neducation costs have put a real strain on their finances. Plus, living on a\nremote Barangay and relying only on farming, which is easily get affected by\nweather and environmental condition, it poses burden in terms of family’s\nfinances. The Ancog family have been struggling for a while but this burden was\nunloaded through the aid of the program; but things are getting more pressing\nnow that their children Nico, Tito Jr. and Blessy must continue in their\nstudies which needs increasing financial demands of supporting such as their school\nexpenses such as food, school supplies, allowances, and other educational\nneeds.</div><div style=\"text-align: justify\">The family’s situation is not entirely permanent. The family may have\nbig problems which mainly comes from social and economic issues that can be\nsolve with the right help, support, and community programs. Ancog family is\nresilient, and they're involved in their community, which shows they want to\nchange and improve for their family. Edna, in particular, has demonstrated her\nhardworking nature and willingness to seek solutions, which suggests that with\nappropriate support given, positive change is achievable.</div><div style=\"text-align: justify\">Their environment also offers some available resources that can promote\nimprovement. Local government programs which facilitate waste management,\nhealth services, and possible livelihood initiatives. The community has also\nbasic facilities such as a health station, barangay hall, and water refilling\nstations, which can support health and sanitation needs. However, restraining\nforces such as limited income, geographic location, and dependence on\nvulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to geographic location, and dependence on vulnerable livelihood sources poses significant barriers to</div>",
+      "savedAt": "2026-03-28T22:46:26.763Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
@@ -187,20 +210,79 @@
           "intervention": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
           "dateCompleted": "Enhance health and safety awareness",
           "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
+        },
+        {
+          "intervention": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "dateCompleted": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
+        },
+        {
+          "intervention": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "dateCompleted": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
+        },
+        {
+          "intervention": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "dateCompleted": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
+        },
+        {
+          "intervention": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "dateCompleted": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
+        },
+        {
+          "intervention": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "dateCompleted": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
+        },
+        {
+          "intervention": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "dateCompleted": "Edna and Tito for skills training on organic gardening to Department of Agriculture",
+          "involvedParties": "Edna and Tito for skills training on organic gardening to Department of Agriculture"
         }
       ],
-      "savedAt": "2026-03-28T22:28:25.787Z",
+      "savedAt": "2026-03-28T22:46:26.763Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
-      "items": [],
-      "savedAt": "2026-03-28T22:28:25.787Z",
+      "items": [
+        {
+          "objectives": "Regular household monitoring and follow-up",
+          "activities": "Regular household monitoring and follow-up",
+          "responsible": "Regular household monitoring and follow-up",
+          "timeline": "Regular household monitoring and follow-up",
+          "outcome": "Regular household monitoring and follow-up"
+        },
+        {
+          "objectives": "Group meeting supplies",
+          "activities": "Group meeting supplies",
+          "responsible": "Group meeting supplies",
+          "timeline": "Group meeting supplies",
+          "outcome": "Group meeting supplies"
+        },
+        {
+          "objectives": "Increased social networks and financial resilience",
+          "activities": "Increased social networks and financial resilience",
+          "responsible": "Increased social networks and financial resilience",
+          "timeline": "Increased social networks and financial resilience",
+          "outcome": "Increased social networks and financial resilience"
+        },
+        {
+          "objectives": "Educational materials",
+          "activities": "Educational materials",
+          "responsible": "Educational materials",
+          "timeline": "Educational materials",
+          "outcome": "Educational materials"
+        }
+      ],
+      "savedAt": "2026-03-28T22:46:26.764Z",
       "lastSaveMode": "autosave"
     },
     "recommendation": {
       "details": {
-        "recommendationText": "",
-        "date": "2026-03-28",
+        "recommendationText": "Edna and her family show resilience and are actively involved in their community, which are important strengths to build on. Their main livelihood activities like farming and selling own grown harvested root crops and vegetables are affected by seasonal weather and environmental factors, making their income unstable. They have good knowledge of health, safety, and disaster preparedness, but they need help in finding ways to diversify their income sources. Their strong social connections and participation in local groups provide a good foundation for receiving more support and making progress.",
+        "date": "2026-03-29",
         "preparedBy": "HAZEL S. GAMAYOT",
         "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
         "notedBy": "LUZ C. FEGARIDO, RSW",
@@ -208,7 +290,7 @@
         "hhGrantee": "AGAPITO MORANO LAGUNSAD",
         "mswdOfficer": "ESTRELLA S. MALNEGRO, RSW"
       },
-      "savedAt": "2026-03-28T22:28:25.787Z",
+      "savedAt": "2026-03-28T22:46:26.764Z",
       "lastSaveMode": "autosave"
     }
   }
