@@ -132,7 +132,7 @@ if "%OBFUSCATE_JS%"=="1" (
   call node --check "!OBF_TMP_SCSR_TEMPLATE!"
   if errorlevel 1 goto :obfuscation_failed
 
-  for %%T in ("__CSR_EXPORT_READY__" "csr_template_payload_v1" "basicInfo" "recommendation") do (
+  for %%T in ("__CSR_EXPORT_READY__" "csr_template_payload_v1" "basicInfo" "recommendation" "addedMembers" "memberProfileOverrides" "deletedMemberKeys" "Additional Member" "Edit Member" "Newly added member") do (
     findstr /C:"%%~T" "!OBF_TMP_SCRIPT!" >nul 2>nul
     if errorlevel 1 (
       echo Safe obfuscation guard failed for main\script.js: missing token %%~T

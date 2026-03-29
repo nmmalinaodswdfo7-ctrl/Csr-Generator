@@ -47,6 +47,7 @@ Use this app to:
 - Your work is saved locally in this project folder.
 - Use the same municipality assigned to your ID.
 - Make sure Microsoft Edge or Google Chrome is installed for PDF export.
+- For Windows trust/SmartScreen planning, see [INTERNAL_DEPLOYMENT.md](./INTERNAL_DEPLOYMENT.md).
 
 ## Safer Windows Build (AV/EDR Friendly)
 
