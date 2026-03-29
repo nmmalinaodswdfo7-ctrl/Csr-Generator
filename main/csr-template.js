@@ -86,6 +86,13 @@
                 });
             }
 
+            function buildSignatureDateLine(dateText) {
+                const formatted = text(dateText);
+                return formatted
+                    ? "<div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black min-w-[140px] leading-tight\">" + escapeHtml(formatted) + "</span></div>"
+                    : "<div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div>";
+            }
+
             async function readPayload() {
                 try {
                     const params = new URLSearchParams(window.location.search);
@@ -704,14 +711,17 @@
                 return block;
             }
 
-            function createRecommendationSignatures() {
+            function createRecommendationSignatures(payload) {
                 const block = document.createElement("div");
+                const preparedByDateLine = buildSignatureDateLine(
+                    formatIsoDate(payload && payload.basicInfo && payload.basicInfo.date)
+                );
                 block.innerHTML =
                     "<section class=\"mt-8 w-full\">" +
                     "<div class=\"grid grid-cols-2 gap-x-12 gap-y-12\">" +
-                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Prepared by:</span><div class=\"relative\"><p class=\"font-bold text-[12pt] text-black uppercase font-calibri relative z-10 mb-2\"><span data-csr-field=\"preparedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri mb-4\">PDO II-Municipal Link</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
+                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Prepared by:</span><div class=\"relative\"><p class=\"font-bold text-[12pt] text-black uppercase font-calibri relative z-10 mb-2\"><span data-csr-field=\"preparedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri mb-4\">PDO II-Municipal Link</p>" + preparedByDateLine + "</div></div>" +
                     "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Reviewed by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-2\"><span data-csr-field=\"reviewedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri mb-4\">Social Welfare Officer III</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
-                    "<div class=\"flex flex-col pt-4\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Noted by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-2\"><span data-csr-field=\"notedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri mb-4\">Provincial Link</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
+                    "<div class=\"flex flex-col pt-4\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Noted by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-2\"><span data-csr-field=\"notedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri mb-4\">SWO IV / Provincial Link</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
                     "<div class=\"flex flex-col pt-4\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Approved by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-2\"><span data-csr-field=\"approvedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri mb-4\">Regional Program Coordinator</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
                     "</div></section>" +
                     "<section class=\"mt-4 pt-4\">" +
@@ -728,7 +738,7 @@
                 wrapper.className = "mb-2";
                 wrapper.setAttribute("data-flow-kind", "recommendation");
                 const recBody = createRecommendationBody(payload);
-                const recSign = createRecommendationSignatures();
+                const recSign = createRecommendationSignatures(payload);
                 wrapper.appendChild(recBody);
                 wrapper.appendChild(recSign);
                 return wrapper;
@@ -1224,6 +1234,7 @@
                 const familyRowsHtml = familyRows.map((row) => buildFamilyRowHtml(row)).join("");
                 const interventionRowsHtml = interventions.map((row) => buildInterventionRowHtml(row)).join("");
                 const planRowsHtml = plans.map((row) => buildPlanRowHtml(row)).join("");
+                const preparedByDateLine = buildSignatureDateLine(formatIsoDate(payload && payload.basicInfo && payload.basicInfo.date));
 
                 return "" +
                     "<div class=\"running-header\">" +
@@ -1286,9 +1297,9 @@
                     "<section class=\"section-gap\"><h2 class=\"font-bold text-[12pt] mb-2 uppercase\">VI. RECOMMENDATION</h2>" +
                     "<p class=\"text-justify indent-[1.27cm] text-[12pt]\">" + escapeHtml(recommendationText) + "</p></section>" +
                     "<section class=\"section-gap\"><div class=\"grid grid-cols-2 gap-x-12 gap-y-10\">" +
-                    "<div><p class=\"mb-10\">Prepared by:</p><p class=\"font-bold uppercase\" data-csr-field=\"preparedBy\"></p><p>PDO II-Municipal Link</p></div>" +
+                    "<div><p class=\"mb-10\">Prepared by:</p><p class=\"font-bold uppercase\" data-csr-field=\"preparedBy\"></p><p>PDO II-Municipal Link</p>" + preparedByDateLine + "</div>" +
                     "<div><p class=\"mb-10\">Reviewed by:</p><p class=\"font-bold uppercase\" data-csr-field=\"reviewedBy\"></p><p>Social Welfare Officer III</p></div>" +
-                    "<div><p class=\"mb-10\">Noted by:</p><p class=\"font-bold uppercase\" data-csr-field=\"notedBy\"></p><p>Provincial Link</p></div>" +
+                    "<div><p class=\"mb-10\">Noted by:</p><p class=\"font-bold uppercase\" data-csr-field=\"notedBy\"></p><p>SWO IV / Provincial Link</p></div>" +
                     "<div><p class=\"mb-10\">Approved by:</p><p class=\"font-bold uppercase\" data-csr-field=\"approvedBy\"></p><p>Regional Program Coordinator</p></div>" +
                     "</div><div class=\"mt-10 grid grid-cols-2 gap-x-12\">" +
                     "<div><p class=\"font-bold uppercase\" data-csr-field=\"hhGrantee\"></p><p>HH Grantee</p></div>" +

@@ -130,6 +130,13 @@
                 });
             }
 
+            function buildSignatureDateLine(dateText) {
+                const formatted = text(dateText);
+                return formatted
+                    ? "<div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black min-w-[140px] leading-tight\">" + escapeHtml(formatted) + "</span></div>"
+                    : "<div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div>";
+            }
+
             function formatFamilyBirthday(value) {
                 const raw = text(value);
                 let match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -1450,14 +1457,17 @@
                 return section;
             }
 
-            function createRecommendationSignatures() {
+            function createRecommendationSignatures(payload) {
                 const block = document.createElement("div");
+                const preparedByDateLine = buildSignatureDateLine(
+                    formatIsoDate(payload && payload.recommendation && payload.recommendation.date)
+                );
                 block.innerHTML =
                     "<section class=\"mt-8 w-full\">" +
                     "<div class=\"flex flex-col gap-y-12\">" +
-                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-6 font-calibri\">Prepared by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-1\"><span data-csr-field=\"preparedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri leading-tight\">PDO II-Municipal Link</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
-                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-6 font-calibri\">Reviewed by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-1\"><span data-csr-field=\"reviewedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri leading-tight\">Social Welfare Officer III</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
-                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-6 font-calibri\">Noted by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-1\"><span data-csr-field=\"approvedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri leading-tight\">Provincial Link</p></div></div>" +
+                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Prepared by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-1\"><span data-csr-field=\"preparedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri leading-tight\">PDO II-Municipal Link</p>" + preparedByDateLine + "</div></div>" +
+                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Reviewed by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-1\"><span data-csr-field=\"reviewedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri leading-tight\">Social Welfare Officer III</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
+                    "<div class=\"flex flex-col\"><span class=\"text-[12pt] font-normal text-black mb-12 font-calibri\">Noted by:</span><div><p class=\"font-bold text-[12pt] text-black uppercase font-calibri mb-1\"><span data-csr-field=\"approvedBy\"></span></p><p class=\"text-[12pt] text-black font-normal font-calibri leading-tight\">SWO IV / Provincial Link</p><div class=\"flex items-end gap-2 mt-1 font-calibri text-[12pt]\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div></div>" +
                     "</div></section>";
                 return block;
             }
@@ -1468,6 +1478,9 @@
                 wrapper.setAttribute("data-flow-kind", "recommendation");
                 const recommendationBlocks = getNarrativeBlocksFromPlainText(
                     payload && payload.recommendation && payload.recommendation.recommendationText
+                );
+                const preparedByDateLine = buildSignatureDateLine(
+                    formatIsoDate(payload && payload.recommendation && payload.recommendation.date)
                 );
                 const recBody = document.createElement("div");
                 recBody.innerHTML =
@@ -1481,7 +1494,7 @@
                         recBodyContainer.appendChild(node.cloneNode(true));
                     });
                 }
-                const recSign = createRecommendationSignatures();
+                const recSign = createRecommendationSignatures(payload);
                 wrapper.appendChild(recBody);
                 wrapper.appendChild(recSign);
                 return wrapper;
@@ -2797,9 +2810,9 @@
                     }).join("") +
                     "</div>" +
                     "<div class=\"mt-8 flex flex-col gap-y-10\">" +
-                    "<div><p class=\"mb-6\">Prepared by:</p><p class=\"font-bold uppercase mb-1\" data-csr-field=\"preparedBy\"></p><p class=\"leading-tight\">PDO II-Municipal Link</p><div class=\"flex items-end gap-2 mt-1\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div>" +
-                    "<div><p class=\"mb-6\">Reviewed by:</p><p class=\"font-bold uppercase mb-1\" data-csr-field=\"reviewedBy\"></p><p class=\"leading-tight\">Social Welfare Officer III</p><div class=\"flex items-end gap-2 mt-1\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div>" +
-                    "<div><p class=\"mb-6\">Noted by:</p><p class=\"font-bold uppercase mb-1\" data-csr-field=\"approvedBy\"></p><p class=\"leading-tight\">Provincial Link</p></div>" +
+                    "<div><p class=\"mb-12\">Prepared by:</p><p class=\"font-bold uppercase mb-1\" data-csr-field=\"preparedBy\"></p><p class=\"leading-tight\">PDO II-Municipal Link</p>" + preparedByDateLine + "</div>" +
+                    "<div><p class=\"mb-12\">Reviewed by:</p><p class=\"font-bold uppercase mb-1\" data-csr-field=\"reviewedBy\"></p><p class=\"leading-tight\">Social Welfare Officer III</p><div class=\"flex items-end gap-2 mt-1\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div>" +
+                    "<div><p class=\"mb-12\">Noted by:</p><p class=\"font-bold uppercase mb-1\" data-csr-field=\"approvedBy\"></p><p class=\"leading-tight\">SWO IV / Provincial Link</p><div class=\"flex items-end gap-2 mt-1\"><span>Date:</span><span class=\"border-b border-black w-24\"></span></div></div>" +
                     "</div></section>";
             }
 
