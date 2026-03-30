@@ -180,7 +180,7 @@
       "addedMembers": [],
       "memberProfileOverrides": {}
     },
-    "activeStep": 8,
+    "activeStep": 1,
     "scsrRecommendation": {
       "details": {
         "date": "2026-03-29",
@@ -189,34 +189,34 @@
         "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
         "approvedBy": "LUZ C. FEGARIDO,RSW"
       },
-      "savedAt": "2026-03-29T04:12:46.261Z",
+      "savedAt": "2026-03-30T15:18:51.841Z",
       "lastSaveMode": "autosave"
     },
     "presentingProblem": {
       "html": "",
-      "savedAt": "2026-03-29T04:12:46.260Z",
+      "savedAt": "2026-03-30T15:18:51.839Z",
       "lastSaveMode": "autosave"
     },
     "backgroundInformation": {
       "tabs": {
         "socioEconomic": {
           "html": "",
-          "savedAt": "2026-03-29T04:12:46.260Z",
+          "savedAt": "2026-03-30T15:18:51.840Z",
           "lastSaveMode": "autosave"
         }
       },
       "activeTab": "socioEconomic",
-      "savedAt": "2026-03-29T04:12:46.260Z",
+      "savedAt": "2026-03-30T15:18:51.840Z",
       "lastSaveMode": "autosave"
     },
     "caseAssessment": {
       "html": "",
-      "savedAt": "2026-03-29T04:12:46.261Z",
+      "savedAt": "2026-03-30T15:18:51.840Z",
       "lastSaveMode": "autosave"
     },
     "caseManagementEvaluation": {
       "html": "",
-      "savedAt": "2026-03-29T04:12:46.261Z",
+      "savedAt": "2026-03-30T15:18:51.840Z",
       "lastSaveMode": "autosave"
     },
     "interventionPlanImplementation": {
@@ -230,17 +230,388 @@
           "expectedOutput": ""
         }
       ],
-      "savedAt": "2026-03-29T04:12:46.261Z",
+      "savedAt": "2026-03-30T15:18:51.841Z",
       "lastSaveMode": "autosave"
     },
     "interventionsProvided": {
       "items": [],
-      "savedAt": "2026-03-29T04:12:46.262Z",
+      "savedAt": "2026-03-30T15:18:51.841Z",
       "lastSaveMode": "autosave"
     },
     "householdInterventionPlan": {
       "items": [],
-      "savedAt": "2026-03-29T04:12:46.260Z",
+      "savedAt": "2026-03-30T15:18:51.842Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "79686",
+    "workflowType": "SCSR",
+    "cardData": {
+      "name": "AGRIPINA MALATE BANGAHON",
+      "hhid": "071201003-2-09528280",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "CANTIGUIB"
+    },
+    "basicInformation": {
+      "editDetails": {
+        "granteeName": "AGRIPINA MALATE BANGAHON",
+        "sex": "FEMALE",
+        "birthday": "1980-11-09",
+        "age": "45",
+        "civilStatus": "Married with spouse present",
+        "educationalAttainment": "No Grade Completed",
+        "contactInfo": "09467254591",
+        "religion": "",
+        "presentAddress": "Cantiguib, Alburquerque, Bohol",
+        "placeOfBirth": "",
+        "sourceOfIncome": "",
+        "wellBeingLevel": "Level 2 - Subsistence",
+        "monthlyIncome": "",
+        "perCapitaIncome": ""
+      },
+      "savedAt": "2026-03-30T22:05:53.796Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "sharedFields": {
+          "granteeName": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T22:04:46.583Z",
+            "sourceCsrId": "77029",
+            "syncMode": "auto-sync"
+          },
+          "sex": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T21:52:52.544Z",
+            "sourceCsrId": "77029",
+            "syncMode": "hydrate-sync"
+          },
+          "birthday": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T21:52:52.544Z",
+            "sourceCsrId": "77029",
+            "syncMode": "hydrate-sync"
+          },
+          "age": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T21:52:52.544Z",
+            "sourceCsrId": "77029",
+            "syncMode": "hydrate-sync"
+          },
+          "civilStatus": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T21:52:52.544Z",
+            "sourceCsrId": "77029",
+            "syncMode": "hydrate-sync"
+          },
+          "educationalAttainment": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T21:52:52.544Z",
+            "sourceCsrId": "77029",
+            "syncMode": "hydrate-sync"
+          },
+          "contactInfo": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T21:52:52.544Z",
+            "sourceCsrId": "77029",
+            "syncMode": "hydrate-sync"
+          }
+        },
+        "lastUpdatedByWorkflow": "CSR",
+        "lastUpdatedAt": "2026-03-30T22:04:46.583Z",
+        "lastSourceCsrId": "77029",
+        "lastSyncMode": "auto-sync"
+      },
+      "prefilled": {
+        "name": "AGRIPINA MALATE BANGAHON",
+        "hhid": "071201003-2-09528280",
+        "hhSet": "11A",
+        "sex": "FEMALE",
+        "birthday": "November 9, 1980",
+        "age": "45",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "NO GRADE COMPLETED",
+        "clientStatusOnExit": "1 - Active",
+        "wellBeingLevel": "Level 2 - Subsistence Index Score : 2.67905"
+      }
+    },
+    "familyComposition": {
+      "ui": {
+        "expandedMemberKeys": []
+      }
+    },
+    "activeStep": 8,
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-31",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO,RSW"
+      },
+      "savedAt": "2026-03-30T22:05:54.765Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-30T22:05:54.763Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "socioEconomic": {
+          "html": "",
+          "savedAt": "2026-03-30T22:05:54.764Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "socioEconomic",
+      "savedAt": "2026-03-30T22:05:54.764Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-30T22:05:54.764Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-30T22:05:54.765Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-30T22:05:54.764Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-30T22:05:54.765Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-30T22:05:54.766Z",
+      "lastSaveMode": "autosave"
+    }
+  },
+  {
+    "csrId": "51849",
+    "workflowType": "SCSR",
+    "cardData": {
+      "name": "ANITA MONTIMOR PIEL",
+      "hhid": "071201010-7934-00004",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "TORIL"
+    },
+    "basicInformation": {
+      "editDetails": {
+        "granteeName": "ANITA MONTIMOR PIEL",
+        "sex": "FEMALE",
+        "birthday": "1973-09-30",
+        "age": "52",
+        "civilStatus": "Married with spouse present",
+        "educationalAttainment": "Grade 6"
+      },
+      "savedAt": "2026-03-30T22:08:52.741Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "sharedFields": {
+          "granteeName": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T22:08:52.741Z",
+            "sourceCsrId": "31276",
+            "syncMode": "hydrate-sync"
+          },
+          "sex": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T22:08:52.741Z",
+            "sourceCsrId": "31276",
+            "syncMode": "hydrate-sync"
+          },
+          "birthday": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T22:08:52.741Z",
+            "sourceCsrId": "31276",
+            "syncMode": "hydrate-sync"
+          },
+          "age": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T22:08:52.741Z",
+            "sourceCsrId": "31276",
+            "syncMode": "hydrate-sync"
+          },
+          "civilStatus": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T22:08:52.741Z",
+            "sourceCsrId": "31276",
+            "syncMode": "hydrate-sync"
+          },
+          "educationalAttainment": {
+            "lastUpdatedByWorkflow": "CSR",
+            "updatedAt": "2026-03-30T22:08:52.741Z",
+            "sourceCsrId": "31276",
+            "syncMode": "hydrate-sync"
+          }
+        },
+        "lastUpdatedByWorkflow": "CSR",
+        "lastUpdatedAt": "2026-03-30T22:08:52.741Z",
+        "lastSourceCsrId": "31276",
+        "lastSyncMode": "hydrate-sync"
+      },
+      "prefilled": {
+        "name": "ANITA MONTIMOR PIEL",
+        "hhid": "071201010-7934-00004",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "September 30, 1973",
+        "age": "52",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "educationalAttainment": "GRADE 6",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "familyComposition": {
+      "members": {
+        "43139442|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
+          "birthday": "1972-01-25",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139734|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
+          "birthday": "1973-09-30",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139758|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
+          "birthday": "1994-05-19",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139780|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "No Grade Completed",
+          "birthday": "1998-01-18",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139797|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
+          "birthday": "1999-03-12",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139830|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Grade 6",
+          "birthday": "2000-06-04",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139857|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
+          "birthday": "2001-11-04",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139882|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "High School Graduate",
+          "birthday": "2003-12-25",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        },
+        "43139935|071201010-7934-00004": {
+          "monitoredChild": "No",
+          "educationalAttainment": "Senior High School Graduate",
+          "birthday": "2005-04-30",
+          "occupation": "NONE",
+          "monthlyIncome": "NONE",
+          "typeOfDisability": "None"
+        }
+      },
+      "addedMembers": [],
+      "memberProfileOverrides": {},
+      "deletedMemberKeys": [],
+      "savedAt": "2026-03-30T22:09:20.754Z",
+      "lastSaveMode": "autosave",
+      "syncAudit": {
+        "lastUpdatedByWorkflow": "CSR",
+        "lastUpdatedAt": "2026-03-30T22:09:20.754Z",
+        "lastSourceCsrId": "31276",
+        "lastSyncMode": "auto-sync"
+      }
+    },
+    "activeStep": 2,
+    "scsrRecommendation": {
+      "details": {
+        "date": "2026-03-31",
+        "recommendationText": "",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "approvedBy": "LUZ C. FEGARIDO,RSW"
+      },
+      "savedAt": "2026-03-30T22:09:10.611Z",
+      "lastSaveMode": "autosave"
+    },
+    "presentingProblem": {
+      "html": "",
+      "savedAt": "2026-03-30T22:09:10.609Z",
+      "lastSaveMode": "autosave"
+    },
+    "backgroundInformation": {
+      "tabs": {
+        "socioEconomic": {
+          "html": "",
+          "savedAt": "2026-03-30T22:09:10.610Z",
+          "lastSaveMode": "autosave"
+        }
+      },
+      "activeTab": "socioEconomic",
+      "savedAt": "2026-03-30T22:09:10.610Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseAssessment": {
+      "html": "",
+      "savedAt": "2026-03-30T22:09:10.610Z",
+      "lastSaveMode": "autosave"
+    },
+    "caseManagementEvaluation": {
+      "html": "",
+      "savedAt": "2026-03-30T22:09:10.610Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionPlanImplementation": {
+      "items": [],
+      "savedAt": "2026-03-30T22:09:10.611Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-03-30T22:09:10.611Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-03-30T22:09:10.612Z",
       "lastSaveMode": "autosave"
     }
   }

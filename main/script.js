@@ -4988,6 +4988,20 @@
       }
     }
 
+    if (basicGranteeNameInput) {
+      const nameInvalid =
+        !normalizeText(basicGranteeNameInput.value) ||
+        hasNumericCharacters(basicGranteeNameInput.value);
+      if (nameInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(basicGranteeNameInput);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(basicGranteeNameInput);
+      }
+    }
+
     const yearsField = document.getElementById("edit-years-program");
     const yearsInProgram = getFieldValue("edit-years-program");
     if (requiredFieldIds.has("edit-years-program") && yearsField) {
@@ -5074,6 +5088,20 @@
         }
       } else if (config.markFields) {
         clearBasicInfoFieldError(basicCivilStatusInput);
+      }
+    }
+
+    if (basicGranteeNameInput) {
+      const nameInvalid =
+        !normalizeText(basicGranteeNameInput.value) ||
+        hasNumericCharacters(basicGranteeNameInput.value);
+      if (nameInvalid) {
+        hasInvalidField = true;
+        if (config.markFields) {
+          setBasicInfoFieldError(basicGranteeNameInput);
+        }
+      } else if (config.markFields) {
+        clearBasicInfoFieldError(basicGranteeNameInput);
       }
     }
 
@@ -10740,6 +10768,16 @@
     field.classList.remove("border-red-500", "focus:border-red-500", "focus:ring-red-500");
   }
 
+  function sanitizeBasicInfoNameInputValue(value) {
+    return String(value == null ? "" : value)
+      .replace(/\d+/g, "")
+      .replace(/\s{2,}/g, " ");
+  }
+
+  function hasNumericCharacters(value) {
+    return /\d/.test(String(value == null ? "" : value));
+  }
+
   function isBasicInfoFieldEmpty(field) {
     const value = normalizeText(field.value);
     if (BASIC_INFO_OPTIONAL_FIELD_IDS.has(field.id) && !value) {
@@ -10761,6 +10799,27 @@
       if (todayIso) {
         basicBirthdayInput.max = todayIso;
       }
+    }
+
+    if (basicGranteeNameInput) {
+      const syncNameValidationState = () => {
+        const invalid = hasNumericCharacters(basicGranteeNameInput.value);
+        if (invalid) {
+          setBasicInfoFieldError(basicGranteeNameInput);
+        } else {
+          clearBasicInfoFieldError(basicGranteeNameInput);
+        }
+      };
+      const sanitizeNameField = () => {
+        const sanitized = sanitizeBasicInfoNameInputValue(basicGranteeNameInput.value);
+        if (basicGranteeNameInput.value !== sanitized) {
+          basicGranteeNameInput.value = sanitized;
+        }
+        syncNameValidationState();
+      };
+      basicGranteeNameInput.addEventListener("input", sanitizeNameField);
+      basicGranteeNameInput.addEventListener("blur", sanitizeNameField);
+      sanitizeNameField();
     }
 
     const contactField = document.getElementById("edit-contact-info");
