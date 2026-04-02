@@ -208,6 +208,18 @@
   let pendingWorkflowCardData = null;
   const workflowIsolationCleanupDone = new Set();
   let crossWorkflowSyncQueue = Promise.resolve();
+  let browserAppVersion = "";
+  let releaseUpdaterDismissedVersion = "";
+  let releaseUpdaterUnsubscribe = null;
+  let releaseUpdaterState = {
+    status: "disabled",
+    currentVersion: "",
+    latestVersion: "",
+    releaseNotes: [],
+    message: "",
+    progressPercent: 0,
+    canUpdate: false,
+  };
 
   const idInput = document.getElementById("user-id");
   const municipalitySelect = document.getElementById("municipality");
@@ -221,6 +233,7 @@
   const appBootScreen = document.getElementById("app-boot-screen");
   const loginSection = document.getElementById("login-section");
   const dataTableHeader = document.getElementById("data-table-header");
+  const appVersionBadge = document.getElementById("app-version-badge");
   const returnToSelectionButton = document.getElementById("return-to-csr-selection");
   const dataTableCard = document.getElementById("data-table-card");
   const dataSearchInput = document.getElementById("data-search-input");
@@ -311,6 +324,13 @@
   const workflowTypeModalCancelButton = document.getElementById("workflow-type-modal-cancel-btn");
   const workflowTypeCsrButton = document.getElementById("workflow-type-csr-btn");
   const workflowTypeScsrButton = document.getElementById("workflow-type-scsr-btn");
+  const releaseUpdaterModal = document.getElementById("release-updater-modal");
+  const releaseUpdaterTitle = document.getElementById("release-updater-title");
+  const releaseUpdaterVersion = document.getElementById("release-updater-version");
+  const releaseUpdaterBody = document.getElementById("release-updater-body");
+  const releaseUpdaterNotes = document.getElementById("release-updater-notes");
+  const releaseUpdaterCancelButton = document.getElementById("release-updater-cancel-btn");
+  const releaseUpdaterActionButton = document.getElementById("release-updater-update-btn");
   const recommendationPreviewCloseButton = document.getElementById("recommendation-preview-close-btn");
   const recommendationTextField = document.getElementById("recommendation_text");
   const recommendationDateField = document.getElementById("recommendation_date");
@@ -395,6 +415,8 @@
 
   pendingCsrDeepLink = parseCsrDeepLinkFromUrl();
   initializeSessionState();
+  void hydrateBrowserAppVersion();
+  initReleaseUpdaterUi();
   startServerSessionWatcher();
   document.addEventListener("visibilitychange", handleDocumentVisibilityChange);
 
@@ -3286,6 +3308,289 @@
       (window.navigator && window.navigator.userAgent) || ""
     );
     return userAgent.includes("Electron");
+  }
+
+  function getDesktopUpdaterBridge() {
+    const bridge =
+      window &&
+      window.csrDesktopUpdater &&
+      typeof window.csrDesktopUpdater === "object"
+        ? window.csrDesktopUpdater
+        : null;
+    if (!bridge) {
+      return null;
+    }
+    if (
+      typeof bridge.getState !== "function" ||
+      typeof bridge.startInstallUpdate !== "function" ||
+      typeof bridge.onStatusChange !== "function"
+    ) {
+      return null;
+    }
+    return bridge;
+  }
+
+  function getBrowserAppVersion() {
+    if (browserAppVersion) {
+      return browserAppVersion;
+    }
+    const versionMeta = document.querySelector('meta[name="app-version"]');
+    return normalizeText(
+      versionMeta && typeof versionMeta.getAttribute === "function"
+        ? versionMeta.getAttribute("content")
+        : ""
+    );
+  }
+
+  async function hydrateBrowserAppVersion() {
+    if (getDesktopUpdaterBridge()) {
+      return;
+    }
+    const candidates = ["../package.json", "/package.json"];
+    for (const candidate of candidates) {
+      try {
+        const response = await fetch(candidate, {
+          cache: "no-store",
+        });
+        if (!response || !response.ok) {
+          continue;
+        }
+        const payload = await response.json();
+        const nextVersion = normalizeText(payload && payload.version);
+        if (!nextVersion) {
+          continue;
+        }
+        browserAppVersion = nextVersion;
+        renderAppVersionBadge();
+        return;
+      } catch (_) {
+        // Try the next same-origin package.json path.
+      }
+    }
+    renderAppVersionBadge();
+  }
+
+  function normalizeReleaseUpdaterNotes(noteSource) {
+    if (typeof noteSource === "string") {
+      return noteSource
+        .split(/\r?\n/)
+        .map((entry) => normalizeText(entry))
+        .filter(Boolean);
+    }
+    if (Array.isArray(noteSource)) {
+      return noteSource
+        .map((entry) => normalizeText(entry))
+        .filter(Boolean);
+    }
+    return [];
+  }
+
+  function normalizeReleaseUpdaterState(payload) {
+    const releaseNotes = normalizeReleaseUpdaterNotes(payload && payload.releaseNotes);
+    return {
+      status: normalizeText(payload && payload.status) || "disabled",
+      currentVersion: normalizeText(payload && payload.currentVersion),
+      latestVersion: normalizeText(payload && payload.latestVersion),
+      releaseNotes: releaseNotes.length
+        ? releaseNotes
+        : ["Improvements and fixes included in this update."],
+      message: normalizeText(payload && payload.message),
+      progressPercent: Number.isFinite(Number(payload && payload.progressPercent))
+        ? Math.max(0, Math.min(100, Number(payload.progressPercent)))
+        : 0,
+      canUpdate: Boolean(payload && payload.canUpdate),
+    };
+  }
+
+  function hideReleaseUpdaterModal() {
+    if (!releaseUpdaterModal) {
+      return;
+    }
+    releaseUpdaterModal.classList.add("hidden");
+    releaseUpdaterModal.classList.remove("flex");
+  }
+
+  function hideAppVersionBadge() {
+    if (!appVersionBadge) {
+      return;
+    }
+    appVersionBadge.classList.add("hidden");
+  }
+
+  function renderAppVersionBadge() {
+    if (!appVersionBadge) {
+      return;
+    }
+    const bridge = getDesktopUpdaterBridge();
+    const currentVersion =
+      normalizeText(releaseUpdaterState.currentVersion) || getBrowserAppVersion();
+    const latestVersion = normalizeText(releaseUpdaterState.latestVersion);
+    if (!currentVersion) {
+      hideAppVersionBadge();
+      return;
+    }
+    const hasNewerVersion =
+      bridge &&
+      latestVersion &&
+      latestVersion !== currentVersion &&
+      (releaseUpdaterState.status === "available" ||
+        releaseUpdaterState.status === "downloading" ||
+        releaseUpdaterState.status === "downloaded");
+    appVersionBadge.textContent = hasNewerVersion
+      ? `Version ${currentVersion} • Update available ${latestVersion}`
+      : `Version ${currentVersion}`;
+    appVersionBadge.classList.remove("hidden");
+  }
+
+  function showReleaseUpdaterModal() {
+    if (!releaseUpdaterModal) {
+      return;
+    }
+    releaseUpdaterModal.classList.remove("hidden");
+    releaseUpdaterModal.classList.add("flex");
+  }
+
+  function shouldShowReleaseUpdaterModal() {
+    if (!getDesktopUpdaterBridge()) {
+      return false;
+    }
+    if (
+      releaseUpdaterState.status === "downloading" ||
+      releaseUpdaterState.status === "downloaded"
+    ) {
+      return true;
+    }
+    if (releaseUpdaterState.status !== "available") {
+      return false;
+    }
+    return releaseUpdaterDismissedVersion !== releaseUpdaterState.latestVersion;
+  }
+
+  function renderReleaseUpdaterNotes() {
+    if (!releaseUpdaterNotes) {
+      return;
+    }
+    releaseUpdaterNotes.replaceChildren();
+    const notes = normalizeReleaseUpdaterNotes(releaseUpdaterState.releaseNotes);
+    notes.forEach((note) => {
+      const item = document.createElement("li");
+      item.textContent = note;
+      releaseUpdaterNotes.appendChild(item);
+    });
+  }
+
+  function renderReleaseUpdaterModal() {
+    if (!releaseUpdaterModal) {
+      return;
+    }
+
+    if (!shouldShowReleaseUpdaterModal()) {
+      hideReleaseUpdaterModal();
+      return;
+    }
+
+    const latestVersionLabel = releaseUpdaterState.latestVersion
+      ? `Version ${releaseUpdaterState.currentVersion || "Current"} to ${
+          releaseUpdaterState.latestVersion
+        }`
+      : "A newer version of the app is ready.";
+    if (releaseUpdaterVersion) {
+      releaseUpdaterVersion.textContent = latestVersionLabel;
+    }
+
+    if (releaseUpdaterTitle) {
+      releaseUpdaterTitle.textContent =
+        releaseUpdaterState.status === "available"
+          ? "Update Available"
+          : "Installing Update";
+    }
+
+    if (releaseUpdaterBody) {
+      if (releaseUpdaterState.status === "available") {
+        releaseUpdaterBody.textContent =
+          releaseUpdaterState.message ||
+          "Improvements and fixes are included in this update.";
+      } else if (releaseUpdaterState.status === "downloading") {
+        releaseUpdaterBody.textContent =
+          releaseUpdaterState.message || "Downloading update...";
+      } else {
+        releaseUpdaterBody.textContent =
+          releaseUpdaterState.message || "Preparing installer...";
+      }
+    }
+
+    renderReleaseUpdaterNotes();
+
+    if (releaseUpdaterCancelButton) {
+      const lockCancel =
+        releaseUpdaterState.status === "downloading" ||
+        releaseUpdaterState.status === "downloaded";
+      releaseUpdaterCancelButton.disabled = lockCancel;
+      releaseUpdaterCancelButton.classList.toggle("hidden", lockCancel);
+    }
+
+    if (releaseUpdaterActionButton) {
+      if (releaseUpdaterState.status === "available") {
+        releaseUpdaterActionButton.textContent = "Update";
+        releaseUpdaterActionButton.disabled = !releaseUpdaterState.canUpdate;
+      } else if (releaseUpdaterState.status === "downloading") {
+        releaseUpdaterActionButton.textContent = "Downloading...";
+        releaseUpdaterActionButton.disabled = true;
+      } else {
+        releaseUpdaterActionButton.textContent = "Installing...";
+        releaseUpdaterActionButton.disabled = true;
+      }
+    }
+
+    showReleaseUpdaterModal();
+  }
+
+  function applyReleaseUpdaterState(payload) {
+    releaseUpdaterState = normalizeReleaseUpdaterState(payload);
+    renderAppVersionBadge();
+    renderReleaseUpdaterModal();
+  }
+
+  function initReleaseUpdaterUi() {
+    const bridge = getDesktopUpdaterBridge();
+    if (!bridge || !releaseUpdaterModal) {
+      hideReleaseUpdaterModal();
+      hideAppVersionBadge();
+      return;
+    }
+
+    if (releaseUpdaterCancelButton) {
+      releaseUpdaterCancelButton.addEventListener("click", () => {
+        releaseUpdaterDismissedVersion = normalizeText(releaseUpdaterState.latestVersion);
+        hideReleaseUpdaterModal();
+      });
+    }
+
+    if (releaseUpdaterActionButton) {
+      releaseUpdaterActionButton.addEventListener("click", async () => {
+        const latestVersion = normalizeText(releaseUpdaterState.latestVersion);
+        releaseUpdaterDismissedVersion = latestVersion ? "" : releaseUpdaterDismissedVersion;
+        renderReleaseUpdaterModal();
+        try {
+          const nextState = await bridge.startInstallUpdate();
+          applyReleaseUpdaterState(nextState);
+        } catch (_) {
+          showToast("Unable to start the update right now.");
+        }
+      });
+    }
+
+    releaseUpdaterUnsubscribe = bridge.onStatusChange((payload) => {
+      applyReleaseUpdaterState(payload);
+    });
+
+    Promise.resolve(bridge.getState())
+      .then((payload) => {
+        applyReleaseUpdaterState(payload);
+      })
+      .catch(() => {
+        hideReleaseUpdaterModal();
+      });
   }
 
   function confirmUserAction(message) {

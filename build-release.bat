@@ -46,7 +46,7 @@ if errorlevel 1 (
 echo Copying project files...
 pushd "%ROOT_DIR%"
 robocopy "." "%RELEASE_DIR%" /E /R:1 /W:1 ^
-  /XD "release" ^
+  /XD "release" "dist" "node_modules" ^
   /XF "*.log"
 set "RC=%ERRORLEVEL%"
 popd
@@ -132,7 +132,15 @@ if "%OBFUSCATE_JS%"=="1" (
   call node --check "!OBF_TMP_SCSR_TEMPLATE!"
   if errorlevel 1 goto :obfuscation_failed
 
-  for %%T in ("__CSR_EXPORT_READY__" "csr_template_payload_v1" "basicInfo" "recommendation" "addedMembers" "memberProfileOverrides" "deletedMemberKeys" "Additional Member" "Edit Member" "Newly added member") do (
+for %%T in ("__CSR_EXPORT_READY__" "csr_template_payload_v1" "basicInfo" "recommendation" "addedMembers" "memberProfileOverrides" "deletedMemberKeys" "Additional Member" "Edit Member" "Newly added member") do (
+  findstr /C:"%%~T" "!OBF_TMP_SCRIPT!" >nul 2>nul
+  if errorlevel 1 (
+      echo Safe obfuscation guard failed for main\script.js: missing token %%~T
+      goto :obfuscation_failed
+    )
+  )
+
+  for %%T in ("csrDesktopUpdater" "release-updater-modal") do (
     findstr /C:"%%~T" "!OBF_TMP_SCRIPT!" >nul 2>nul
     if errorlevel 1 (
       echo Safe obfuscation guard failed for main\script.js: missing token %%~T
@@ -316,7 +324,7 @@ if "%BUILD_EXE%"=="1" (
     dir /b "%RELEASE_DIR%\dist\*.exe"
   )
   if exist "%RELEASE_DIR%\dist\win-unpacked\*.exe" (
-    echo Generated portable app EXE:
+    echo Generated unpacked app EXE:
     dir /b "%RELEASE_DIR%\dist\win-unpacked\*.exe"
   )
   if exist "%RELEASE_DIR%\dist\Install-CSR-With-Diagnostics.cmd" (
@@ -348,6 +356,8 @@ set "PF_RELEASE_DIR=%~1"
 set "PF_SCRIPT=%PF_RELEASE_DIR%\main\script.js"
 set "PF_TEMPLATE=%PF_RELEASE_DIR%\main\csr-template.js"
 set "PF_SCSR_TEMPLATE=%PF_RELEASE_DIR%\main\scsr-template.js"
+set "PF_ELECTRON_MAIN=%PF_RELEASE_DIR%\launcher\electron-main.cjs"
+set "PF_PRELOAD=%PF_RELEASE_DIR%\launcher\preload.cjs"
 
 if not exist "%PF_SCRIPT%" (
   echo Preflight error: missing main\script.js
@@ -361,7 +371,14 @@ if not exist "%PF_SCSR_TEMPLATE%" (
   echo Preflight error: missing main\scsr-template.js
   endlocal & exit /b 1
 )
-
+if not exist "%PF_ELECTRON_MAIN%" (
+  echo Preflight error: missing launcher\electron-main.cjs
+  endlocal & exit /b 1
+)
+if not exist "%PF_PRELOAD%" (
+  echo Preflight error: missing launcher\preload.cjs
+  endlocal & exit /b 1
+)
 node --check "%PF_SCRIPT%" >nul 2>nul
 if errorlevel 1 (
   echo Preflight error: syntax check failed for main\script.js
@@ -377,11 +394,41 @@ if errorlevel 1 (
   echo Preflight error: syntax check failed for main\scsr-template.js
   endlocal & exit /b 1
 )
-
+node --check "%PF_ELECTRON_MAIN%" >nul 2>nul
+if errorlevel 1 (
+  echo Preflight error: syntax check failed for launcher\electron-main.cjs
+  endlocal & exit /b 1
+)
+node --check "%PF_PRELOAD%" >nul 2>nul
+if errorlevel 1 (
+  echo Preflight error: syntax check failed for launcher\preload.cjs
+  endlocal & exit /b 1
+)
 for %%T in ("__CSR_EXPORT_READY__" "csr_template_payload_v1" "basicInfo" "recommendation") do (
   findstr /C:"%%~T" "%PF_SCRIPT%" >nul 2>nul
   if errorlevel 1 (
     echo Preflight error: missing token in main\script.js: %%~T
+    endlocal & exit /b 1
+  )
+)
+for %%T in ("csrDesktopUpdater" "release-updater-modal") do (
+  findstr /C:"%%~T" "%PF_SCRIPT%" >nul 2>nul
+  if errorlevel 1 (
+    echo Preflight error: missing token in main\script.js: %%~T
+    endlocal & exit /b 1
+  )
+)
+for %%T in ("electron-updater" "desktop-updater:get-state" "desktop-updater:start-install") do (
+  findstr /C:"%%~T" "%PF_ELECTRON_MAIN%" >nul 2>nul
+  if errorlevel 1 (
+    echo Preflight error: missing token in launcher\electron-main.cjs: %%~T
+    endlocal & exit /b 1
+  )
+)
+for %%T in ("desktop-updater:get-state" "desktop-updater:check" "desktop-updater:start-install" "csrDesktopUpdater") do (
+  findstr /C:"%%~T" "%PF_PRELOAD%" >nul 2>nul
+  if errorlevel 1 (
+    echo Preflight error: missing token in launcher\preload.cjs: %%~T
     endlocal & exit /b 1
   )
 )

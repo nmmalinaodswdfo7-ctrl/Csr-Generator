@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "provider": "generic",
+  "baseUrl": "https://csrgenerator.site/",
+  "channel": "latest",
+  "notesFile": "release-notes.json"
+}

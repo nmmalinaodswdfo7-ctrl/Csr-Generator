@@ -22,6 +22,7 @@
   "win": {
     "signAndEditExecutable": false,
     "icon": "assets/logo/favicon.ico",
+    "artifactName": "Social-Case-Report-Manager-Setup-${version}.${ext}",
     "target": [
       {
         "target": "nsis",

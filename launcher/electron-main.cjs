@@ -1,4 +1,5 @@
-﻿const { app, BrowserWindow, dialog, shell } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, shell } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const { fork } = require("child_process");
 const http = require("http");
 const net = require("net");
@@ -11,12 +12,24 @@ const LAUNCHER_DIR = path.resolve(ROOT_DIR, "launcher");
 const SERVER_READY_TIMEOUT_MS = 20000;
 const SERVER_START_ATTEMPTS = 3;
 const PORT_SCAN_ATTEMPTS = 25;
+const UPDATER_STATUS_CHANNEL = "desktop-updater:status";
+const DEFAULT_UPDATER_NOTES = Object.freeze([
+  "Improvements and fixes included in this update.",
+]);
 
 let mainWindow = null;
 let serverProcess = null;
 let isShuttingDown = false;
 let startupInProgress = false;
 let activePort = DEFAULT_PORT;
+let updaterInitialized = false;
+let updaterCheckInFlight = false;
+let updaterDownloadRequested = false;
+let updaterConfig = null;
+let updaterState = createUpdaterState({
+  status: "disabled",
+  message: "Auto-update is available only in installed Windows builds.",
+});
 
 const SINGLE_INSTANCE_ERROR_TITLE = "App Already Running";
 const SINGLE_INSTANCE_ERROR_MESSAGE =
@@ -46,8 +59,224 @@ function resolveAppIconPath() {
 }
 
 function resolveServerEntrypoint() {
-  const sourceEntry = path.join(LAUNCHER_DIR, "server.js");
-  return sourceEntry;
+  return path.join(LAUNCHER_DIR, "server.js");
+}
+
+function resolvePreloadEntrypoint() {
+  return path.join(LAUNCHER_DIR, "preload.cjs");
+}
+
+function resolveUpdaterConfigPath() {
+  return path.join(LAUNCHER_DIR, "updater-config.json");
+}
+
+function normalizeText(value) {
+  return String(value == null ? "" : value).trim();
+}
+
+function ensureTrailingSlash(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) {
+    return "";
+  }
+  return normalized.endsWith("/") ? normalized : `${normalized}/`;
+}
+
+function normalizeReleaseNotes(noteSource) {
+  if (typeof noteSource === "string") {
+    return noteSource
+      .split(/\r?\n/)
+      .map((entry) => normalizeText(entry))
+      .filter(Boolean);
+  }
+  if (Array.isArray(noteSource)) {
+    return noteSource
+      .flatMap((entry) => {
+        if (typeof entry === "string") {
+          return [entry];
+        }
+        if (entry && typeof entry === "object") {
+          const text = normalizeText(
+            entry.note || entry.text || entry.message || entry.name
+          );
+          return text ? [text] : [];
+        }
+        return [];
+      })
+      .map((entry) => normalizeText(entry))
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function createUpdaterState(overrides = {}) {
+  const normalizedNotes = normalizeReleaseNotes(overrides.releaseNotes);
+  return {
+    status: normalizeText(overrides.status) || "disabled",
+    currentVersion: app.getVersion(),
+    latestVersion: normalizeText(overrides.latestVersion),
+    releaseNotes: normalizedNotes.length ? normalizedNotes : [...DEFAULT_UPDATER_NOTES],
+    message: normalizeText(overrides.message),
+    progressPercent: Number.isFinite(Number(overrides.progressPercent))
+      ? Math.max(0, Math.min(100, Number(overrides.progressPercent)))
+      : 0,
+    canUpdate: Boolean(overrides.canUpdate),
+  };
+}
+
+function sanitizeUpdaterState(state) {
+  return createUpdaterState(state);
+}
+
+function broadcastUpdaterState() {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return;
+  }
+  try {
+    mainWindow.webContents.send(
+      UPDATER_STATUS_CHANNEL,
+      sanitizeUpdaterState(updaterState)
+    );
+  } catch (_) {
+    // Ignore renderer broadcast failures.
+  }
+}
+
+function setUpdaterState(patch) {
+  updaterState = createUpdaterState({
+    ...updaterState,
+    ...patch,
+  });
+  broadcastUpdaterState();
+  return updaterState;
+}
+
+function isUpdaterSupportedBuild() {
+  if (process.platform !== "win32") {
+    return false;
+  }
+  if (!app.isPackaged) {
+    return false;
+  }
+  const execPath = normalizeText(process.execPath).toLowerCase();
+  if (!execPath) {
+    return false;
+  }
+  return !execPath.includes("portable") && !execPath.includes("win-unpacked");
+}
+
+function loadUpdaterConfig() {
+  const defaults = {
+    enabled: false,
+    provider: "generic",
+    baseUrl: "",
+    channel: "latest",
+    notesFile: "release-notes.json",
+  };
+  try {
+    const configPath = resolveUpdaterConfigPath();
+    if (!fs.existsSync(configPath)) {
+      return defaults;
+    }
+    const parsed = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    return {
+      enabled: Boolean(parsed && parsed.enabled),
+      provider: normalizeText(parsed && parsed.provider) || defaults.provider,
+      baseUrl: ensureTrailingSlash(parsed && parsed.baseUrl),
+      channel: normalizeText(parsed && parsed.channel) || defaults.channel,
+      notesFile: normalizeText(parsed && parsed.notesFile) || defaults.notesFile,
+    };
+  } catch (_) {
+    return defaults;
+  }
+}
+
+function extractReleaseNotesFromJson(payload, targetVersion) {
+  if (!payload || typeof payload !== "object") {
+    return [];
+  }
+
+  const directNotes = normalizeReleaseNotes(payload.notes);
+  if (directNotes.length) {
+    return directNotes;
+  }
+
+  const normalizedTargetVersion = normalizeText(targetVersion);
+  if (
+    normalizedTargetVersion &&
+    normalizeText(payload.version) === normalizedTargetVersion
+  ) {
+    const versionNotes = normalizeReleaseNotes(payload.notes);
+    if (versionNotes.length) {
+      return versionNotes;
+    }
+  }
+
+  const releases =
+    payload.releases && typeof payload.releases === "object"
+      ? payload.releases
+      : null;
+  if (releases && normalizedTargetVersion) {
+    const matchedRelease = releases[normalizedTargetVersion];
+    if (matchedRelease) {
+      const matchedNotes = normalizeReleaseNotes(
+        matchedRelease.notes || matchedRelease.releaseNotes || matchedRelease.body || matchedRelease
+      );
+      if (matchedNotes.length) {
+        return matchedNotes;
+      }
+    }
+  }
+
+  if (normalizedTargetVersion && payload[normalizedTargetVersion]) {
+    const matchedNotes = normalizeReleaseNotes(payload[normalizedTargetVersion]);
+    if (matchedNotes.length) {
+      return matchedNotes;
+    }
+  }
+
+  return [];
+}
+
+async function fetchHostedReleaseNotes(version) {
+  if (
+    !updaterConfig ||
+    normalizeText(updaterConfig.provider).toLowerCase() !== "generic" ||
+    !normalizeText(updaterConfig.baseUrl)
+  ) {
+    return [];
+  }
+
+  const notesFile = normalizeText(updaterConfig.notesFile) || "release-notes.json";
+  try {
+    const notesUrl = new URL(notesFile, updaterConfig.baseUrl);
+    const response = await fetch(notesUrl.toString(), {
+      cache: "no-store",
+    });
+    if (!response || !response.ok) {
+      return [];
+    }
+    const payload = await response.json();
+    return extractReleaseNotesFromJson(payload, version);
+  } catch (_) {
+    return [];
+  }
+}
+
+async function resolveReleaseNotes(info) {
+  const directNotes = normalizeReleaseNotes(info && info.releaseNotes);
+  if (directNotes.length) {
+    return directNotes;
+  }
+  const hostedNotes = await fetchHostedReleaseNotes(info && info.version);
+  return hostedNotes.length ? hostedNotes : [...DEFAULT_UPDATER_NOTES];
+}
+
+function formatUpdaterError(error, fallbackMessage) {
+  const rawMessage = normalizeText(
+    error && typeof error === "object" ? error.message || error.stack : error
+  );
+  return rawMessage || fallbackMessage;
 }
 
 function resolveDataRootDir() {
@@ -55,7 +284,6 @@ function resolveDataRootDir() {
   if (fromEnv) {
     return path.resolve(fromEnv);
   }
-  // Keep runtime data in Electron's writable userData directory.
   return path.resolve(app.getPath("userData"), "runtime-data");
 }
 
@@ -104,7 +332,9 @@ async function resolveAvailablePort(preferredPort) {
     }
   }
   throw new Error(
-    `No available localhost port found from ${startPort} to ${startPort + PORT_SCAN_ATTEMPTS - 1}.`
+    `No available localhost port found from ${startPort} to ${
+      startPort + PORT_SCAN_ATTEMPTS - 1
+    }.`
   );
 }
 
@@ -157,7 +387,9 @@ async function startServer() {
       if (!isShuttingDown && !startupInProgress) {
         dialog.showErrorBox(
           "CSR Server Stopped",
-          `The local CSR server stopped unexpectedly.\n\nEntry: ${entry}\nExit code: ${String(code)}\nSignal: ${String(signal)}`
+          `The local CSR server stopped unexpectedly.\n\nEntry: ${entry}\nExit code: ${String(
+            code
+          )}\nSignal: ${String(signal)}`
         );
         app.quit();
       }
@@ -184,6 +416,7 @@ async function startServer() {
 async function createMainWindow() {
   await startServer();
   const appIconPath = resolveAppIconPath();
+  const preloadPath = resolvePreloadEntrypoint();
   mainWindow = new BrowserWindow({
     width: 1366,
     height: 860,
@@ -193,6 +426,7 @@ async function createMainWindow() {
     autoHideMenuBar: true,
     icon: appIconPath || undefined,
     webPreferences: {
+      preload: fs.existsSync(preloadPath) ? preloadPath : undefined,
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -200,7 +434,6 @@ async function createMainWindow() {
   });
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {
-      // Open maximized on desktop/laptop in packaged and dev builds.
       mainWindow.maximize();
       mainWindow.show();
     }
@@ -216,6 +449,7 @@ async function createMainWindow() {
   });
   enforceFixedZoom(mainWindow);
   await mainWindow.loadURL(buildAppUrl(activePort));
+  broadcastUpdaterState();
 }
 
 function stopServer() {
@@ -289,10 +523,215 @@ function enforceFixedZoom(win) {
   resetZoom();
 }
 
+async function runUpdaterCheck() {
+  if (!updaterInitialized || updaterCheckInFlight) {
+    return sanitizeUpdaterState(updaterState);
+  }
+  updaterCheckInFlight = true;
+  try {
+    await autoUpdater.checkForUpdates();
+  } catch (error) {
+    setUpdaterState({
+      status: "error",
+      canUpdate: false,
+      progressPercent: 0,
+      message: formatUpdaterError(error, "Unable to check for updates right now."),
+    });
+  } finally {
+    updaterCheckInFlight = false;
+  }
+  return sanitizeUpdaterState(updaterState);
+}
+
+function scheduleQuitAndInstall() {
+  if (isShuttingDown) {
+    return;
+  }
+  setUpdaterState({
+    status: "downloaded",
+    canUpdate: false,
+    progressPercent: 100,
+    message: "Closing app to install update...",
+  });
+  setTimeout(() => {
+    try {
+      autoUpdater.quitAndInstall(false, true);
+    } catch (error) {
+      setUpdaterState({
+        status: "error",
+        canUpdate: false,
+        progressPercent: 0,
+        message: formatUpdaterError(error, "Unable to start the installer update."),
+      });
+    }
+  }, 700);
+}
+
+async function startInstallerUpdate() {
+  if (!updaterInitialized) {
+    return sanitizeUpdaterState(updaterState);
+  }
+  if (updaterState.status === "downloaded") {
+    scheduleQuitAndInstall();
+    return sanitizeUpdaterState(updaterState);
+  }
+  if (updaterState.status === "downloading" || updaterDownloadRequested) {
+    return sanitizeUpdaterState(updaterState);
+  }
+  if (updaterState.status !== "available") {
+    return sanitizeUpdaterState(updaterState);
+  }
+
+  updaterDownloadRequested = true;
+  setUpdaterState({
+    status: "downloading",
+    canUpdate: false,
+    progressPercent: 0,
+    message: "Downloading update...",
+  });
+  try {
+    await autoUpdater.downloadUpdate();
+  } catch (error) {
+    updaterDownloadRequested = false;
+    setUpdaterState({
+      status: "error",
+      canUpdate: false,
+      progressPercent: 0,
+      message: formatUpdaterError(error, "Unable to download the update."),
+    });
+  }
+  return sanitizeUpdaterState(updaterState);
+}
+
+function registerUpdaterIpcHandlers() {
+  ipcMain.handle("desktop-updater:get-state", async () => sanitizeUpdaterState(updaterState));
+  ipcMain.handle("desktop-updater:check", async () => runUpdaterCheck());
+  ipcMain.handle("desktop-updater:start-install", async () => startInstallerUpdate());
+}
+
+function initializeAutoUpdater() {
+  if (updaterInitialized) {
+    broadcastUpdaterState();
+    return;
+  }
+  if (!isUpdaterSupportedBuild()) {
+    setUpdaterState({
+      status: "disabled",
+      canUpdate: false,
+      progressPercent: 0,
+      message: "Auto-update is available only in installed Windows builds.",
+    });
+    return;
+  }
+
+  updaterConfig = loadUpdaterConfig();
+  const provider = normalizeText(updaterConfig.provider).toLowerCase();
+  if (!updaterConfig.enabled || provider !== "generic" || !normalizeText(updaterConfig.baseUrl)) {
+    setUpdaterState({
+      status: "disabled",
+      canUpdate: false,
+      progressPercent: 0,
+      message: "Auto-update is not configured for this build.",
+    });
+    return;
+  }
+
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = false;
+  autoUpdater.autoRunAppAfterInstall = true;
+  autoUpdater.allowPrerelease = false;
+  autoUpdater.setFeedURL({
+    provider: "generic",
+    url: updaterConfig.baseUrl,
+    channel: updaterConfig.channel,
+  });
+
+  autoUpdater.on("checking-for-update", () => {
+    setUpdaterState({
+      status: "checking",
+      canUpdate: false,
+      progressPercent: 0,
+      message: "Checking for updates...",
+    });
+  });
+
+  autoUpdater.on("update-not-available", (info) => {
+    updaterDownloadRequested = false;
+    setUpdaterState({
+      status: "idle",
+      latestVersion: normalizeText(info && info.version) || app.getVersion(),
+      canUpdate: false,
+      progressPercent: 0,
+      message: "App is up to date.",
+    });
+  });
+
+  autoUpdater.on("update-available", async (info) => {
+    updaterDownloadRequested = false;
+    const releaseNotes = await resolveReleaseNotes(info);
+    setUpdaterState({
+      status: "available",
+      latestVersion: normalizeText(info && info.version),
+      releaseNotes,
+      canUpdate: true,
+      progressPercent: 0,
+      message: "A new version is available with improvements and fixes.",
+    });
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    const percent = Number.isFinite(Number(progress && progress.percent))
+      ? Math.round(Number(progress.percent))
+      : 0;
+    setUpdaterState({
+      status: "downloading",
+      canUpdate: false,
+      progressPercent: percent,
+      message: percent > 0 ? `Downloading update... ${percent}%` : "Downloading update...",
+    });
+  });
+
+  autoUpdater.on("update-downloaded", async (info) => {
+    updaterDownloadRequested = false;
+    const currentNotes = normalizeReleaseNotes(updaterState.releaseNotes);
+    const releaseNotes = currentNotes.length ? currentNotes : await resolveReleaseNotes(info);
+    setUpdaterState({
+      status: "downloaded",
+      latestVersion: normalizeText(info && info.version) || updaterState.latestVersion,
+      releaseNotes,
+      canUpdate: false,
+      progressPercent: 100,
+      message: "Preparing installer...",
+    });
+    scheduleQuitAndInstall();
+  });
+
+  autoUpdater.on("error", (error) => {
+    updaterDownloadRequested = false;
+    setUpdaterState({
+      status: "error",
+      canUpdate: false,
+      progressPercent: 0,
+      message: formatUpdaterError(error, "Updater encountered an unexpected error."),
+    });
+  });
+
+  updaterInitialized = true;
+  setUpdaterState({
+    status: "idle",
+    canUpdate: false,
+    progressPercent: 0,
+    message: "Checking for updates...",
+  });
+  void runUpdaterCheck();
+}
+
 if (!hasSingleInstanceLock) {
   dialog.showErrorBox(SINGLE_INSTANCE_ERROR_TITLE, SINGLE_INSTANCE_ERROR_MESSAGE);
   app.quit();
 } else {
+  registerUpdaterIpcHandlers();
+
   app.on("second-instance", () => {
     if (!mainWindow) {
       return;
@@ -318,14 +757,18 @@ if (!hasSingleInstanceLock) {
   });
 
   app.whenReady().then(() => {
-    createMainWindow().catch((error) => {
-      dialog.showErrorBox(
-        "Startup Failed",
-        `CSR desktop startup failed.\n\n${String(error && error.message ? error.message : error)}`
-      );
-      app.quit();
-    });
+    createMainWindow()
+      .then(() => {
+        initializeAutoUpdater();
+      })
+      .catch((error) => {
+        dialog.showErrorBox(
+          "Startup Failed",
+          `CSR desktop startup failed.\n\n${String(
+            error && error.message ? error.message : error
+          )}`
+        );
+        app.quit();
+      });
   });
 }
-
-

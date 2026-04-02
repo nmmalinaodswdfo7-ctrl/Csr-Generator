@@ -48,6 +48,7 @@ Use this app to:
 - Use the same municipality assigned to your ID.
 - Make sure Microsoft Edge or Google Chrome is installed for PDF export.
 - For Windows trust/SmartScreen planning, see [INTERNAL_DEPLOYMENT.md](./INTERNAL_DEPLOYMENT.md).
+- For the Electron in-app updater using Cloudflare R2, see [UPDATER_CLOUDFLARE_GUIDE.md](./UPDATER_CLOUDFLARE_GUIDE.md).
 
 ## Safer Windows Build (AV/EDR Friendly)
 
@@ -60,7 +61,6 @@ Use this app to:
   - `FORCE_UNSIGNED=0` (allows signing if cert env vars are set)
 - Outputs include:
   - NSIS installer
-  - Portable `.exe`
 
 ### Optional Overrides
 

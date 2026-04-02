@@ -307,5 +307,74 @@
       "savedAt": "2026-03-30T22:09:24.442Z",
       "lastSaveMode": "autosave"
     }
+  },
+  {
+    "csrId": "43956",
+    "createdAt": "2026-04-01T23:11:37.718Z",
+    "activeStep": 6,
+    "workflowType": "CSR",
+    "completion": {
+      "status": "in_progress",
+      "completedAt": "",
+      "lastExportedAt": "",
+      "lastExportedFileName": "",
+      "exportCount": 0
+    },
+    "householdKey": "ALBURQUERQUE|071201004-8011-00003",
+    "cardData": {
+      "name": "TEODORA BUDLAT MURING",
+      "hhid": "071201004-8011-00003",
+      "municipality": "ALBURQUERQUE",
+      "barangay": "DANGAY"
+    },
+    "basicInformation": {
+      "prefilled": {
+        "name": "TEODORA BUDLAT MURING",
+        "hhid": "071201004-8011-00003",
+        "hhSet": "6A",
+        "sex": "FEMALE",
+        "birthday": "November 9, 1971",
+        "age": "54",
+        "civilStatus": "Married with spouse present",
+        "ipAffiliation": "NONE",
+        "clientStatusOnExit": "3 - Graduated Due to Improved Level of Well-Being"
+      }
+    },
+    "caseDevelopment": {
+      "html": "",
+      "savedAt": "2026-04-02T01:49:43.591Z",
+      "lastSaveMode": "autosave"
+    },
+    "recommendation": {
+      "details": {
+        "recommendationText": "",
+        "date": "2026-04-02",
+        "preparedBy": "HAZEL S. GAMAYOT",
+        "reviewedBy": "MIGUELIZA V. FELIAS, RSW",
+        "notedBy": "LUZ C. FEGARIDO, RSW",
+        "approvedBy": "JIAH L. SAYSON",
+        "hhGrantee": "TEODORA BUDLAT MURING",
+        "mswdOfficer": "ESTRELLA S. MALNEGRO, RSW"
+      },
+      "savedAt": "2026-04-02T01:49:43.593Z",
+      "lastSaveMode": "autosave"
+    },
+    "householdInterventionPlan": {
+      "items": [],
+      "savedAt": "2026-04-02T01:49:43.593Z",
+      "lastSaveMode": "autosave"
+    },
+    "interventionsProvided": {
+      "items": [],
+      "savedAt": "2026-04-02T01:49:43.592Z",
+      "lastSaveMode": "autosave"
+    },
+    "familyComposition": {
+      "ui": {
+        "expandedMemberKeys": [
+          "49400331|071201004-8011-00003"
+        ]
+      }
+    }
   }
 ]
