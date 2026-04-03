@@ -55,6 +55,44 @@
     { key: "environmentalLivingConditions", label: "Environmental and Living Conditions" },
     { key: "environmentCommunity", label: "The Environment/ Community" },
   ]);
+  const LOCAL_MATERIAL_SYMBOL_SVGS = Object.freeze({
+    add:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+    arrow_back:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H6"/><path d="m12 6-6 6 6 6"/></svg>',
+    chevron_left:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>',
+    chevron_right:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
+    close:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
+    delete:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M7 7l1 12h8l1-12"/><path d="M10 11v5"/><path d="M14 11v5"/></svg>',
+    edit:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.5-1 8.7-8.7-3.5-3.5L5 15.5 4 20z"/><path d="m12.9 6.9 3.5 3.5"/><path d="M14 5.8 16.2 3.6a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L17.2 9"/></svg>',
+    file_download:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10"/><path d="m8 10 4 4 4-4"/><path d="M5 19h14"/></svg>',
+    info:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6"/><path d="M12 7.5h.01"/></svg>',
+    open_in_new:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="m10 14 9-9"/><path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>',
+    person_add:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="3"/><path d="M4.5 18c1.4-2.8 3.5-4.2 5.5-4.2s4.1 1.4 5.5 4.2"/><path d="M18 8v6"/><path d="M15 11h6"/></svg>',
+    person_outline:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25"/><path d="M5 19c1.7-3.2 4.1-4.8 7-4.8s5.3 1.6 7 4.8"/></svg>',
+    phone:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 4 3 3-1.8 2.4a13 13 0 0 0 7.4 7.4L17 15l3 3-2.2 2.2a2 2 0 0 1-1.8.5C9.7 19.5 4.5 14.3 3.3 8a2 2 0 0 1 .5-1.8L6 4z"/></svg>',
+    preview:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 6.5 12 6.5 21.5 12 21.5 12 18 17.5 12 17.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>',
+    restart_alt:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7H4V3"/><path d="M4 7c2-2.8 4.9-4 8-4 4.8 0 8.8 3.4 8.8 8 0 3.2-1.9 5.9-4.8 7.2"/><path d="M16 21h4v-4"/></svg>',
+    restore:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h5"/><path d="M4.8 9A8 8 0 1 1 12 20"/><path d="M12 8v4l3 2"/></svg>',
+    search:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/></svg>',
+    sync_alt:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h11"/><path d="m13 5 3 3-3 3"/><path d="M19 16H8"/><path d="m11 13-3 3 3 3"/></svg>',
+  });
   const SOURCE_OF_INFO_FIELD_ID = "edit-source-of-info";
   const SOURCE_OF_INFO_DATALIST_ID = "source-of-info-datalist";
   const PREV_WELLBEING_FIELD_ID = "edit-prev-wellbeing";
@@ -232,6 +270,7 @@
   const restoreSessionButton = document.getElementById("restore-session");
   const appBootScreen = document.getElementById("app-boot-screen");
   const loginSection = document.getElementById("login-section");
+  const appMain = document.getElementById("app-main");
   const dataTableHeader = document.getElementById("data-table-header");
   const appVersionBadge = document.getElementById("app-version-badge");
   const returnToSelectionButton = document.getElementById("return-to-csr-selection");
@@ -407,10 +446,60 @@
   let scsrPlanImplementationEditingIndex = null;
   let householdInterventionPlanEditingIndex = null;
 
+  initLocalMaterialSymbols();
   initSummernoteIfPresent();
 
   if (!idInput || !municipalitySelect || !loginButton) {
     return;
+  }
+
+  function renderMaterialSymbolIcon(node) {
+    if (!(node instanceof HTMLElement)) {
+      return;
+    }
+    const iconName = String(node.dataset.icon || node.textContent || "").trim();
+    const svg = LOCAL_MATERIAL_SYMBOL_SVGS[iconName];
+    if (!svg) {
+      return;
+    }
+    node.dataset.icon = iconName;
+    node.setAttribute("aria-hidden", "true");
+    node.replaceChildren();
+    node.insertAdjacentHTML("afterbegin", svg);
+  }
+
+  function renderMaterialSymbolIcons(root = document) {
+    if (!root) {
+      return;
+    }
+    if (root instanceof HTMLElement && root.classList.contains("material-symbols-outlined")) {
+      renderMaterialSymbolIcon(root);
+      return;
+    }
+    if (typeof root.querySelectorAll !== "function") {
+      return;
+    }
+    root.querySelectorAll(".material-symbols-outlined").forEach(renderMaterialSymbolIcon);
+  }
+
+  function initLocalMaterialSymbols() {
+    renderMaterialSymbolIcons(document);
+    if (!document.body || typeof MutationObserver !== "function") {
+      return;
+    }
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            renderMaterialSymbolIcons(node);
+          }
+        });
+      });
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
   }
 
   pendingCsrDeepLink = parseCsrDeepLinkFromUrl();
@@ -1975,6 +2064,22 @@
     appBootScreen.classList.toggle("flex", !!isVisible);
   }
 
+  function setMainContentVisible(isVisible) {
+    if (!appMain) {
+      return;
+    }
+
+    appMain.classList.toggle("hidden", !isVisible);
+  }
+
+  function setLoginScreenActive(isActive) {
+    if (!document.body) {
+      return;
+    }
+
+    document.body.classList.toggle("login-screen-active", !!isActive);
+  }
+
   function hideLoginSection() {
     if (!loginSection) {
       return;
@@ -1986,6 +2091,8 @@
 
   async function showPostLoginUI() {
     setAppBootScreenVisible(false);
+    setMainContentVisible(true);
+    setLoginScreenActive(false);
     hideCsrWorkspace();
     showDataTableHeader();
     hideLoginSection();
@@ -2614,6 +2721,8 @@
 
   function showLoginUI() {
     setAppBootScreenVisible(false);
+    setMainContentVisible(false);
+    setLoginScreenActive(true);
     hideCsrWorkspace();
     if (loginSection) {
       loginSection.classList.remove("hidden");
@@ -2642,6 +2751,8 @@
 
   function showRestoreOnlyUI() {
     setAppBootScreenVisible(false);
+    setMainContentVisible(false);
+    setLoginScreenActive(true);
     hideCsrWorkspace();
     if (loginSection) {
       loginSection.classList.remove("hidden");
