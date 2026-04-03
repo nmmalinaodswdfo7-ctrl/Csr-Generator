@@ -1,6 +1,6 @@
 {
   "name": "csr-generator-desktop",
-  "version": "1.0.3",
+  "version": "1.0.8",
   "private": true,
   "main": "launcher/electron-main.cjs",
   "dependencies": {
